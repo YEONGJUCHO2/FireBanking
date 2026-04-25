@@ -16,6 +16,8 @@ describe("SignInButton", () => {
   beforeEach(() => {
     signInWithOAuth.mockReset();
     vi.restoreAllMocks();
+    vi.unstubAllEnvs();
+    vi.stubEnv("NEXT_PUBLIC_KAKAO_AUTH_ENABLED", "true");
   });
 
   it("starts Google OAuth with the current origin callback", async () => {
@@ -34,15 +36,40 @@ describe("SignInButton", () => {
     });
   });
 
+  it("starts Kakao OAuth with the current origin callback", async () => {
+    signInWithOAuth.mockResolvedValue({});
+    render(<SignInButton />);
+
+    fireEvent.click(screen.getByRole("button", { name: "카카오로 시작하기" }));
+
+    await waitFor(() => {
+      expect(signInWithOAuth).toHaveBeenCalledWith({
+        provider: "kakao",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+    });
+  });
+
   it("warns KakaoTalk users to open the login page in an external browser", async () => {
     vi.spyOn(window.navigator, "userAgent", "get").mockReturnValue("Mozilla/5.0 KAKAOTALK 11.4.0");
 
     render(<SignInButton />);
 
     expect(
-      await screen.findByText("카카오톡 안에서는 Google 로그인이 끊길 수 있어요."),
+      await screen.findByText("카카오톡 안에서는 카카오 로그인을 권장해요."),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "외부 브라우저로 열기" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Google로 시작하기" })).toBeInTheDocument();
+  });
+
+  it("keeps Kakao OAuth hidden until the provider is configured", () => {
+    vi.stubEnv("NEXT_PUBLIC_KAKAO_AUTH_ENABLED", "false");
+
+    render(<SignInButton />);
+
+    expect(screen.queryByRole("button", { name: "카카오로 시작하기" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Google로 시작하기" })).toBeInTheDocument();
   });
 });
