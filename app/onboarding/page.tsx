@@ -10,11 +10,11 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-stone-50 px-6 py-8 text-slate-950">
+    <main className="min-h-screen bg-stone-50 px-4 py-6 text-slate-950 sm:px-6 sm:py-8">
       <div className="mx-auto grid max-w-2xl gap-8">
         <section className="grid gap-3">
           <p className="text-sm font-medium text-emerald-700">R0 Internal Alpha</p>
-          <h1 className="text-3xl font-bold tracking-normal">
+          <h1 className="text-2xl font-bold tracking-normal sm:text-3xl">
             먼저 신뢰할 수 있는 첫 결과를 확인해요
           </h1>
           <p className="text-base leading-7 text-slate-700">

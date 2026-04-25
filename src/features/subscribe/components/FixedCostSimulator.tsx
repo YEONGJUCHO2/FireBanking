@@ -72,10 +72,10 @@ export function FixedCostSimulator({
   return (
     <div className="grid gap-6">
       <section className="grid gap-4 rounded-lg border border-slate-200 bg-white p-4">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-sm font-medium text-emerald-700">고정비 시뮬레이터</p>
-            <h1 className="mt-1 text-3xl font-bold tracking-normal">
+            <h1 className="mt-1 text-2xl font-bold tracking-normal sm:text-3xl">
               내 고정비가 미래 자산을 얼마나 바꾸는지 확인해요
             </h1>
           </div>
@@ -83,7 +83,7 @@ export function FixedCostSimulator({
             type="button"
             onClick={save}
             disabled={isPending}
-            className="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+            className="w-full rounded-md bg-slate-950 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60 sm:w-auto sm:py-2"
           >
             {isPending ? "저장 중..." : "저장"}
           </button>
@@ -205,7 +205,7 @@ export function FixedCostSimulator({
 
           return (
             <div key={category.id} className="rounded-lg border border-slate-200 bg-white p-4">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                 <div>
                   <h3 className="font-semibold">{category.name}</h3>
                   <p className="text-sm text-slate-600">{category.prompt}</p>
@@ -214,7 +214,7 @@ export function FixedCostSimulator({
                   {formatKrw(categoryTotal)}
                 </p>
               </div>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {category.items.map((item) => (
                   <div
                     key={item.id}

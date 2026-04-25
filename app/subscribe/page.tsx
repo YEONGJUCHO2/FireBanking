@@ -30,9 +30,9 @@ export default async function SubscribePage() {
     .maybeSingle();
 
   return (
-    <main className="min-h-screen bg-stone-50 px-6 py-8 text-slate-950">
+    <main className="min-h-screen bg-stone-50 px-4 py-6 text-slate-950 sm:px-6 sm:py-8">
       <div className="mx-auto grid max-w-5xl gap-6">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <p className="text-sm font-medium text-slate-600">Fire Banking</p>
           <Link
             href="/dashboard"
