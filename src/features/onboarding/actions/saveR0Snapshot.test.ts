@@ -229,6 +229,7 @@ describe("saveR0Snapshot", () => {
     );
 
     expect(refs.coupleInsert.insert).toHaveBeenCalledWith({
+      created_by: "user-1",
       name: "리드님의 FIRE 워크스페이스",
     });
     expect(refs.memberInsert).toHaveBeenCalledWith({

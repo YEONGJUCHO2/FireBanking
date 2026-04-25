@@ -72,7 +72,7 @@ export async function saveR0Snapshot(
   if (!coupleId) {
     const { data: couple, error: coupleError } = await supabase
       .from("couples")
-      .insert({ name: `${displayName}님의 FIRE 워크스페이스` })
+      .insert({ name: `${displayName}님의 FIRE 워크스페이스`, created_by: user.id })
       .select("id")
       .single();
 
