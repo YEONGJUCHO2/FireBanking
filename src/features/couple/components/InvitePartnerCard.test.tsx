@@ -23,4 +23,22 @@ describe("InvitePartnerCard", () => {
     });
     expect(screen.getByRole("button", { name: "복사했어요" })).toBeInTheDocument();
   });
+
+  it("shows a copy fallback when clipboard permission is blocked", async () => {
+    const writeText = vi.fn().mockRejectedValue(new DOMException("blocked", "NotAllowedError"));
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+
+    render(<InvitePartnerCard coupleId="couple-1" latestInviteUrl="/invite/token-1" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "초대 링크 복사" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("복사 권한이 막혔어요. 초대 링크를 직접 선택해서 복사해주세요."),
+      ).toBeInTheDocument();
+    });
+  });
 });

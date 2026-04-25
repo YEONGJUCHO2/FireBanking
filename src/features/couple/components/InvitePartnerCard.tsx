@@ -25,6 +25,7 @@ export function InvitePartnerCard({
 }) {
   const [state, formAction, pending] = useActionState(createInviteLink, initialState);
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
   const inviteUrl = state.inviteUrl ?? latestInviteUrl;
 
   async function copyInviteUrl() {
@@ -32,9 +33,15 @@ export function InvitePartnerCard({
       return;
     }
 
-    await navigator.clipboard.writeText(toShareableInviteUrl(inviteUrl));
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(toShareableInviteUrl(inviteUrl));
+      setCopyError(null);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+      setCopyError("복사 권한이 막혔어요. 초대 링크를 직접 선택해서 복사해주세요.");
+    }
   }
 
   return (
@@ -71,6 +78,7 @@ export function InvitePartnerCard({
           >
             {copied ? "복사했어요" : "초대 링크 복사"}
           </button>
+          {copyError ? <p className="text-sm text-slate-700">{copyError}</p> : null}
         </div>
       ) : null}
 
