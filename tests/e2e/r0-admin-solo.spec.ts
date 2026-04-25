@@ -17,6 +17,10 @@ test("protected admin pages redirect unauthenticated users home", async ({ page 
   await page.goto("/onboarding");
   await expect(page).toHaveURL("/");
   await expect(page.getByRole("button", { name: "Google로 시작하기" })).toBeVisible();
+
+  await page.goto("/subscribe");
+  await expect(page).toHaveURL("/");
+  await expect(page.getByRole("button", { name: "Google로 시작하기" })).toBeVisible();
 });
 
 test("invite preview page explains R0 invite scope", async ({ page }) => {

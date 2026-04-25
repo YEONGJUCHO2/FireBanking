@@ -54,12 +54,20 @@ export default async function DashboardPage() {
       <div className="mx-auto grid max-w-4xl gap-6">
         <div className="flex items-center justify-between gap-4">
           <p className="text-sm font-medium text-slate-600">Fire Banking</p>
-          <Link
-            href="/onboarding"
-            className="text-sm font-medium text-emerald-700 hover:text-emerald-800"
-          >
-            이번 달 값 수정
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/subscribe"
+              className="text-sm font-medium text-emerald-700 hover:text-emerald-800"
+            >
+              고정비 시뮬레이터
+            </Link>
+            <Link
+              href="/onboarding"
+              className="text-sm font-medium text-emerald-700 hover:text-emerald-800"
+            >
+              이번 달 값 수정
+            </Link>
+          </div>
         </div>
         <R0Dashboard snapshot={snapshot} />
         <InvitePartnerCard
