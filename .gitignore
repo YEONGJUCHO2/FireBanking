@@ -1,0 +1,10 @@
+.DS_Store
+.superpowers
+.env
+.env.local
+.next
+memory.md
+node_modules
+playwright-report
+supabase/.temp
+test-results
