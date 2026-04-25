@@ -214,32 +214,67 @@ export function FixedCostSimulator({
                   {formatKrw(categoryTotal)}
                 </p>
               </div>
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {category.items.map((item) => (
-                  <button
+                  <div
                     key={item.id}
-                    type="button"
-                    onClick={() =>
-                      updateConfig((next) => {
-                        const targetCategory = next.subscriptionCategories.find(
-                          (candidate) => candidate.id === category.id,
-                        );
-                        const targetItem = targetCategory?.items.find(
-                          (candidate) => candidate.id === item.id,
-                        );
-                        if (targetItem) {
-                          targetItem.enabled = !targetItem.enabled;
-                        }
-                      })
-                    }
-                    className={`rounded-md border px-3 py-2 text-sm ${
+                    className={`grid gap-2 rounded-md border p-3 ${
                       item.enabled
                         ? "border-emerald-700 bg-emerald-50 text-emerald-800"
                         : "border-slate-300 bg-white text-slate-700"
                     }`}
                   >
-                    {item.name}
-                  </button>
+                    <div className="flex items-center justify-between gap-3">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updateConfig((next) => {
+                            const targetCategory = next.subscriptionCategories.find(
+                              (candidate) => candidate.id === category.id,
+                            );
+                            const targetItem = targetCategory?.items.find(
+                              (candidate) => candidate.id === item.id,
+                            );
+                            if (targetItem) {
+                              targetItem.enabled = !targetItem.enabled;
+                            }
+                          })
+                        }
+                        className="text-left text-sm font-semibold"
+                      >
+                        {item.name}
+                      </button>
+                      <span className="text-xs font-medium text-slate-500">
+                        {item.enabled ? "포함" : "제외"}
+                      </span>
+                    </div>
+                    <label className="grid gap-1">
+                      <span className="text-xs font-medium text-slate-600">
+                        {item.name} 월 금액
+                      </span>
+                      <input
+                        aria-label={`${item.name} 월 금액`}
+                        type="number"
+                        min={0}
+                        step={1000}
+                        value={item.monthlyAmount}
+                        onChange={(event) =>
+                          updateConfig((next) => {
+                            const targetCategory = next.subscriptionCategories.find(
+                              (candidate) => candidate.id === category.id,
+                            );
+                            const targetItem = targetCategory?.items.find(
+                              (candidate) => candidate.id === item.id,
+                            );
+                            if (targetItem) {
+                              targetItem.monthlyAmount = Number(event.target.value);
+                            }
+                          })
+                        }
+                        className="rounded-md border border-slate-300 bg-white px-2 py-2 text-sm text-slate-950"
+                      />
+                    </label>
+                  </div>
                 ))}
               </div>
             </div>

@@ -13,6 +13,24 @@ describe("FixedCostSimulator", () => {
     expect(screen.getByText(/₩14,900/)).toBeInTheDocument();
   });
 
+  it("lets a user edit a card amount before saving", async () => {
+    const saveAction = vi.fn().mockResolvedValue({ saved: true });
+
+    render(<FixedCostSimulator initialConfig={defaultFixedCostConfig} saveAction={saveAction} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "유튜브 프리미엄" }));
+    fireEvent.change(screen.getByLabelText("유튜브 프리미엄 월 금액"), {
+      target: { value: "20000" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "저장" }));
+
+    await waitFor(() => {
+      expect(saveAction).toHaveBeenCalled();
+    });
+    expect(saveAction.mock.calls[0][0].subscriptionCategories[0].items[0].monthlyAmount).toBe(20_000);
+    expect(screen.getByText(/₩20,000/)).toBeInTheDocument();
+  });
+
   it("shows copy failure feedback instead of throwing when clipboard is blocked", async () => {
     const writeText = vi.fn().mockRejectedValue(new DOMException("blocked", "NotAllowedError"));
     Object.assign(navigator, {
