@@ -147,7 +147,7 @@ export function InvitePartnerCard({
       });
       setShareError(null);
     } catch (error) {
-      console.error("KakaoTalk invite share failed", error);
+      console.warn("KakaoTalk invite share fallback", error);
       try {
         await navigator.clipboard.writeText(toShareableInviteUrl(inviteUrl));
         setCopyError(null);
@@ -157,7 +157,9 @@ export function InvitePartnerCard({
           "카카오톡 공유창이 막혀 초대 링크를 복사했어요. 카카오톡에 붙여넣어 보내주세요.",
         );
       } catch {
-        setShareError("카카오톡 공유창을 열지 못했습니다. 링크 복사를 사용해주세요.");
+        setShareError(
+          "카카오톡 공유창이 막혔어요. 아래 초대 링크를 복사해서 카카오톡에 붙여넣어 주세요.",
+        );
       }
     }
   }
