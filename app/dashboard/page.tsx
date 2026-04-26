@@ -1,6 +1,7 @@
 import { AppHeader, BottomNav, CashflowSummary, DesktopDashboard, FireHeroCard, HeaderIconButton, InviteCard, MetricCard, MobileAppShell } from '@/components/fire-banking'
 import { dashboardMetrics as m } from '@/lib/sample-data'
 import { formatManWon } from '@/lib/format'
+import { SignOutButton } from '@/src/features/auth/components/SignOutButton'
 
 export default function DashboardPage() {
   const remainingAfterRegular = m.monthlyIncomeMan - m.monthlyLivingCostMan - m.monthlyRegularInvestmentMan
@@ -12,7 +13,7 @@ export default function DashboardPage() {
           <AppHeader
             title="대시보드"
             subtitle="우리의 경제적 자유 현황을 한눈에 확인해요."
-            right={<div className="flex gap-2"><HeaderIconButton icon="bell" label="알림" /><HeaderIconButton icon="users" label="함께" /></div>}
+            right={<div className="flex items-center gap-2"><HeaderIconButton icon="bell" label="알림" /><HeaderIconButton icon="users" label="함께" /><SignOutButton compact /></div>}
           />
 
           <div className="space-y-4 px-5 pb-5">
@@ -42,7 +43,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="hidden min-h-dvh px-8 py-8 lg:block">
-        <DesktopDashboard />
+        <DesktopDashboard footerAction={<SignOutButton />} />
       </div>
     </>
   )

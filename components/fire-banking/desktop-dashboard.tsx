@@ -6,6 +6,7 @@ import { CashflowSummary } from './cashflow-summary'
 import { FireHeroCard } from './fire-hero-card'
 import { MetricCard } from './metric-card'
 import { Icon, type IconName } from './icons'
+import type { ReactNode } from 'react'
 
 const sidebar: Array<{ label: string; icon: IconName }> = [
   { label: '대시보드', icon: 'home' },
@@ -16,7 +17,7 @@ const sidebar: Array<{ label: string; icon: IconName }> = [
   { label: '설정', icon: 'settings' },
 ]
 
-export function DesktopDashboard() {
+export function DesktopDashboard({ footerAction }: { footerAction?: ReactNode }) {
   const m = dashboardMetrics
   const remainingAfterRegular = m.monthlyIncomeMan - m.monthlyLivingCostMan - m.monthlyRegularInvestmentMan
 
@@ -36,6 +37,7 @@ export function DesktopDashboard() {
           <p className="font-bold text-fb-ink">우리 부부</p>
           <p>월 체크인 진행 중</p>
         </div>
+        {footerAction ? <div className="mt-4">{footerAction}</div> : null}
       </aside>
       <div className="p-6">
         <div className="flex items-end justify-between gap-6">
