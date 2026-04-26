@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { InvitePartnerCard } from "./InvitePartnerCard";
 
 vi.mock("@/src/features/couple/actions/createInviteLink", () => ({
@@ -7,6 +7,11 @@ vi.mock("@/src/features/couple/actions/createInviteLink", () => ({
 }));
 
 describe("InvitePartnerCard", () => {
+  beforeEach(() => {
+    vi.unstubAllEnvs();
+    Reflect.deleteProperty(window, "Kakao");
+  });
+
   it("explains that invitees can now accept the shared dashboard invite", () => {
     render(<InvitePartnerCard coupleId="couple-1" />);
 
@@ -49,5 +54,46 @@ describe("InvitePartnerCard", () => {
         screen.getByText("복사 권한이 막혔어요. 초대 링크를 직접 선택해서 복사해주세요."),
       ).toBeInTheDocument();
     });
+  });
+
+  it("shares an invite link through KakaoTalk when the JavaScript SDK is configured", async () => {
+    vi.stubEnv("NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY", "javascript-key");
+    const sendDefault = vi.fn();
+    const init = vi.fn();
+    Object.defineProperty(window, "Kakao", {
+      configurable: true,
+      value: {
+        isInitialized: vi.fn(() => false),
+        init,
+        Share: { sendDefault },
+      },
+    });
+
+    render(<InvitePartnerCard coupleId="couple-1" latestInviteUrl="/invite/token-1" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "카카오톡으로 보내기" }));
+
+    await waitFor(() => {
+      expect(init).toHaveBeenCalledWith("javascript-key");
+      expect(sendDefault).toHaveBeenCalledWith({
+        objectType: "text",
+        text: "Fire Banking에서 FIRE 대시보드를 함께 보자.",
+        link: {
+          mobileWebUrl: `${window.location.origin}/invite/token-1`,
+          webUrl: `${window.location.origin}/invite/token-1`,
+        },
+        buttonTitle: "초대 수락하기",
+      });
+    });
+  });
+
+  it("shows a setup message when the Kakao JavaScript key is missing", async () => {
+    render(<InvitePartnerCard coupleId="couple-1" latestInviteUrl="/invite/token-1" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "카카오톡으로 보내기" }));
+
+    expect(
+      await screen.findByText("카카오 JavaScript 키 설정이 필요합니다."),
+    ).toBeInTheDocument();
   });
 });
