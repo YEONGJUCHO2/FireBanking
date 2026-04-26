@@ -2,7 +2,10 @@ import { redirect } from "next/navigation";
 import { AppHeader } from "@/src/features/auth/components/AppHeader";
 import { getCurrentUser } from "@/src/features/auth/lib/getCurrentUser";
 import { InvitePartnerCard } from "@/src/features/couple/components/InvitePartnerCard";
+import { PartnerReadOnlyCard } from "@/src/features/dashboard/components/PartnerReadOnlyCard";
+import { PartnerWaitingCard } from "@/src/features/dashboard/components/PartnerWaitingCard";
 import { R0Dashboard } from "@/src/features/dashboard/components/R0Dashboard";
+import { getDashboardHeaderLinks, type CoupleRole } from "@/src/features/dashboard/lib/dashboardRoleUi";
 import { createSupabaseServerClient } from "@/src/lib/supabase/server";
 
 export default async function DashboardPage() {
@@ -35,7 +38,9 @@ export default async function DashboardPage() {
     .limit(1)
     .maybeSingle();
 
-  if (!snapshot && membership.role === "admin") {
+  const role = membership.role as CoupleRole;
+
+  if (!snapshot && role === "admin") {
     redirect("/onboarding");
   }
 
@@ -43,21 +48,15 @@ export default async function DashboardPage() {
     return (
       <main className="min-h-screen bg-stone-50 px-4 py-6 text-slate-950 sm:px-6 sm:py-8">
         <div className="mx-auto grid max-w-4xl gap-6">
-          <AppHeader links={[{ href: "/subscribe", label: "고정비 시뮬레이터" }]} />
-          <section className="rounded-lg border border-slate-200 bg-white p-5">
-            <p className="text-sm font-medium text-slate-900">배우자 입력 대기 중</p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              아직 공유된 FIRE 결과가 없습니다. 배우자가 이번 달 값을 입력하면 같은 대시보드에서 바로
-              확인할 수 있습니다.
-            </p>
-          </section>
+          <AppHeader links={getDashboardHeaderLinks(role)} />
+          <PartnerWaitingCard />
         </div>
       </main>
     );
   }
 
   const { data: latestInvite } =
-    membership.role === "admin"
+    role === "admin"
       ? await supabase
           .from("couple_invites")
           .select("token")
@@ -71,25 +70,15 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen bg-stone-50 px-4 py-6 text-slate-950 sm:px-6 sm:py-8">
       <div className="mx-auto grid max-w-4xl gap-6">
-        <AppHeader
-          links={[
-            { href: "/subscribe", label: "고정비 시뮬레이터" },
-            { href: "/onboarding", label: "이번 달 값 수정" },
-          ]}
-        />
+        <AppHeader links={getDashboardHeaderLinks(role)} />
         <R0Dashboard snapshot={snapshot} />
-        {membership.role === "admin" ? (
+        {role === "admin" ? (
           <InvitePartnerCard
             coupleId={membership.couple_id}
             latestInviteUrl={latestInvite ? `/invite/${latestInvite.token}` : undefined}
           />
         ) : (
-          <section className="rounded-lg border border-slate-200 bg-white p-4">
-            <p className="text-sm font-medium text-emerald-700">함께 보기 연결됨</p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              배우자 워크스페이스에 연결되어 같은 FIRE 결과를 보고 있습니다.
-            </p>
-          </section>
+          <PartnerReadOnlyCard />
         )}
       </div>
     </main>

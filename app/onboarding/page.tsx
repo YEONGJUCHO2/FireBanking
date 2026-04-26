@@ -5,6 +5,7 @@ import {
   R0OnboardingForm,
   type R0OnboardingInitialValues,
 } from "@/src/features/onboarding/components/R0OnboardingForm";
+import { shouldRedirectOnboardingToDashboard } from "@/src/features/onboarding/lib/onboardingAccess";
 import { createSupabaseServerClient } from "@/src/lib/supabase/server";
 
 export default async function OnboardingPage() {
@@ -17,14 +18,17 @@ export default async function OnboardingPage() {
   const supabase = await createSupabaseServerClient();
   const { data: membership } = await supabase
     .from("couple_members")
-    .select("couple_id")
+    .select("couple_id,role")
     .eq("user_id", user.id)
-    .eq("role", "admin")
     .order("joined_at", { ascending: true })
     .limit(1)
     .maybeSingle();
 
-  const { data: snapshot } = membership
+  if (shouldRedirectOnboardingToDashboard(membership?.role ?? null)) {
+    redirect("/dashboard");
+  }
+
+  const { data: snapshot } = membership?.role === "admin"
     ? await supabase
         .from("monthly_cashflow_snapshots")
         .select(
