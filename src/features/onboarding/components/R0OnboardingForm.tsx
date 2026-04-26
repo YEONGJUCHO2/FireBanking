@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { ChangeEvent, useActionState, useState } from "react";
 import {
   saveR0Snapshot,
   type SaveR0SnapshotState,
@@ -60,6 +60,47 @@ const fields = [
   ],
 ] as const;
 
+function formatManwonInput(value: string) {
+  const digits = value.replace(/\D/g, "");
+
+  if (!digits) {
+    return "";
+  }
+
+  return Number(digits).toLocaleString("ko-KR");
+}
+
+type ManwonInputProps = {
+  name: (typeof fields)[number][0];
+  label: string;
+  placeholder: string;
+  required: boolean;
+};
+
+function ManwonInput({ name, label, placeholder, required }: ManwonInputProps) {
+  const [value, setValue] = useState("");
+
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    setValue(formatManwonInput(event.target.value));
+  }
+
+  return (
+    <div className="flex items-center rounded-md border border-slate-300 bg-white focus-within:border-emerald-600 focus-within:ring-2 focus-within:ring-emerald-100">
+      <input
+        required={required}
+        inputMode="numeric"
+        name={name}
+        aria-label={label}
+        value={value}
+        onChange={handleChange}
+        placeholder={formatManwonInput(placeholder)}
+        className="min-w-0 flex-1 rounded-md bg-transparent px-3 py-3 text-base outline-none"
+      />
+      <span className="shrink-0 px-3 text-sm font-medium text-slate-500">만원</span>
+    </div>
+  );
+}
+
 export function R0OnboardingForm() {
   const [state, formAction, pending] = useActionState(saveR0Snapshot, initialState);
 
@@ -68,13 +109,7 @@ export function R0OnboardingForm() {
       {fields.map(([name, label, placeholder, help, required]) => (
         <label key={name} className="grid gap-2">
           <span className="text-sm font-medium text-slate-800">{label}</span>
-          <input
-            required={required}
-            inputMode="numeric"
-            name={name}
-            placeholder={placeholder}
-            className="rounded-md border border-slate-300 bg-white px-3 py-3 text-base outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
-          />
+          <ManwonInput name={name} label={label} placeholder={placeholder} required={required} />
           <span className="text-xs leading-5 text-slate-500">{help}</span>
         </label>
       ))}

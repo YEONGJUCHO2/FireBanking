@@ -19,6 +19,22 @@ describe("r0OnboardingSchema", () => {
     expect(result.otherNetWorth).toBe(20_000_000);
   });
 
+  it("accepts comma-formatted manwon inputs", () => {
+    const result = r0OnboardingSchema.parse({
+      monthlyNetIncome: "720",
+      investableNetWorth: "12,000",
+      primaryResidenceNetWorth: "70,000",
+      otherNetWorth: "2,000",
+      monthlyFixedExpense: "230",
+      monthlyVariableExpense: "170",
+      monthlyRegularInvestment: "200",
+    });
+
+    expect(result.investableNetWorth).toBe(120_000_000);
+    expect(result.primaryResidenceNetWorth).toBe(700_000_000);
+    expect(result.otherNetWorth).toBe(20_000_000);
+  });
+
   it("defaults optional residence and other net worth inputs to zero when blank", () => {
     const result = r0OnboardingSchema.parse({
       monthlyNetIncome: "720",
