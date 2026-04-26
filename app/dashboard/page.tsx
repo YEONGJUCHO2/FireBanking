@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { AppHeader } from "@/src/features/auth/components/AppHeader";
 import { getCurrentUser } from "@/src/features/auth/lib/getCurrentUser";
-import { InvitePartnerCard } from "@/src/features/couple/components/InvitePartnerCard";
+import { AdminPartnerCard } from "@/src/features/dashboard/components/AdminPartnerCard";
 import { PartnerReadOnlyCard } from "@/src/features/dashboard/components/PartnerReadOnlyCard";
 import { PartnerWaitingCard } from "@/src/features/dashboard/components/PartnerWaitingCard";
 import { R0Dashboard } from "@/src/features/dashboard/components/R0Dashboard";
@@ -55,8 +55,19 @@ export default async function DashboardPage() {
     );
   }
 
-  const { data: latestInvite } =
+  const { count: connectedPartnerCount } =
     role === "admin"
+      ? await supabase
+          .from("couple_members")
+          .select("user_id", { count: "exact", head: true })
+          .eq("couple_id", membership.couple_id)
+          .eq("role", "lite")
+      : { count: 0 };
+
+  const hasConnectedPartner = (connectedPartnerCount ?? 0) > 0;
+
+  const { data: latestInvite } =
+    role === "admin" && !hasConnectedPartner
       ? await supabase
           .from("couple_invites")
           .select("token")
@@ -73,8 +84,9 @@ export default async function DashboardPage() {
         <AppHeader links={getDashboardHeaderLinks(role)} />
         <R0Dashboard snapshot={snapshot} />
         {role === "admin" ? (
-          <InvitePartnerCard
+          <AdminPartnerCard
             coupleId={membership.couple_id}
+            connectedPartnerCount={connectedPartnerCount ?? 0}
             latestInviteUrl={latestInvite ? `/invite/${latestInvite.token}` : undefined}
           />
         ) : (
