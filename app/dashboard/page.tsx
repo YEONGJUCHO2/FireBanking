@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import { AppHeader } from "@/src/features/auth/components/AppHeader";
 import { getCurrentUser } from "@/src/features/auth/lib/getCurrentUser";
 import { InvitePartnerCard } from "@/src/features/couple/components/InvitePartnerCard";
 import { R0Dashboard } from "@/src/features/dashboard/components/R0Dashboard";
@@ -52,23 +52,12 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen bg-stone-50 px-4 py-6 text-slate-950 sm:px-6 sm:py-8">
       <div className="mx-auto grid max-w-4xl gap-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <p className="text-sm font-medium text-slate-600">Fire Banking</p>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <Link
-              href="/subscribe"
-              className="text-sm font-medium text-emerald-700 hover:text-emerald-800"
-            >
-              고정비 시뮬레이터
-            </Link>
-            <Link
-              href="/onboarding"
-              className="text-sm font-medium text-emerald-700 hover:text-emerald-800"
-            >
-              이번 달 값 수정
-            </Link>
-          </div>
-        </div>
+        <AppHeader
+          links={[
+            { href: "/subscribe", label: "고정비 시뮬레이터" },
+            { href: "/onboarding", label: "이번 달 값 수정" },
+          ]}
+        />
         <R0Dashboard snapshot={snapshot} />
         <InvitePartnerCard
           coupleId={membership.couple_id}

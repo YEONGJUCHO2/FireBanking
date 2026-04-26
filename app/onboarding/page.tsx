@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { AppHeader } from "@/src/features/auth/components/AppHeader";
 import { getCurrentUser } from "@/src/features/auth/lib/getCurrentUser";
 import { R0OnboardingForm } from "@/src/features/onboarding/components/R0OnboardingForm";
 
@@ -12,6 +13,7 @@ export default async function OnboardingPage() {
   return (
     <main className="min-h-screen bg-stone-50 px-4 py-6 text-slate-950 sm:px-6 sm:py-8">
       <div className="mx-auto grid max-w-2xl gap-8">
+        <AppHeader links={[{ href: "/subscribe", label: "고정비 시뮬레이터" }]} />
         <section className="grid gap-3">
           <p className="text-sm font-medium text-emerald-700">R0 Internal Alpha</p>
           <h1 className="text-2xl font-bold tracking-normal sm:text-3xl">

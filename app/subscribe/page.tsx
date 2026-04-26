@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import { AppHeader } from "@/src/features/auth/components/AppHeader";
 import { getCurrentUser } from "@/src/features/auth/lib/getCurrentUser";
 import { saveFixedCostSimulation } from "@/src/features/subscribe/actions/saveFixedCostSimulation";
 import { FixedCostSimulator } from "@/src/features/subscribe/components/FixedCostSimulator";
@@ -32,15 +32,7 @@ export default async function SubscribePage() {
   return (
     <main className="min-h-screen bg-stone-50 px-4 py-6 text-slate-950 sm:px-6 sm:py-8">
       <div className="mx-auto grid max-w-5xl gap-6">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <p className="text-sm font-medium text-slate-600">Fire Banking</p>
-          <Link
-            href="/dashboard"
-            className="text-sm font-medium text-emerald-700 hover:text-emerald-800"
-          >
-            대시보드로 돌아가기
-          </Link>
-        </div>
+        <AppHeader links={[{ href: "/dashboard", label: "대시보드로 돌아가기" }]} />
         <FixedCostSimulator
           initialConfig={readConfig(simulation?.config)}
           saveAction={saveFixedCostSimulation}
