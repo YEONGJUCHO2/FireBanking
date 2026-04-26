@@ -60,6 +60,9 @@ const fields = [
   ],
 ] as const;
 
+type FieldName = (typeof fields)[number][0];
+export type R0OnboardingInitialValues = Partial<Record<FieldName, number>>;
+
 function formatManwonInput(value: string) {
   const digits = value.replace(/\D/g, "");
 
@@ -70,15 +73,24 @@ function formatManwonInput(value: string) {
   return Number(digits).toLocaleString("ko-KR");
 }
 
+function formatKrwAsManwonInput(value: number | undefined) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "";
+  }
+
+  return Math.round(value / 10_000).toLocaleString("ko-KR");
+}
+
 type ManwonInputProps = {
-  name: (typeof fields)[number][0];
+  name: FieldName;
   label: string;
   placeholder: string;
   required: boolean;
+  initialValue?: number;
 };
 
-function ManwonInput({ name, label, placeholder, required }: ManwonInputProps) {
-  const [value, setValue] = useState("");
+function ManwonInput({ name, label, placeholder, required, initialValue }: ManwonInputProps) {
+  const [value, setValue] = useState(() => formatKrwAsManwonInput(initialValue));
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     setValue(formatManwonInput(event.target.value));
@@ -101,7 +113,11 @@ function ManwonInput({ name, label, placeholder, required }: ManwonInputProps) {
   );
 }
 
-export function R0OnboardingForm() {
+type R0OnboardingFormProps = {
+  initialValues?: R0OnboardingInitialValues;
+};
+
+export function R0OnboardingForm({ initialValues = {} }: R0OnboardingFormProps) {
   const [state, formAction, pending] = useActionState(saveR0Snapshot, initialState);
 
   return (
@@ -109,7 +125,13 @@ export function R0OnboardingForm() {
       {fields.map(([name, label, placeholder, help, required]) => (
         <label key={name} className="grid gap-2">
           <span className="text-sm font-medium text-slate-800">{label}</span>
-          <ManwonInput name={name} label={label} placeholder={placeholder} required={required} />
+          <ManwonInput
+            name={name}
+            label={label}
+            placeholder={placeholder}
+            required={required}
+            initialValue={initialValues[name]}
+          />
           <span className="text-xs leading-5 text-slate-500">{help}</span>
         </label>
       ))}

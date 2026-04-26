@@ -1,7 +1,11 @@
 import { redirect } from "next/navigation";
 import { AppHeader } from "@/src/features/auth/components/AppHeader";
 import { getCurrentUser } from "@/src/features/auth/lib/getCurrentUser";
-import { R0OnboardingForm } from "@/src/features/onboarding/components/R0OnboardingForm";
+import {
+  R0OnboardingForm,
+  type R0OnboardingInitialValues,
+} from "@/src/features/onboarding/components/R0OnboardingForm";
+import { createSupabaseServerClient } from "@/src/lib/supabase/server";
 
 export default async function OnboardingPage() {
   const user = await getCurrentUser();
@@ -9,6 +13,40 @@ export default async function OnboardingPage() {
   if (!user) {
     redirect("/");
   }
+
+  const supabase = await createSupabaseServerClient();
+  const { data: membership } = await supabase
+    .from("couple_members")
+    .select("couple_id")
+    .eq("user_id", user.id)
+    .eq("role", "admin")
+    .order("joined_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  const { data: snapshot } = membership
+    ? await supabase
+        .from("monthly_cashflow_snapshots")
+        .select(
+          "total_income,investable_net_worth,primary_residence_net_worth,other_net_worth,fixed_expense,variable_expense,regular_investment",
+        )
+        .eq("couple_id", membership.couple_id)
+        .order("month", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+    : { data: null };
+
+  const initialValues: R0OnboardingInitialValues = snapshot
+    ? {
+        monthlyNetIncome: snapshot.total_income,
+        investableNetWorth: snapshot.investable_net_worth,
+        primaryResidenceNetWorth: snapshot.primary_residence_net_worth,
+        otherNetWorth: snapshot.other_net_worth,
+        monthlyFixedExpense: snapshot.fixed_expense,
+        monthlyVariableExpense: snapshot.variable_expense,
+        monthlyRegularInvestment: snapshot.regular_investment,
+      }
+    : {};
 
   return (
     <main className="min-h-screen bg-stone-50 px-4 py-6 text-slate-950 sm:px-6 sm:py-8">
@@ -24,7 +62,7 @@ export default async function OnboardingPage() {
             거리를 확인합니다. 정확하지 않아도 괜찮아요. 지금은 첫 거리감을 보는 단계예요.
           </p>
         </section>
-        <R0OnboardingForm />
+        <R0OnboardingForm initialValues={initialValues} />
       </div>
     </main>
   );
