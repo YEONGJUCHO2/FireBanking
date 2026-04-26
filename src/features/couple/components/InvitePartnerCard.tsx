@@ -142,7 +142,8 @@ export function InvitePartnerCard({
         buttonTitle: "초대 수락하기",
       });
       setShareError(null);
-    } catch {
+    } catch (error) {
+      console.error("KakaoTalk invite share failed", error);
       setShareError("카카오톡 공유창을 열지 못했습니다. 링크 복사를 사용해주세요.");
     }
   }
