@@ -8,6 +8,7 @@ vi.mock("@/src/features/couple/actions/createInviteLink", () => ({
 
 describe("InvitePartnerCard", () => {
   beforeEach(() => {
+    vi.restoreAllMocks();
     vi.unstubAllEnvs();
     Reflect.deleteProperty(window, "Kakao");
   });
@@ -118,6 +119,39 @@ describe("InvitePartnerCard", () => {
 
     expect(
       await screen.findByText("카카오 JavaScript 키 설정이 필요합니다."),
+    ).toBeInTheDocument();
+  });
+
+  it("copies the invite link when the Kakao share popup is blocked", async () => {
+    vi.stubEnv("NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY", "javascript-key");
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+    Object.defineProperty(window, "Kakao", {
+      configurable: true,
+      value: {
+        isInitialized: vi.fn(() => true),
+        init: vi.fn(),
+        Share: {
+          sendDefault: vi.fn(() => {
+            throw new TypeError("Cannot read properties of null (reading 'focus')");
+          }),
+        },
+      },
+    });
+
+    render(<InvitePartnerCard coupleId="couple-1" latestInviteUrl="/invite/token-1" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "카카오톡으로 보내기" }));
+
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/invite/token-1`);
+    });
+    expect(
+      screen.getByText("카카오톡 공유창이 막혀 초대 링크를 복사했어요. 카카오톡에 붙여넣어 보내주세요."),
     ).toBeInTheDocument();
   });
 });
