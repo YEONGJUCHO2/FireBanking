@@ -15,9 +15,8 @@ export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient();
   const { data: membership } = await supabase
     .from("couple_members")
-    .select("couple_id")
+    .select("couple_id,role")
     .eq("user_id", user.id)
-    .eq("role", "admin")
     .order("joined_at", { ascending: true })
     .limit(1)
     .maybeSingle();
@@ -36,18 +35,38 @@ export default async function DashboardPage() {
     .limit(1)
     .maybeSingle();
 
-  if (!snapshot) {
+  if (!snapshot && membership.role === "admin") {
     redirect("/onboarding");
   }
 
-  const { data: latestInvite } = await supabase
-    .from("couple_invites")
-    .select("token")
-    .eq("couple_id", membership.couple_id)
-    .eq("status", "pending")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  if (!snapshot) {
+    return (
+      <main className="min-h-screen bg-stone-50 px-4 py-6 text-slate-950 sm:px-6 sm:py-8">
+        <div className="mx-auto grid max-w-4xl gap-6">
+          <AppHeader links={[{ href: "/subscribe", label: "고정비 시뮬레이터" }]} />
+          <section className="rounded-lg border border-slate-200 bg-white p-5">
+            <p className="text-sm font-medium text-slate-900">배우자 입력 대기 중</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              아직 공유된 FIRE 결과가 없습니다. 배우자가 이번 달 값을 입력하면 같은 대시보드에서 바로
+              확인할 수 있습니다.
+            </p>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
+  const { data: latestInvite } =
+    membership.role === "admin"
+      ? await supabase
+          .from("couple_invites")
+          .select("token")
+          .eq("couple_id", membership.couple_id)
+          .eq("status", "pending")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : { data: null };
 
   return (
     <main className="min-h-screen bg-stone-50 px-4 py-6 text-slate-950 sm:px-6 sm:py-8">
@@ -59,10 +78,19 @@ export default async function DashboardPage() {
           ]}
         />
         <R0Dashboard snapshot={snapshot} />
-        <InvitePartnerCard
-          coupleId={membership.couple_id}
-          latestInviteUrl={latestInvite ? `/invite/${latestInvite.token}` : undefined}
-        />
+        {membership.role === "admin" ? (
+          <InvitePartnerCard
+            coupleId={membership.couple_id}
+            latestInviteUrl={latestInvite ? `/invite/${latestInvite.token}` : undefined}
+          />
+        ) : (
+          <section className="rounded-lg border border-slate-200 bg-white p-4">
+            <p className="text-sm font-medium text-emerald-700">함께 보기 연결됨</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              배우자 워크스페이스에 연결되어 같은 FIRE 결과를 보고 있습니다.
+            </p>
+          </section>
+        )}
       </div>
     </main>
   );

@@ -52,6 +52,22 @@ describe("SignInButton", () => {
     });
   });
 
+  it("can preserve an invite return path through OAuth", async () => {
+    signInWithOAuth.mockResolvedValue({});
+    render(<SignInButton callbackPath="/auth/callback?next=/invite/token-1" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "카카오로 시작하기" }));
+
+    await waitFor(() => {
+      expect(signInWithOAuth).toHaveBeenCalledWith({
+        provider: "kakao",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=/invite/token-1`,
+        },
+      });
+    });
+  });
+
   it("warns KakaoTalk users to open the login page in an external browser", async () => {
     vi.spyOn(window.navigator, "userAgent", "get").mockReturnValue("Mozilla/5.0 KAKAOTALK 11.4.0");
 
