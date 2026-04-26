@@ -62,7 +62,7 @@ export function DesktopDashboard({ footerAction }: { footerAction?: ReactNode })
             <p className="text-sm font-bold text-fb-muted">월 생활비</p>
             <p className="mt-3 text-3xl font-bold tracking-normal text-fb-ink">{formatManWon(m.monthlyLivingCostMan)}</p>
             <p className="mt-2 text-sm leading-6 text-fb-muted">고정비 + 변동비 기준</p>
-            <Button href="/subscribe" variant="secondary" size="sm" className="mt-4 w-full">고정비 계산하기</Button>
+            <Button href="/subscribe" variant="secondary" size="sm" className="mt-4 w-full whitespace-nowrap px-2 text-xs">고정비 계산하기</Button>
           </div>
           <div className="fb-card p-5">
             <p className="text-sm font-bold text-fb-ink">배우자 현황</p>
