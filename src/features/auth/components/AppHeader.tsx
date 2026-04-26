@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { signOut } from "@/src/features/auth/actions/signOut";
+import { BrandLockup } from "@/components/fire-banking";
 
 type AppHeaderLink = {
   href: string;
@@ -12,16 +13,16 @@ type AppHeaderProps = {
 
 export function AppHeader({ links = [] }: AppHeaderProps) {
   return (
-    <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-      <Link href="/dashboard" className="text-sm font-semibold text-slate-700 hover:text-slate-950">
-        Fire Banking
+    <header className="flex flex-col gap-4 px-5 pb-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
+      <Link href="/dashboard" className="w-fit">
+        <BrandLockup compact />
       </Link>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         {links.map((link) => (
           <Link
             key={link.href}
             href={link.href}
-            className="text-sm font-medium text-emerald-700 hover:text-emerald-800"
+            className="text-sm font-bold text-fb-green hover:text-fb-green-900"
           >
             {link.label}
           </Link>
@@ -29,7 +30,7 @@ export function AppHeader({ links = [] }: AppHeaderProps) {
         <form action={signOut}>
           <button
             type="submit"
-            className="text-sm font-medium text-slate-500 underline-offset-4 hover:text-slate-900 hover:underline"
+            className="text-sm font-semibold text-fb-muted underline-offset-4 hover:text-fb-ink hover:underline"
           >
             로그아웃
           </button>

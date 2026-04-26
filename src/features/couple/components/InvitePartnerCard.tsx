@@ -165,13 +165,18 @@ export function InvitePartnerCard({
   }
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4">
-      <div className="grid gap-2">
-        <p className="text-sm font-medium text-emerald-700">함께 보기</p>
-        <h2 className="text-xl font-semibold text-slate-950">배우자에게 공유할 준비</h2>
-        <p className="text-sm leading-6 text-slate-600">
+    <section className="fb-card p-5">
+      <div className="flex items-start gap-4">
+        <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-fb-green-100 text-xl text-fb-green">
+          ♡
+        </div>
+        <div className="grid gap-2">
+          <p className="text-sm font-bold text-fb-green">배우자 현황</p>
+          <h2 className="text-xl font-bold tracking-normal text-fb-ink">함께 보면 결과가 더 또렷해져요.</h2>
+          <p className="text-sm leading-6 text-fb-muted">
           초대를 수락하면 배우자가 같은 FIRE 대시보드를 함께 볼 수 있습니다.
-        </p>
+          </p>
+        </div>
       </div>
 
       <form action={formAction} className="mt-4">
@@ -179,7 +184,7 @@ export function InvitePartnerCard({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-slate-950 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="fb-focus w-full rounded-button bg-fb-green px-4 py-3 text-sm font-bold text-white shadow-card hover:bg-fb-green-900 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {pending ? "링크 만드는 중..." : "배우자 초대 링크 만들기"}
         </button>
@@ -187,29 +192,29 @@ export function InvitePartnerCard({
 
       {inviteUrl ? (
         <div className="mt-3 grid gap-2">
-          <p className="break-all rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-700">
+          <p className="break-all rounded-soft bg-fb-green-50 px-3 py-2 text-sm text-fb-muted">
             {inviteUrl}
           </p>
           <button
             type="button"
             onClick={copyInviteUrl}
-            className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            className="fb-focus rounded-button border border-fb-line bg-white px-4 py-2 text-sm font-bold text-fb-ink shadow-card hover:border-fb-green/30"
           >
             {copied ? "복사했어요" : "초대 링크 복사"}
           </button>
           <button
             type="button"
             onClick={shareInviteUrlWithKakao}
-            className="rounded-md bg-[#fee500] px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-[#f3dc00]"
+            className="fb-focus rounded-button bg-fb-kakao px-4 py-2 text-sm font-bold text-[#381E1F] hover:brightness-95"
           >
             카카오톡으로 보내기
           </button>
-          {copyError ? <p className="text-sm text-slate-700">{copyError}</p> : null}
-          {shareError ? <p className="text-sm text-slate-700">{shareError}</p> : null}
+          {copyError ? <p className="text-sm text-fb-muted">{copyError}</p> : null}
+          {shareError ? <p className="text-sm text-fb-muted">{shareError}</p> : null}
         </div>
       ) : null}
 
-      {state.error ? <p className="mt-3 text-sm text-red-700">{state.error}</p> : null}
+      {state.error ? <p className="mt-3 text-sm text-fb-danger">{state.error}</p> : null}
     </section>
   );
 }

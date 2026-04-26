@@ -50,7 +50,7 @@ export function SignInButton({ callbackPath = "/auth/callback" }: { callbackPath
       {inAppBrowser === "kakaotalk" ? (
         <div
           role="alert"
-          className="grid gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
+          className="grid gap-3 rounded-card border border-fb-warning/25 bg-fb-warning-bg p-4 text-sm text-fb-ink"
         >
           <div className="grid gap-1">
             <p className="font-semibold">
@@ -67,7 +67,7 @@ export function SignInButton({ callbackPath = "/auth/callback" }: { callbackPath
           <button
             type="button"
             onClick={openExternalBrowser}
-            className="w-full rounded-md border border-amber-300 bg-white px-4 py-3 text-sm font-semibold text-amber-950 shadow-sm hover:bg-amber-100 sm:w-fit"
+            className="fb-focus w-full rounded-button border border-fb-warning/30 bg-white px-4 py-3 text-sm font-semibold text-fb-ink shadow-card hover:bg-fb-sand sm:w-fit"
           >
             외부 브라우저로 열기
           </button>
@@ -77,7 +77,7 @@ export function SignInButton({ callbackPath = "/auth/callback" }: { callbackPath
         <button
           type="button"
           onClick={() => signInWithProvider("kakao")}
-          className="w-full rounded-md bg-[#FEE500] px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm hover:bg-[#f5dc00] sm:w-fit"
+          className="fb-focus h-14 w-full rounded-button bg-fb-kakao px-4 py-3 text-sm font-bold text-[#381E1F] shadow-card hover:brightness-95"
         >
           카카오로 시작하기
         </button>
@@ -85,7 +85,7 @@ export function SignInButton({ callbackPath = "/auth/callback" }: { callbackPath
       <button
         type="button"
         onClick={() => signInWithProvider("google")}
-        className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 sm:w-fit"
+        className="fb-focus h-14 w-full rounded-button border border-fb-line bg-white px-4 py-3 text-sm font-bold text-fb-ink shadow-card hover:border-fb-green/30"
       >
         Google로 시작하기
       </button>

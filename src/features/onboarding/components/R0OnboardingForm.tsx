@@ -97,7 +97,7 @@ function ManwonInput({ name, label, placeholder, required, initialValue }: Manwo
   }
 
   return (
-    <div className="flex items-center rounded-md border border-slate-300 bg-white focus-within:border-emerald-600 focus-within:ring-2 focus-within:ring-emerald-100">
+    <div className="flex items-center rounded-soft border border-fb-line bg-white shadow-inner-soft focus-within:border-fb-green focus-within:ring-4 focus-within:ring-fb-green/15">
       <input
         required={required}
         inputMode="numeric"
@@ -106,9 +106,9 @@ function ManwonInput({ name, label, placeholder, required, initialValue }: Manwo
         value={value}
         onChange={handleChange}
         placeholder={formatManwonInput(placeholder)}
-        className="min-w-0 flex-1 rounded-md bg-transparent px-3 py-3 text-base outline-none"
+        className="min-w-0 flex-1 rounded-soft bg-transparent px-4 py-3 text-right text-base font-semibold text-fb-ink outline-none placeholder:text-fb-subtle"
       />
-      <span className="shrink-0 px-3 text-sm font-medium text-slate-500">만원</span>
+      <span className="shrink-0 px-4 text-sm font-bold text-fb-muted">만원</span>
     </div>
   );
 }
@@ -122,9 +122,13 @@ export function R0OnboardingForm({ initialValues = {} }: R0OnboardingFormProps) 
 
   return (
     <form action={formAction} className="grid gap-5">
+      <div className="flex items-center justify-between rounded-card border border-fb-line bg-fb-green-50 px-4 py-3 text-sm text-fb-muted">
+        <span>입력 단위</span>
+        <strong className="text-fb-green">10,000원</strong>
+      </div>
       {fields.map(([name, label, placeholder, help, required]) => (
         <label key={name} className="grid gap-2">
-          <span className="text-sm font-medium text-slate-800">{label}</span>
+          <span className="text-sm font-bold text-fb-ink">{label}</span>
           <ManwonInput
             name={name}
             label={label}
@@ -132,20 +136,20 @@ export function R0OnboardingForm({ initialValues = {} }: R0OnboardingFormProps) 
             required={required}
             initialValue={initialValues[name]}
           />
-          <span className="text-xs leading-5 text-slate-500">{help}</span>
+          <span className="text-xs leading-5 text-fb-muted">{help}</span>
         </label>
       ))}
 
       {state.error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{state.error}</p>
+        <p className="rounded-soft bg-fb-danger-bg px-4 py-3 text-sm text-fb-danger">{state.error}</p>
       ) : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="rounded-md bg-emerald-700 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+        className="fb-focus h-14 rounded-button bg-fb-green px-4 py-3 text-sm font-bold text-white shadow-card hover:bg-fb-green-900 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {pending ? "계산 중..." : "첫 FIRE 결과 보기"}
+        {pending ? "계산 중..." : "다음"}
       </button>
     </form>
   );
