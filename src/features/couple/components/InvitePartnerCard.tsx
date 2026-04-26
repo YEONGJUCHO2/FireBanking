@@ -44,7 +44,7 @@ function toShareableInviteUrl(inviteUrl: string) {
 }
 
 function loadKakaoSdk() {
-  if (window.Kakao?.Share) {
+  if (window.Kakao) {
     return Promise.resolve();
   }
 
@@ -123,12 +123,16 @@ export function InvitePartnerCard({
     try {
       await loadKakaoSdk();
 
-      if (!window.Kakao?.Share) {
-        throw new Error("Kakao Share is unavailable");
+      if (!window.Kakao) {
+        throw new Error("Kakao SDK is unavailable");
       }
 
       if (!window.Kakao.isInitialized()) {
         window.Kakao.init(javascriptKey);
+      }
+
+      if (!window.Kakao.Share) {
+        throw new Error("Kakao Share is unavailable");
       }
 
       const shareableInviteUrl = toShareableInviteUrl(inviteUrl);

@@ -87,6 +87,30 @@ describe("InvitePartnerCard", () => {
     });
   });
 
+  it("initializes Kakao before checking the Share module", async () => {
+    vi.stubEnv("NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY", "javascript-key");
+    const sendDefault = vi.fn();
+    const kakao = {
+      isInitialized: vi.fn(() => false),
+      init: vi.fn(() => {
+        Object.assign(kakao, { Share: { sendDefault } });
+      }),
+    };
+    Object.defineProperty(window, "Kakao", {
+      configurable: true,
+      value: kakao,
+    });
+
+    render(<InvitePartnerCard coupleId="couple-1" latestInviteUrl="/invite/token-1" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "카카오톡으로 보내기" }));
+
+    await waitFor(() => {
+      expect(kakao.init).toHaveBeenCalledWith("javascript-key");
+      expect(sendDefault).toHaveBeenCalled();
+    });
+  });
+
   it("shows a setup message when the Kakao JavaScript key is missing", async () => {
     render(<InvitePartnerCard coupleId="couple-1" latestInviteUrl="/invite/token-1" />);
 
