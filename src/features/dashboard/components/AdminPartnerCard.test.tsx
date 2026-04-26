@@ -31,6 +31,7 @@ describe("AdminPartnerCard", () => {
 
     expect(screen.getByText("배우자 연결됨")).toBeInTheDocument();
     expect(screen.getByText(/읽기 전용으로 같은 FIRE 결과/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "연동 해제" })).toBeInTheDocument();
     expect(screen.queryByText("배우자에게 공유할 준비")).not.toBeInTheDocument();
   });
 });

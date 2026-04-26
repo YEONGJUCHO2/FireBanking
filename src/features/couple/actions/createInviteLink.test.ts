@@ -32,16 +32,27 @@ function createFormData(coupleId?: string) {
 function createSupabaseMock({
   user = { id: "user-1" },
   insertError = null,
+  connectedPartnerCount = 0,
 }: {
   user?: { id: string } | null;
   insertError?: unknown;
+  connectedPartnerCount?: number | null;
 } = {}) {
   const insert = vi.fn(async () => ({ error: insertError }));
+  const selectMembers = vi.fn(() => ({
+    eq: vi.fn(() => ({
+      eq: vi.fn(async () => ({ count: connectedPartnerCount, error: null })),
+    })),
+  }));
   const supabase = {
     auth: {
       getUser: vi.fn(async () => ({ data: { user } })),
     },
     from: vi.fn((table: string) => {
+      if (table === "couple_members") {
+        return { select: selectMembers };
+      }
+
       if (table !== "couple_invites") {
         throw new Error(`Unexpected table: ${table}`);
       }
@@ -50,7 +61,7 @@ function createSupabaseMock({
     }),
   };
 
-  return { supabase, insert };
+  return { supabase, insert, selectMembers };
 }
 
 describe("createInviteLink", () => {
@@ -91,6 +102,20 @@ describe("createInviteLink", () => {
     });
     expect(mocks.revalidatePath).toHaveBeenCalledWith("/dashboard");
     expect(result).toEqual({ inviteUrl: "/invite/token-1" });
+  });
+
+  it("blocks new invites when a spouse account is already connected", async () => {
+    const refs = createSupabaseMock({ connectedPartnerCount: 1 });
+    mocks.createSupabaseServerClient.mockResolvedValue(refs.supabase);
+    mocks.createInviteToken.mockReturnValue("token-1");
+
+    const result = await createInviteLink({}, createFormData("couple-1"));
+
+    expect(result).toEqual({
+      error: "이미 배우자 계정이 연결되어 있습니다. 연동 해제 후 다시 초대해주세요.",
+    });
+    expect(refs.insert).not.toHaveBeenCalled();
+    expect(mocks.revalidatePath).not.toHaveBeenCalled();
   });
 
   it("returns an invite creation error when insert fails", async () => {

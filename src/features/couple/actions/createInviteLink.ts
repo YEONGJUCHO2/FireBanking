@@ -28,6 +28,20 @@ export async function createInviteLink(
     return { error: "로그인이 필요합니다." };
   }
 
+  const { count: connectedPartnerCount, error: memberCountError } = await supabase
+    .from("couple_members")
+    .select("user_id", { count: "exact", head: true })
+    .eq("couple_id", coupleId)
+    .eq("role", "lite");
+
+  if (memberCountError) {
+    return { error: "초대 상태를 확인하지 못했습니다." };
+  }
+
+  if ((connectedPartnerCount ?? 0) > 0) {
+    return { error: "이미 배우자 계정이 연결되어 있습니다. 연동 해제 후 다시 초대해주세요." };
+  }
+
   const token = createInviteToken();
   const { error } = await supabase.from("couple_invites").insert({
     couple_id: coupleId,

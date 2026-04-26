@@ -12,6 +12,7 @@ const acceptInviteErrors: Record<string, string> = {
   invalid_invite: "초대 링크가 올바르지 않습니다.",
   expired_invite: "만료된 초대 링크입니다. 새 링크를 요청해주세요.",
   unavailable_invite: "이미 사용되었거나 더 이상 사용할 수 없는 초대 링크입니다.",
+  partner_already_connected: "이미 배우자 계정이 연결되어 있습니다. 관리자에게 새 초대를 요청해주세요.",
   login_required: "로그인이 필요합니다.",
 };
 
