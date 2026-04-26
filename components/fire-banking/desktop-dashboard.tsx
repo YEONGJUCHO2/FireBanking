@@ -7,14 +7,15 @@ import { FireHeroCard } from './fire-hero-card'
 import { MetricCard } from './metric-card'
 import { Icon, type IconName } from './icons'
 import type { ReactNode } from 'react'
+import Link from 'next/link'
 
-const sidebar: Array<{ label: string; icon: IconName }> = [
-  { label: '대시보드', icon: 'home' },
-  { label: '기록', icon: 'calendar' },
-  { label: '분석', icon: 'chart' },
-  { label: '설계 도구', icon: 'mountain' },
-  { label: '배우자 관리', icon: 'users' },
-  { label: '설정', icon: 'settings' },
+const sidebar: Array<{ label: string; icon: IconName; href: string }> = [
+  { label: '대시보드', icon: 'home', href: '/dashboard' },
+  { label: '기록', icon: 'calendar', href: '/onboarding' },
+  { label: '고정비 계산', icon: 'chart', href: '/subscribe' },
+  { label: '설계 도구', icon: 'mountain', href: '/subscribe' },
+  { label: '배우자 관리', icon: 'users', href: '/invite/demo-token' },
+  { label: '설정', icon: 'settings', href: '/design-system' },
 ]
 
 export function DesktopDashboard({ footerAction }: { footerAction?: ReactNode }) {
@@ -27,10 +28,10 @@ export function DesktopDashboard({ footerAction }: { footerAction?: ReactNode })
         <BrandLockup compact />
         <nav className="mt-8 space-y-1 text-sm font-bold text-fb-muted">
           {sidebar.map((item) => (
-            <div key={item.label} className={item.label === '대시보드' ? 'flex items-center gap-3 rounded-soft bg-fb-green-100 px-3 py-3 text-fb-green' : 'flex items-center gap-3 px-3 py-3'}>
+            <Link key={item.label} href={item.href} className={item.label === '대시보드' ? 'flex items-center gap-3 rounded-soft bg-fb-green-100 px-3 py-3 text-fb-green' : 'flex items-center gap-3 rounded-soft px-3 py-3 transition hover:bg-fb-green-50 hover:text-fb-green'}>
               <Icon name={item.icon} className="size-4" />
               {item.label}
-            </div>
+            </Link>
           ))}
         </nav>
         <div className="mt-10 rounded-card border border-fb-line bg-white p-4 text-sm leading-6 text-fb-muted">
@@ -57,7 +58,12 @@ export function DesktopDashboard({ footerAction }: { footerAction?: ReactNode })
         <div className="mt-4 grid grid-cols-[1fr_1fr_1fr_280px] gap-4">
           <MetricCard title="월 자산 증가 여력" value={formatManWon(m.monthlyAssetGrowthCapacityMan)} caption="수입에서 생활비를 제외한 여력" />
           <MetricCard title="FIRE 목표 자산" value={formatManWon(m.fireTargetAssetMan)} caption="월 생활비 × 12 × 25배" />
-          <MetricCard title="월 생활비" value={formatManWon(m.monthlyLivingCostMan)} caption="고정비 + 변동비 기준" />
+          <div className="fb-card p-5">
+            <p className="text-sm font-bold text-fb-muted">월 생활비</p>
+            <p className="mt-3 text-3xl font-bold tracking-normal text-fb-ink">{formatManWon(m.monthlyLivingCostMan)}</p>
+            <p className="mt-2 text-sm leading-6 text-fb-muted">고정비 + 변동비 기준</p>
+            <Button href="/subscribe" variant="secondary" size="sm" className="mt-4 w-full">고정비 계산하기</Button>
+          </div>
           <div className="fb-card p-5">
             <p className="text-sm font-bold text-fb-ink">배우자 현황</p>
             <p className="mt-2 text-sm leading-6 text-fb-muted">배우자가 아직 참여하지 않았어요. 초대하면 이번 달 결과가 더 정확해져요.</p>

@@ -1,4 +1,4 @@
-import { AppHeader, BottomNav, CashflowSummary, DesktopDashboard, FireHeroCard, HeaderIconButton, InviteCard, MetricCard, MobileAppShell } from '@/components/fire-banking'
+import { AppHeader, BottomNav, Button, CashflowSummary, DesktopDashboard, FireHeroCard, HeaderIconButton, InviteCard, MetricCard, MobileAppShell } from '@/components/fire-banking'
 import { dashboardMetrics as m } from '@/lib/sample-data'
 import { formatManWon } from '@/lib/format'
 import { SignOutButton } from '@/src/features/auth/components/SignOutButton'
@@ -30,6 +30,7 @@ export default function DashboardPage() {
             </div>
 
             <MetricCard title="월 생활비" value={formatManWon(m.monthlyLivingCostMan)} caption={`고정비 ${formatManWon(m.monthlyFixedCostMan)} + 변동비 ${formatManWon(m.monthlyVariableCostMan)}`} size="sm" />
+            <Button href="/subscribe" variant="secondary" className="w-full">고정비 계산하기</Button>
 
             <CashflowSummary incomeMan={m.monthlyIncomeMan} livingCostMan={m.monthlyLivingCostMan} regularInvestmentMan={m.monthlyRegularInvestmentMan} remainingMan={remainingAfterRegular} />
 

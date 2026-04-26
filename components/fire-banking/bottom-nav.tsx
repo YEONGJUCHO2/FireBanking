@@ -5,7 +5,7 @@ import { Icon, type IconName } from './icons'
 const navItems: Array<{ href: string; label: string; icon: IconName }> = [
   { href: '/dashboard', label: '홈', icon: 'home' },
   { href: '/onboarding', label: '기록', icon: 'calendar' },
-  { href: '/subscribe', label: '분석', icon: 'chart' },
+  { href: '/subscribe', label: '고정비', icon: 'chart' },
   { href: '/invite/demo-token', label: '함께', icon: 'users' },
   { href: '/design-system', label: '설정', icon: 'settings' },
 ]
