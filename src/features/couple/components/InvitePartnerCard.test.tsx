@@ -7,6 +7,15 @@ vi.mock("@/src/features/couple/actions/createInviteLink", () => ({
 }));
 
 describe("InvitePartnerCard", () => {
+  it("explains that invitees can now accept the shared dashboard invite", () => {
+    render(<InvitePartnerCard coupleId="couple-1" />);
+
+    expect(
+      screen.getByText("초대를 수락하면 배우자가 같은 FIRE 대시보드를 함께 볼 수 있습니다."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/R1/)).not.toBeInTheDocument();
+  });
+
   it("copies an absolute shareable invite URL", async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", {

@@ -50,8 +50,7 @@ export function InvitePartnerCard({
         <p className="text-sm font-medium text-emerald-700">함께 보기</p>
         <h2 className="text-xl font-semibold text-slate-950">배우자에게 공유할 준비</h2>
         <p className="text-sm leading-6 text-slate-600">
-          R0에서는 링크 생성과 복사 행동으로 공유 의향을 봅니다. 배우자의 가입, 입력, 체크인은 R1에서
-          이어집니다.
+          초대를 수락하면 배우자가 같은 FIRE 대시보드를 함께 볼 수 있습니다.
         </p>
       </div>
 

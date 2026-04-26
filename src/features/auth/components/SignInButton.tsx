@@ -21,7 +21,7 @@ function readServerInAppBrowser(): InAppBrowser {
   return null;
 }
 
-export function SignInButton() {
+export function SignInButton({ callbackPath = "/auth/callback" }: { callbackPath?: string }) {
   const inAppBrowser = useSyncExternalStore(
     subscribeToUserAgent,
     readInAppBrowser,
@@ -36,7 +36,7 @@ export function SignInButton() {
     await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${origin}/auth/callback`,
+        redirectTo: `${origin}${callbackPath}`,
       },
     });
   }

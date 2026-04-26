@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/src/lib/supabase/server";
+import { getSafeAuthRedirectPath } from "@/src/features/auth/lib/authRedirect";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -16,5 +17,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/?error=auth_callback_failed", request.url));
   }
 
-  return NextResponse.redirect(new URL("/onboarding", request.url));
+  return NextResponse.redirect(
+    new URL(getSafeAuthRedirectPath(requestUrl.searchParams.get("next")), request.url),
+  );
 }
