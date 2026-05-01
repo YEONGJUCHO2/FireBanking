@@ -73,7 +73,7 @@ export function FireTimeline({
         >
           <span className="sr-only">현재 FIRE 진척 {Math.round(pct * 100)}%</span>
         </div>
-        <FlameMark className="absolute right-0 top-[-2px] size-[38px]" />
+        <FireEmoji className="absolute right-0 top-[-2px] size-[38px]" />
       </div>
 
       <div className="fb-num relative h-[18px] text-[12px] font-bold">
@@ -145,7 +145,7 @@ export function FireTimelineWide({
           className="absolute top-[33px] size-[22px] rounded-full border-[4px] border-fb-trust bg-white shadow-[0_0_0_3px_rgba(0,102,255,0.12)]"
           style={{ left: `calc(${pct * 100}% - ${fireTrackInset * pct + 11}px)` }}
         />
-        <FlameMark className="absolute right-0 top-[19px] size-10" />
+        <FireEmoji className="absolute right-0 top-[19px] size-10" />
 
         <div className="absolute left-0 right-0 top-16">
           {ticks.map((tick) => (
@@ -196,18 +196,13 @@ export function FireTimelineWide({
   )
 }
 
-function FlameMark({ className }: { className?: string }) {
+function FireEmoji({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 40 40" className={className} fill="none" aria-hidden="true">
-      <circle cx="20" cy="20" r="20" fill="#EAF2FE" />
-      <path
-        d="M21.3 8.5c.8 4.2-2.4 6.2-4.7 8.7-2 2.1-3.1 4.1-2.6 7 .6 3.9 3.7 6.8 7.6 6.8 4.5 0 7.9-3.1 7.9-7.6 0-3.4-1.8-6.1-4.5-8.4.1 2-1 3.6-2.4 4.5.5-4.4-.1-7.9-1.3-11Z"
-        fill="#0066FF"
-      />
-      <path
-        d="M20.8 22.2c-1.5 1.4-2.1 2.6-2 4 .1 1.7 1.4 2.9 3.1 2.9 1.9 0 3.3-1.3 3.3-3.2 0-1.8-1.1-3.2-2.6-4.4.1 1-.5 1.9-1.4 2.5.1-.7 0-1.3-.4-1.8Z"
-        fill="white"
-      />
-    </svg>
+    <img
+      src="https://em-content.zobj.net/source/animated-noto-color-emoji/356/fire_1f525.gif"
+      alt="FIRE"
+      className={cn('pointer-events-none select-none object-contain', className)}
+      draggable={false}
+    />
   )
 }
