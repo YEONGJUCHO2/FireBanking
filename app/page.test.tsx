@@ -8,11 +8,14 @@ describe("HomePage", () => {
 
     expect(screen.getAllByText("Fire Banking").length).toBeGreaterThan(0);
     expect(screen.getAllByText(/부부가 함께/).length).toBeGreaterThan(0);
-    expect(screen.getByRole("link", { name: "시작하기" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Google로 계속하기" })).toHaveAttribute(
       "href",
       "/onboarding",
     );
-    expect(screen.getByRole("link", { name: "로그인" })).toHaveAttribute("href", "/dashboard");
+    expect(screen.getByRole("link", { name: "이메일로 시작하기" })).toHaveAttribute(
+      "href",
+      "/onboarding",
+    );
     expect(screen.queryByText(/다음 릴리즈/)).not.toBeInTheDocument();
   });
 });

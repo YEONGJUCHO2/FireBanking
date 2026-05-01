@@ -24,7 +24,7 @@ describe("R0Dashboard", () => {
   it("shows the projected FIRE month when projected_fire_date exists", () => {
     render(<R0Dashboard snapshot={snapshot} />);
 
-    expect(screen.getByText("2035년 5월")).toBeInTheDocument();
+    expect(screen.getByText(/예상 도달 시점은 2035년 5월/)).toBeInTheDocument();
   });
 
   it("shows the calculation-impossible recovery message when projected_fire_date is null", () => {
