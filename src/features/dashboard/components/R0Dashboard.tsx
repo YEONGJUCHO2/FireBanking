@@ -35,8 +35,8 @@ export function R0Dashboard({ snapshot }: { snapshot: R0Snapshot }) {
       <section className="grid gap-3">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-bold text-fb-green">{formatMonth(snapshot.month)} 요약</p>
-            <p className="mt-1 text-sm text-fb-muted">우리의 경제적 자유 현황을 한눈에 확인해요.</p>
+            <p className="text-sm font-bold text-fb-trust">{formatMonth(snapshot.month)} 요약</p>
+            <p className="mt-1 text-sm text-fb-ink-2">우리의 경제적 자유 현황을 한눈에 확인해요.</p>
           </div>
           <StatusPill label="참고용" status="info" />
         </div>
@@ -97,13 +97,13 @@ export function R0Dashboard({ snapshot }: { snapshot: R0Snapshot }) {
       />
 
       {snapshot.projected_fire_date ? null : (
-        <p className="rounded-card bg-fb-warning-bg px-4 py-3 text-sm leading-6 text-fb-ink">
+        <p className="rounded-card bg-fb-cautionary-soft px-4 py-3 text-sm leading-6 text-fb-ink">
           현재 입력 기준으로는 목표 도달 시점을 계산하기 어려워요. 월 자산 증가 여력이 생기면
           예상일을 보여드릴 수 있어요.
         </p>
       )}
 
-      <p className="rounded-card border border-fb-line bg-fb-sand/70 px-4 py-3 text-sm leading-6 text-fb-muted">
+      <p className="rounded-card border border-fb-line bg-fb-card-alt/70 px-4 py-3 text-sm leading-6 text-fb-ink-2">
         이 결과는 참고용 시뮬레이션이에요. 거주 부동산은 표시 순자산에는 포함하지만 R0 FIRE
         계산에서는 제외합니다. 연 5%, 25배 룰 기준이며 투자 자문이 아닙니다.
       </p>
