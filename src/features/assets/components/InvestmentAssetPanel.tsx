@@ -48,7 +48,7 @@ export function InvestmentAssetPanel({ holdings = defaultHoldings }: { holdings?
                 자동 시세는 국내 상장 종목부터 지원해요.
               </p>
             </div>
-            <Button type="button" variant="secondary" size="sm">
+            <Button type="button" variant="secondary" size="sm" className="shrink-0 whitespace-nowrap">
               검색 준비중
             </Button>
           </div>
