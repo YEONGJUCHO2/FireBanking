@@ -17,6 +17,7 @@ This plan implements only R0 from `docs/superpowers/specs/2026-04-25-fire-bankin
 R0 includes:
 
 - Google OAuth login
+- Kakao OAuth when Supabase/Kakao credentials are configured
 - Lead-partner onboarding
 - Total input fields for monthly income, investable net worth, optional primary residence net worth, optional other net worth, fixed expense, variable expense, and regular investment
 - Basic FIRE calculation
@@ -26,7 +27,6 @@ R0 includes:
 
 R0 excludes:
 
-- Kakao OAuth
 - Lite onboarding
 - Lite check-in submission
 - Request system
@@ -40,10 +40,26 @@ Product validation boundary:
 - R0 validates whether one lead partner can reach a trusted first FIRE result, understand the assumptions, persist the result after refresh, and take the first social step of generating/copying a spouse invite link.
 - R0 does not validate the full couple ritual. Do not treat R0 success as proof that spouse participation, asymmetric UX, or monthly retention works. Those are R1-R3 questions.
 - First external validation unit: R0+R1. R0 alone is an internal alpha for technical trust, input clarity, and invite intent.
-- User-facing copy must not expose `admin` / `lite`. Those remain database roles only. UI copy should use neutral Korean language such as "리드 파트너", "배우자", "함께 보기", or the user's display names.
+- User-facing copy must not expose `admin` / `lite`. Those remain database roles only. UI copy should prefer action-based Korean labels such as "내가 먼저 입력하기", "배우자에게 공유", "함께 보기", or the user's display names. Avoid relying on unfamiliar nouns such as "리드 파트너" in primary CTAs.
 - R0 delivery is split into two execution slices:
   - R0a Core Alpha: Google OAuth, lead-partner onboarding, FIRE calculation, dashboard, and monthly snapshot persistence.
   - R0b Invite Intent: spouse invite link generation, copy action, invite status display, and preview route. This does not include spouse signup, spouse onboarding, or spouse input.
+
+External usability review decisions:
+
+- Monthly edit prefill is required. The `/onboarding` edit path must load the latest
+  `monthly_cashflow_snapshots` row and prefill all seven money inputs. A returning
+  user must not retype the whole household from scratch.
+- Manwon inputs must show both formatted input and human-readable confirmation copy,
+  for example `12,000만원 = 1억 2,000만원`, near the active field or summary area.
+- Fixed/variable expense copy must include Korean gray-zone examples so the FIRE date
+  does not swing because users classify ordinary expenses differently.
+- Auth callback failures must be visible on the landing page. Redirecting to
+  `/?error=auth_callback_failed` without rendering an error message is not acceptable.
+- Spouse invite arrival must not be a dead end. The invite page should show why the
+  invite exists and provide at least a Lite/read-only/waitlist continuation path.
+- R0 does not solve detailed asset category migration, but it must preserve enough
+  monthly snapshot data for R1 to split `investableNetWorth` safely.
 
 ## Data Definitions
 
@@ -61,9 +77,17 @@ Use these definitions consistently in forms, schema, database columns, dashboard
 Input UX rule:
 
 - R0 money inputs use 만원 units in the UI to reduce typing burden. The schema normalizes 만원 input values to KRW integers before calculation and persistence.
+- R0 money inputs must render a meaning preview for non-empty values. Example:
+  `12,000만원 = 1억 2,000만원`. This is part of trust, not visual decoration.
 - Investable net worth is required because it drives the R0 FIRE projection.
 - Primary residence net worth and other net worth are optional context fields. The form copy must say "없거나 모르겠으면 비워도 괜찮아요.".
 - Onboarding copy must reassure the user: "정확하지 않아도 괜찮아요. 지금은 첫 거리감을 보는 단계예요."
+- Investable net worth help copy must include examples and exclusions:
+  `예금, 주식, ETF, 연금저축/IRP처럼 FIRE 계산에 넣고 싶은 자산입니다. 당장 쓰기 어려운 연금은 나중에 따로 조정할 수 있어요.`
+- Fixed expense help copy must include examples:
+  `월세/대출이자, 관리비, 보험, 통신, 구독처럼 거의 매달 반복되는 비용입니다.`
+- Variable expense help copy must include examples:
+  `식비, 쇼핑, 병원비, 명절비, 여행비처럼 달마다 흔들리는 돈을 평소 한 달 기준으로 잡아요.`
 
 Result-screen assumptions:
 
@@ -1162,7 +1186,20 @@ export async function GET(request: NextRequest) {
 }
 ```
 
-- [ ] **Step 4: Replace `app/page.tsx`**
+- [ ] **Step 4: Render callback errors on the landing page**
+
+`app/page.tsx` must read the `error` search param and render a clear, recoverable
+Korean message:
+
+```text
+auth_callback_missing_code -> 로그인 정보를 받지 못했어요. 다시 시도해주세요.
+auth_callback_failed -> 로그인 처리 중 문제가 생겼어요. 다시 시도해주세요.
+```
+
+Add a test proving `/?error=auth_callback_failed` does not silently render the normal
+landing state only. The user must see that login failed.
+
+- [ ] **Step 5: Replace `app/page.tsx`**
 
 ```tsx
 import { SignInButton } from "@/src/features/auth/components/SignInButton";
@@ -1188,7 +1225,20 @@ export default function HomePage() {
 }
 ```
 
-- [ ] **Step 5: Run lint**
+- [ ] **Step 6: Add Kakao OAuth when configured**
+
+The alpha can still recruit Google users, but the app should support Kakao when
+`NEXT_PUBLIC_KAKAO_AUTH_ENABLED=true` and Supabase Kakao credentials are configured.
+
+Tests:
+
+```text
+- Google button remains available.
+- Kakao button appears only when enabled.
+- KakaoTalk in-app browser copy recommends Kakao first or external browser fallback.
+```
+
+- [ ] **Step 7: Run lint**
 
 Run:
 
@@ -1202,7 +1252,7 @@ Expected:
 No ESLint warnings or errors
 ```
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
 git add app/page.tsx app/auth/callback/route.ts src/features/auth
@@ -1618,6 +1668,32 @@ If this directory is not a git repository, skip the commit and record that in th
 
 - [ ] **Step 1: Create `src/features/onboarding/components/R0OnboardingForm.tsx`**
 
+The form must support both first entry and monthly edit:
+
+```ts
+type R0OnboardingInitialValues = {
+  monthlyNetIncome?: number;
+  investableNetWorth?: number;
+  primaryResidenceNetWorth?: number;
+  otherNetWorth?: number;
+  monthlyFixedExpense?: number;
+  monthlyVariableExpense?: number;
+  monthlyRegularInvestment?: number;
+};
+```
+
+When `initialValues` are provided, show them as comma-formatted manwon values. Add a
+test proving saved KRW values such as `120_000_000` render as `12,000`.
+
+For every non-empty money input, render a meaning preview:
+
+```text
+12,000만원 = 1억 2,000만원
+```
+
+This preview is required because a single extra zero can make the FIRE result look
+plausible but wrong.
+
 ```tsx
 "use client";
 
@@ -1701,6 +1777,18 @@ export default async function OnboardingPage() {
     </main>
   );
 }
+```
+
+The real page implementation must load the latest `monthly_cashflow_snapshots` row for
+the current admin user's couple and pass it to `R0OnboardingForm` as `initialValues`.
+If there is no snapshot yet, render empty inputs.
+
+Regression tests:
+
+```text
+- New user sees empty inputs.
+- Returning user sees the latest snapshot prefilled.
+- The dashboard's "이번 달 값 수정" link lands on a prefilled form.
 ```
 
 - [ ] **Step 3: Run lint**
@@ -2420,11 +2508,13 @@ If this directory is not a git repository, skip the commit and record that in th
 
 - `fire_couple_app_prd_v2.md`: product direction, long-term scope, tech stack, and domain model.
 - `docs/superpowers/specs/2026-04-25-fire-banking-mvp-design.md`: R0-R3 release split and R0 validation criteria.
-- No application source code exists yet. This directory is not currently a git repository, so commit steps must be skipped unless `git init` is done before implementation.
+- Historical note: at the original plan-writing moment, application source code did
+  not exist yet. In the current branch, source code exists; follow current git status
+  and do not overwrite unrelated workspace changes.
 
 ### NOT in scope
 
-- Kakao OAuth: deferred to R1 because R0 uses Google for the lead partner.
+- Kakao OAuth: in scope when Supabase/Kakao credentials are configured; Google remains available.
 - Lite onboarding and Lite check-in: deferred to R1 because R0 only measures invite intent, not spouse completion.
 - Detailed fixed-cost CRUD, ledger, debt breakdown, and simulation controls: deferred to R2 because R0 uses total monthly inputs.
 - Request system, monthly result cards, PWA polish, and retention loops: deferred to R3 because they depend on the monthly ritual working.
