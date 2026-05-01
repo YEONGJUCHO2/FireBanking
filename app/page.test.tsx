@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import HomePage from "./page";
 
 describe("HomePage", () => {
-  it("renders the reference-style login entry screen", () => {
+  it("renders the upgraded landing entry screen", () => {
     render(<HomePage />);
 
-    expect(screen.getByText("Fire Banking")).toBeInTheDocument();
+    expect(screen.getAllByText("Fire Banking").length).toBeGreaterThan(0);
     expect(screen.getAllByText(/부부가 함께/).length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: "시작하기" })).toHaveAttribute(
       "href",

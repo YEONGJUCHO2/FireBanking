@@ -18,7 +18,7 @@ export function FireHeroCard({ dateLabel, distanceLabel, state = 'positive', com
       <div className="relative z-10 flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-bold opacity-90">예상 FIRE 도달 시점</p>
-          <h1 className={cn('mt-3 font-bold tracking-[-0.07em]', compact ? 'text-3xl' : 'text-5xl')}>{dateLabel}</h1>
+          <h1 className={cn('mt-3 whitespace-nowrap font-bold tracking-[-0.07em]', compact ? 'text-3xl' : 'text-[2.5rem] leading-[1.05]')}>{dateLabel}</h1>
           {distanceLabel ? <p className="mt-2 text-sm font-semibold opacity-85">({distanceLabel})</p> : null}
         </div>
         <StatusPill label={label} status={status} className="bg-white/88" />

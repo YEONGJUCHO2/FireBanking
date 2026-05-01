@@ -12,7 +12,7 @@ const tone: Record<Status, string> = {
 
 export function StatusPill({ label, status = 'info', className }: { label: string; status?: Status; className?: string }) {
   return (
-    <span className={cn('inline-flex items-center rounded-full px-3 py-1 text-xs font-bold tracking-[-0.01em]', tone[status], className)}>
+    <span className={cn('inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-3 py-1 text-xs font-bold tracking-[-0.01em]', tone[status], className)}>
       {label}
     </span>
   )

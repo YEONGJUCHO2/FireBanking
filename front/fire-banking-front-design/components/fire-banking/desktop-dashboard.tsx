@@ -21,8 +21,8 @@ export function DesktopDashboard() {
   const remainingAfterRegular = m.monthlyIncomeMan - m.monthlyLivingCostMan - m.monthlyRegularInvestmentMan
 
   return (
-    <section className="mx-auto hidden w-full max-w-6xl rounded-[2rem] border border-fb-line bg-fb-surface p-3 shadow-soft lg:grid lg:grid-cols-[240px_1fr]">
-      <aside className="rounded-[1.5rem] bg-fb-bg p-5">
+    <section className="grid w-full grid-cols-[260px_1fr] overflow-hidden rounded-[2rem] border border-fb-line bg-fb-surface shadow-soft">
+      <aside className="border-r border-fb-line bg-fb-bg p-6">
         <BrandLockup compact />
         <nav className="mt-8 space-y-1 text-sm font-bold text-fb-muted">
           {sidebar.map((item) => (
@@ -37,7 +37,7 @@ export function DesktopDashboard() {
           <p>월 체크인 진행 중</p>
         </div>
       </aside>
-      <div className="p-6">
+      <div className="p-8">
         <div className="flex items-end justify-between gap-6">
           <div>
             <h2 className="text-2xl font-bold tracking-[-0.05em]">대시보드</h2>

@@ -1,159 +1,213 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { compoundMonthly } from '@/lib/fire-calculator'
-import { fixedCostItems as initialItems } from '@/lib/sample-data'
-import { formatManWon, formatNumber } from '@/lib/format'
-import { Button } from './button'
-import { MetricCard } from './metric-card'
-import { StatusPill } from './status-pill'
-import { Icon } from './icons'
 import { cn } from '@/lib/cn'
+import { Card, SectionHeader } from './card'
+import { Icon } from './icons'
+import { StatusPill } from './status-pill'
 
-type Item = (typeof initialItems)[number]
+type Item = {
+  id: string
+  name: string
+  cat: string
+  amount: number // 만원/월
+  on: boolean
+}
+
+const initialItems: Item[] = [
+  { id: 'netflix', name: 'Netflix 프리미엄', cat: '구독', amount: 1.7, on: true },
+  { id: 'tving', name: 'TVING + Disney+', cat: '구독', amount: 2.3, on: true },
+  { id: 'gym', name: '필라테스', cat: '운동', amount: 18, on: true },
+  { id: 'phone', name: '통신비 (2인)', cat: '통신', amount: 14, on: true },
+  { id: 'insure', name: '실손보험', cat: '보험', amount: 9.8, on: true },
+  { id: 'coffee', name: '주 3회 카페 정기', cat: '식비', amount: 12, on: false },
+]
+
+const YEARS = 10
+const ANNUAL_RETURN = 0.05
 
 export function FixedCostSimulator() {
   const [items, setItems] = useState<Item[]>(initialItems)
-  const [periodYears, setPeriodYears] = useState(20)
-  const [returnRate, setReturnRate] = useState(5)
-  const [monthlyIncomeMan, setMonthlyIncomeMan] = useState(600)
-  const [investmentRatio, setInvestmentRatio] = useState(50)
 
-  const result = useMemo(() => {
-    const activeTotal = items.filter((item) => item.active).reduce((sum, item) => sum + item.amountMan, 0)
-    const reducedAmountMan = Math.min(50, activeTotal)
-    const baselineMonthlyInvestmentMan = Math.max(0, monthlyIncomeMan * (investmentRatio / 100) - activeTotal * 0.15)
-    const optimizedMonthlyInvestmentMan = baselineMonthlyInvestmentMan + reducedAmountMan
-    const baselineFutureMan = compoundMonthly(baselineMonthlyInvestmentMan, periodYears, returnRate / 100)
-    const optimizedFutureMan = compoundMonthly(optimizedMonthlyInvestmentMan, periodYears, returnRate / 100)
+  const { total, direct, fv, monthsSaved } = useMemo(() => {
+    const total = items.filter((i) => i.on).reduce((a, b) => a + b.amount, 0)
+    const direct = total * 12 * YEARS
+    const r = ANNUAL_RETURN / 12
+    const n = 12 * YEARS
+    const fv = total === 0 ? 0 : total * ((Math.pow(1 + r, n) - 1) / r)
+    // Months-saved-on-FIRE: rough — invested fv applied to remaining gap to FIRE
+    const monthsSaved = Math.round(fv / 200) // simple proxy
+    return { total, direct, fv, monthsSaved }
+  }, [items])
 
-    return {
-      activeTotal,
-      reducedAmountMan,
-      baselineFutureMan,
-      optimizedFutureMan,
-      differenceMan: optimizedFutureMan - baselineFutureMan,
-      baselineMonthlyInvestmentMan,
-      optimizedMonthlyInvestmentMan,
-    }
-  }, [items, investmentRatio, monthlyIncomeMan, periodYears, returnRate])
+  const toggle = (id: string) =>
+    setItems((cur) => cur.map((i) => (i.id === id ? { ...i, on: !i.on } : i)))
 
-  function updateItem(id: string, patch: Partial<Item>) {
-    setItems((current) => current.map((item) => (item.id === id ? { ...item, ...patch } : item)))
-  }
-
-  const maxBar = Math.max(result.baselineFutureMan, result.optimizedFutureMan, 1)
+  const activeCount = items.filter((i) => i.on).length
 
   return (
-    <div className="space-y-4">
-      <section className="fb-card p-5">
-        <div className="flex items-start justify-between gap-4">
+    <div className="space-y-5">
+      {/* Hero comparison */}
+      <Card radius="hero" className="p-6">
+        <div className="text-[12px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">
+          {YEARS}년 후 차이
+        </div>
+
+        <div className="mt-3 flex flex-col gap-3.5">
+          {/* Now path */}
           <div>
-            <p className="text-sm font-bold text-fb-ink">고정비 시뮬레이터</p>
-            <p className="mt-1 text-sm leading-6 text-fb-muted">반복 지출이 미래 자산에 주는 영향을 차분히 확인해요.</p>
+            <div className="mb-1 text-[12px] font-semibold text-fb-ink-2">지금처럼 쓰면</div>
+            <div className="fb-num flex items-baseline gap-1">
+              <span className="text-[16px] font-bold text-fb-ink-3">−</span>
+              <span className="text-[32px] font-bold tracking-[-0.020em] text-fb-ink">
+                {Math.round(direct).toLocaleString('ko-KR')}
+              </span>
+              <span className="text-[14px] font-bold text-fb-ink-2">만원</span>
+            </div>
           </div>
-          <StatusPill label="참고용" status="info" />
+
+          <div className="self-start rounded-full bg-fb-card-mute px-2.5 py-1 text-[11px] font-semibold tracking-[0.012em] text-fb-ink-2">
+            대신 5% 수익률로 투자하면
+          </div>
+
+          {/* Invested path */}
+          <div>
+            <div className="mb-1 text-[12px] font-semibold text-fb-trust">10년 뒤 투자 예상액</div>
+            <div className="fb-num flex items-baseline gap-1">
+              <span className="text-[16px] font-bold text-fb-trust">+</span>
+              <span className="text-[36px] font-bold tracking-[-0.024em] text-fb-trust">
+                {Math.round(fv).toLocaleString('ko-KR')}
+              </span>
+              <span className="text-[14px] font-bold text-fb-trust-ink">만원</span>
+            </div>
+            {monthsSaved > 0 ? (
+              <div className="mt-1.5 text-[12px] font-medium text-fb-ink-3">
+                FIRE까지{' '}
+                <b className="fb-num font-bold text-fb-trust">
+                  약 {Math.floor(monthsSaved / 12)}년 {monthsSaved % 12}개월
+                </b>{' '}
+                단축
+              </div>
+            ) : null}
+          </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          <NumberControl label="월 실수령액" value={monthlyIncomeMan} onChange={setMonthlyIncomeMan} suffix="만원" />
-          <NumberControl label="시뮬레이션 기간" value={periodYears} onChange={setPeriodYears} suffix="년" />
-          <NumberControl label="투자 비율" value={investmentRatio} onChange={setInvestmentRatio} suffix="%" />
-          <NumberControl label="예상 수익률" value={returnRate} onChange={setReturnRate} suffix="%" />
+        {/* mini bar comparison */}
+        <div className="mt-5 flex h-14 items-end gap-2.5">
+          <div className="flex-1">
+            <div
+              className="rounded-[6px] bg-fb-line-strong"
+              style={{ height: fv > 0 ? `${Math.min(56, (56 * direct) / fv)}px` : 0 }}
+            />
+            <div className="fb-num mt-1.5 text-[10px] font-semibold text-fb-ink-3">소비 누적</div>
+          </div>
+          <div className="flex-1">
+            <div
+              className="rounded-[6px] bg-gradient-to-b from-fb-trust to-[#3385FF]"
+              style={{ height: '56px' }}
+            />
+            <div className="fb-num mt-1.5 text-[10px] font-semibold text-fb-trust">투자 결과</div>
+          </div>
         </div>
-      </section>
+      </Card>
 
-      <section className="fb-card p-5">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-base font-bold tracking-normal">월 고정비 항목</h2>
-          <span className="text-xs font-bold text-fb-muted">현재 합계 {formatManWon(result.activeTotal)}</span>
+      {/* params */}
+      <div className="grid grid-cols-2 gap-2.5">
+        <ParamPill label="기간" value={`${YEARS}년`} />
+        <ParamPill label="수익률" value={`연 ${ANNUAL_RETURN * 100}%`} />
+      </div>
+
+      {/* monthly total */}
+      <Card className="flex items-center justify-between p-4">
+        <div>
+          <div className="text-[12px] font-medium text-fb-ink-3">이번 달 활성 고정비</div>
+          <div className="fb-num mt-0.5 text-[22px] font-bold tracking-[-0.012em] text-fb-ink">
+            {total.toFixed(1)}{' '}
+            <span className="text-[13px] font-semibold text-fb-ink-3">만원 / 월</span>
+          </div>
         </div>
-        <div className="mt-4 space-y-2">
-          {items.map((item) => (
-            <div key={item.id} className={cn('grid grid-cols-[auto_1fr_92px] items-center gap-3 rounded-soft border p-3 transition', item.active ? 'border-fb-line bg-fb-surface' : 'border-fb-line/70 bg-fb-stone/30 text-fb-muted')}>
-              <input
-                type="checkbox"
-                checked={item.active}
-                onChange={(event) => updateItem(item.id, { active: event.target.checked })}
-                className="size-5 accent-fb-green"
-                aria-label={`${item.label} 사용 여부`}
-              />
-              <span className="text-sm font-semibold">{item.label}</span>
-              <label className="relative">
-                <input
-                  inputMode="numeric"
-                  value={item.amountMan}
-                  onChange={(event) => updateItem(item.id, { amountMan: Number(event.target.value.replace(/[^0-9]/g, '')) })}
-                  className="fb-input h-10 px-3 pr-8 text-right text-sm"
-                  aria-label={`${item.label} 금액`}
-                />
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-fb-muted">만</span>
-              </label>
+        <StatusPill tone="trust">{activeCount}개 활성</StatusPill>
+      </Card>
+
+      {/* item list */}
+      <section className="space-y-3">
+        <SectionHeader
+          title="반복 지출"
+          subtitle="끄거나 켜서 미래 자산이 어떻게 달라지는지 봐요"
+        />
+        <Card className="px-1 py-1">
+          {items.map((item, i) => (
+            <div key={item.id}>
+              <SubRow item={item} onToggle={() => toggle(item.id)} />
+              {i < items.length - 1 ? <div className="ml-14 h-px bg-fb-line-soft" /> : null}
             </div>
           ))}
-        </div>
-      </section>
-
-      <section className="fb-card overflow-hidden p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-base font-bold tracking-normal">고정비를 줄이면 달라지는 미래 자산</h2>
-            <p className="mt-1 text-sm leading-6 text-fb-muted">현재 고정비에서 {formatManWon(result.reducedAmountMan)}을 줄여 투자한다고 가정했어요.</p>
-          </div>
-          <StatusPill label={`${periodYears}년 후`} status="positive" />
-        </div>
-
-        <div className="relative mt-6 h-48 overflow-hidden rounded-card bg-fb-green-50 p-5">
-          <div className="absolute inset-x-5 top-5 flex items-center justify-between text-xs font-bold text-fb-muted">
-            <span>현재</span>
-            <span>고정비 -{formatNumber(result.reducedAmountMan)}만원</span>
-          </div>
-          <div className="flex h-full items-end justify-center gap-12 pt-8">
-            <Bar label="현재" value={result.baselineFutureMan} height={(result.baselineFutureMan / maxBar) * 100} muted />
-            <Bar label="조정 후" value={result.optimizedFutureMan} height={(result.optimizedFutureMan / maxBar) * 100} />
-          </div>
-          <div className="absolute right-6 top-1/2 rounded-full bg-white px-3 py-2 text-xs font-bold text-fb-green shadow-card">+{formatManWon(result.differenceMan)}</div>
-        </div>
-
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <MetricCard title="미래 자산 차이" value={formatManWon(result.differenceMan)} delta="절감액을 투자한 가정" variant="positive" size="sm" />
-          <MetricCard title="월 투자 여력" value={formatManWon(result.optimizedMonthlyInvestmentMan)} delta={`현재 대비 +${formatNumber(result.reducedAmountMan)}만원`} variant="positive" size="sm" />
-        </div>
-
-        <div className="mt-4 flex gap-3 rounded-soft bg-fb-sand/70 p-4 text-sm leading-6 text-fb-ink">
-          <Icon name="leaf" className="mt-0.5 size-5 shrink-0 text-fb-green" />
-          <p>돈이 샌다는 표현보다, 반복 지출을 조정하면 두 사람이 선택할 수 있는 미래가 넓어진다는 방식으로 보여줍니다.</p>
-        </div>
-
-        <Button className="mt-4 w-full">결과 공유하기</Button>
+        </Card>
+        <button
+          type="button"
+          className="fbpress flex h-12 w-full items-center justify-center gap-1.5 rounded-[12px] border border-dashed border-fb-line-strong bg-white text-[14px] font-semibold text-fb-ink-2"
+        >
+          <Icon name="plus" className="size-[18px]" />
+          항목 추가
+        </button>
       </section>
     </div>
   )
 }
 
-function NumberControl({ label, value, suffix, onChange }: { label: string; value: number; suffix: string; onChange: (value: number) => void }) {
+function ParamPill({ label, value }: { label: string; value: string }) {
   return (
-    <label>
-      <span className="mb-2 block text-xs font-bold text-fb-muted">{label}</span>
-      <div className="relative">
-        <input
-          inputMode="numeric"
-          value={value}
-          onChange={(event) => onChange(Number(event.target.value.replace(/[^0-9]/g, '')))}
-          className="fb-input h-11 px-3 pr-10 text-right"
-        />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-fb-muted">{suffix}</span>
+    <div className="flex items-center justify-between rounded-[12px] border border-fb-line bg-white px-4 py-3">
+      <span className="text-[12px] font-semibold text-fb-ink-3">{label}</span>
+      <span className="fb-num text-[14px] font-bold text-fb-ink">{value}</span>
+    </div>
+  )
+}
+
+function SubRow({ item, onToggle }: { item: Item; onToggle: () => void }) {
+  return (
+    <div className="flex items-center gap-3 px-4 py-3.5">
+      <div
+        className={cn(
+          'flex size-8 shrink-0 items-center justify-center rounded-[10px]',
+          item.on ? 'bg-fb-trust-soft text-fb-trust-ink' : 'bg-fb-card-mute text-fb-ink-3',
+        )}
+      >
+        <span className="text-[11px] font-bold">{item.cat}</span>
       </div>
-    </label>
+      <div className="min-w-0 flex-1">
+        <div
+          className={cn(
+            'text-[14px] font-semibold',
+            item.on ? 'text-fb-ink' : 'text-fb-ink-3 line-through',
+          )}
+        >
+          {item.name}
+        </div>
+        <div className="fb-num mt-0.5 text-[12px] font-medium text-fb-ink-3">
+          {item.amount} 만원 / 월
+        </div>
+      </div>
+      <Toggle on={item.on} onClick={onToggle} />
+    </div>
   )
 }
 
-function Bar({ label, value, height, muted = false }: { label: string; value: number; height: number; muted?: boolean }) {
+function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
   return (
-    <div className="flex h-full w-24 flex-col items-center justify-end gap-2">
-      <p className="text-sm font-bold tracking-normal text-fb-ink">{formatManWon(value)}</p>
-      <div className={muted ? 'w-full rounded-t-xl bg-fb-slate/30' : 'w-full rounded-t-xl bg-fb-green shadow-card'} style={{ height: `${Math.max(18, height)}%` }} />
-      <p className="text-xs font-bold text-fb-muted">{label}</p>
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={on}
+      className={cn(
+        'relative h-[26px] w-11 shrink-0 rounded-full transition-[background] duration-150 ease-out',
+        on ? 'bg-fb-trust' : 'bg-[#DBDCDF]',
+      )}
+    >
+      <span
+        className="absolute top-[3px] size-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.18)] transition-[left] duration-150 ease-out"
+        style={{ left: on ? 21 : 3 }}
+      />
+    </button>
   )
 }

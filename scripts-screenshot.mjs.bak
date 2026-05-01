@@ -1,0 +1,39 @@
+// Screenshot key pages on mobile + desktop viewports
+import { chromium } from 'playwright'
+
+const base = 'http://localhost:3737'
+const pages = [
+  { url: '/', name: 'login' },
+  { url: '/onboarding', name: 'onboarding' },
+  { url: '/dashboard', name: 'dashboard' },
+  { url: '/invite/abc', name: 'invite' },
+  { url: '/invite/abc?lite=1', name: 'lite' },
+  { url: '/subscribe', name: 'simulator' },
+  { url: '/history', name: 'history' },
+  { url: '/insights', name: 'insights' },
+  { url: '/together', name: 'together' },
+  { url: '/settings', name: 'settings' },
+]
+
+const viewports = [
+  { name: 'mobile', width: 430, height: 932 },
+  { name: 'desktop', width: 1440, height: 900 },
+]
+
+const browser = await chromium.launch()
+for (const vp of viewports) {
+  const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2 })
+  const page = await ctx.newPage()
+  for (const p of pages) {
+    try {
+      await page.goto(base + p.url, { waitUntil: 'domcontentloaded', timeout: 15000 })
+      await page.waitForTimeout(700)
+      await page.screenshot({ path: `/tmp/shots/${vp.name}-${p.name}.png`, fullPage: true })
+      console.log(`OK ${vp.name} ${p.name}`)
+    } catch (e) {
+      console.log(`FAIL ${vp.name} ${p.name}: ${e.message}`)
+    }
+  }
+  await ctx.close()
+}
+await browser.close()

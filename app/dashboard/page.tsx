@@ -1,49 +1,152 @@
-import { AppHeader, BottomNav, Button, CashflowSummary, DesktopDashboard, FireHeroCard, HeaderIconButton, InviteCard, MetricCard, MobileAppShell } from '@/components/fire-banking'
-import { dashboardMetrics as m } from '@/lib/sample-data'
-import { formatManWon } from '@/lib/format'
+import Link from 'next/link'
+import {
+  BottomNav,
+  CashflowSummary,
+  DesktopDashboard,
+  FireHeroCard,
+  InviteCard,
+  MobileAppShell,
+  NetWorthHero,
+  ScreenTopBar,
+  StatusPill,
+} from '@/components/fire-banking'
+import { Card, SectionHeader } from '@/components/fire-banking/card'
+import { CheckinRow } from '@/components/fire-banking/checkin-row'
+import { Icon } from '@/components/fire-banking/icons'
 import { SignOutButton } from '@/src/features/auth/components/SignOutButton'
 
+const data = {
+  totalNetWorthMan: 51_500,
+  netWorthDeltaMan: 320,
+  homeMan: 38_000,
+  investableMan: 13_500,
+  otherMan: 1_500,
+  fireTargetMan: 40_000,
+  incomeMan: 850,
+  fixedMan: 350,
+  variableMan: 220,
+  saveMan: 180,
+  monthlyAddMan: 280,
+  fireYears: 8,
+  fireMonths: 4,
+}
+
 export default function DashboardPage() {
-  const remainingAfterRegular = m.monthlyIncomeMan - m.monthlyLivingCostMan - m.monthlyRegularInvestmentMan
+  const percent = Math.max(0, Math.min(1, data.investableMan / data.fireTargetMan))
 
   return (
     <>
+      {/* MOBILE */}
       <div className="lg:hidden">
         <MobileAppShell>
-          <AppHeader
-            title="대시보드"
-            subtitle="우리의 경제적 자유 현황을 한눈에 확인해요."
-            right={<div className="flex items-center gap-2"><HeaderIconButton icon="bell" label="알림" /><HeaderIconButton icon="users" label="함께" /><SignOutButton compact /></div>}
+          <ScreenTopBar
+            right={
+              <button
+                aria-label="설정"
+                className="fbpress flex size-9 items-center justify-center rounded-full text-fb-ink-2 hover:bg-fb-card-alt"
+              >
+                <Icon name="settings" className="size-5" />
+              </button>
+            }
           />
 
-          <div className="space-y-4 px-5 pb-5">
-            <FireHeroCard dateLabel={m.expectedFireDateLabel} distanceLabel={m.expectedFireDistanceLabel} />
-
-            <div className="grid grid-cols-2 gap-3">
-              <MetricCard title="표시 순자산" value={formatManWon(m.displayNetWorthMan)} delta={`전월 대비 ${formatManWon(m.displayNetWorthDeltaMan, { signed: true })}`} variant="positive" />
-              <MetricCard title="FIRE 계산 순자산" value={formatManWon(m.fireNetWorthMan)} delta={`전월 대비 ${formatManWon(m.fireNetWorthDeltaMan, { signed: true })}`} variant="positive" />
+          <main className="flex-1 overflow-auto px-4 pb-8 pt-5">
+            {/* month banner */}
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">
+                  2026. 04. 체크인
+                </div>
+                <div className="mt-0.5 text-[18px] font-bold tracking-[-0.012em] text-fb-ink">
+                  안녕하세요, 지윤님
+                </div>
+              </div>
+              <StatusPill
+                tone="trust"
+                icon={<span className="size-1.5 rounded-full bg-fb-trust" />}
+              >
+                이번 달 진행 중
+              </StatusPill>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <MetricCard title="월 자산 증가 여력" value={formatManWon(m.monthlyAssetGrowthCapacityMan)} caption="수입 - 생활비" size="sm" />
-              <MetricCard title="FIRE 목표 자산" value={formatManWon(m.fireTargetAssetMan)} caption="월 생활비 × 25배 룰" size="sm" />
+            <NetWorthHero
+              totalManWon={data.totalNetWorthMan}
+              deltaManWon={data.netWorthDeltaMan}
+              homeManWon={data.homeMan}
+              investableManWon={data.investableMan}
+              otherManWon={data.otherMan}
+              fireTargetManWon={data.fireTargetMan}
+            />
+
+            <div className="mt-4">
+              <FireHeroCard
+                percent={percent}
+                years={data.fireYears}
+                months={data.fireMonths}
+                goalManWon={data.fireTargetMan}
+                coastManWon={Math.round(data.fireTargetMan * 0.55)}
+              />
             </div>
 
-            <MetricCard title="월 생활비" value={formatManWon(m.monthlyLivingCostMan)} caption={`고정비 ${formatManWon(m.monthlyFixedCostMan)} + 변동비 ${formatManWon(m.monthlyVariableCostMan)}`} size="sm" />
-            <Button href="/subscribe" variant="secondary" className="w-full">고정비 계산하기</Button>
+            <section className="mt-6 space-y-3">
+              <SectionHeader
+                title="이번 달 부부 체크인"
+                subtitle="배우자 입력이 끝나면 결과가 확정돼요"
+              />
+              <Card className="px-4 py-1">
+                <CheckinRow name="지윤" role="admin" status="done" when="오늘 14:08 입력" />
+                <div className="fb-divider" />
+                <CheckinRow
+                  name="민호"
+                  role="lite"
+                  status="pending"
+                  when="초대 수락 · 입력 대기 중"
+                />
+              </Card>
+            </section>
 
-            <CashflowSummary incomeMan={m.monthlyIncomeMan} livingCostMan={m.monthlyLivingCostMan} regularInvestmentMan={m.monthlyRegularInvestmentMan} remainingMan={remainingAfterRegular} />
+            <div className="mt-6">
+              <CashflowSummary
+                incomeMan={data.incomeMan}
+                fixedMan={data.fixedMan}
+                variableMan={data.variableMan}
+                regularInvestmentMan={data.saveMan}
+                remainingMan={data.monthlyAddMan}
+              />
+            </div>
 
-            <InviteCard />
+            <section className="mt-6 space-y-3">
+              <SectionHeader title="배우자 초대" />
+              <InviteCard />
+            </section>
 
-            <div className="rounded-card border border-fb-line bg-fb-sand/70 p-4 text-sm leading-6 text-fb-muted">이 결과는 참고용 시뮬레이션이에요. 투자 조언이 아니며 실제 결과와 다를 수 있어요.</div>
-          </div>
+            <Link
+              href="/subscribe"
+              className="fbpress mt-4 flex items-center gap-3.5 rounded-[20px] border border-fb-line bg-white p-5"
+            >
+              <span className="flex size-11 items-center justify-center rounded-[14px] bg-fb-trust-soft text-fb-trust-ink">
+                <Icon name="refresh" className="size-[22px]" />
+              </span>
+              <span className="flex-1">
+                <span className="block text-[14px] font-bold text-fb-ink">고정비 시뮬레이터</span>
+                <span className="mt-0.5 block text-[12px] font-medium text-fb-ink-3">
+                  반복 지출이 미래 자산에 미치는 영향
+                </span>
+              </span>
+              <Icon name="chevron-right" className="size-5 text-fb-ink-3" />
+            </Link>
 
-          <BottomNav active="홈" />
+            <div className="mt-6">
+              <SignOutButton />
+            </div>
+          </main>
+
+          <BottomNav active="home" partnerPending />
         </MobileAppShell>
       </div>
 
-      <div className="hidden min-h-dvh px-8 py-8 lg:block">
+      {/* DESKTOP */}
+      <div className="hidden min-h-dvh bg-fb-page px-8 py-10 lg:block">
         <DesktopDashboard footerAction={<SignOutButton />} />
       </div>
     </>

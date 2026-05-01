@@ -21,8 +21,8 @@ const statusMap = {
 } as const
 
 const sizeClass: Record<MetricSize, { value: string; card: string }> = {
-  sm: { value: 'text-xl', card: 'p-4' },
-  md: { value: 'text-2xl', card: 'p-5' },
+  sm: { value: 'text-lg', card: 'p-4' },
+  md: { value: 'text-xl', card: 'p-5' },
   lg: { value: 'text-3xl', card: 'p-6' },
 }
 
@@ -33,7 +33,7 @@ export function MetricCard({ title, value, caption, delta, variant = 'neutral', 
         <p className="text-xs font-bold tracking-[-0.01em] text-fb-muted">{title}</p>
         {statusLabel ? <StatusPill label={statusLabel} status={statusMap[variant]} /> : null}
       </div>
-      <p className={cn('mt-2 font-bold tracking-[-0.06em] text-fb-ink', sizeClass[size].value)}>{value}</p>
+      <p className={cn('mt-2 whitespace-nowrap font-bold tracking-[-0.06em] text-fb-ink', sizeClass[size].value)}>{value}</p>
       {delta ? <p className={cn('mt-2 text-xs font-bold', variantText[variant])}>{delta}</p> : null}
       {caption ? <p className="mt-2 text-xs leading-5 text-fb-muted">{caption}</p> : null}
     </section>

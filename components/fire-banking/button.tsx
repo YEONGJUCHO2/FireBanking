@@ -2,52 +2,76 @@ import Link from 'next/link'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { cn } from '@/lib/cn'
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'kakao' | 'soft' | 'dangerSoft'
-type ButtonSize = 'md' | 'lg' | 'sm'
+type ButtonVariant = 'primary' | 'inverse' | 'secondary' | 'ghost' | 'soft' | 'kakao' | 'dangerSoft'
+type ButtonSize = 'sm' | 'md' | 'lg'
 
 type ButtonProps = {
-  children: ReactNode
+  children?: ReactNode
   href?: string
   variant?: ButtonVariant
   size?: ButtonSize
+  full?: boolean
+  iconLeft?: ReactNode
+  iconRight?: ReactNode
   className?: string
 } & ButtonHTMLAttributes<HTMLButtonElement>
 
 const variantClass: Record<ButtonVariant, string> = {
-  primary: 'bg-fb-green text-white shadow-card hover:bg-fb-green-900',
-  secondary: 'border border-fb-line bg-white text-fb-ink shadow-card hover:border-fb-green/35',
-  ghost: 'text-fb-muted hover:bg-fb-green-50 hover:text-fb-green',
-  kakao: 'bg-fb-kakao text-[#381E1F] hover:brightness-95',
-  soft: 'bg-fb-green-100 text-fb-green hover:bg-fb-green/15',
-  dangerSoft: 'bg-fb-danger-bg text-fb-danger hover:brightness-[0.98]',
+  primary: 'bg-fb-trust text-white border-fb-trust hover:bg-fb-trust-strong',
+  inverse: 'bg-fb-ink text-white border-fb-ink hover:bg-black',
+  secondary: 'bg-white text-fb-ink border-fb-line-strong hover:bg-fb-card-alt',
+  ghost: 'bg-transparent text-fb-ink border-transparent hover:bg-fb-card-alt',
+  soft: 'bg-fb-trust-soft text-fb-trust-ink border-fb-trust-soft hover:bg-[#DEE9FE]',
+  kakao: 'bg-[#FEE500] text-[#191600] border-[#FEE500] hover:brightness-95',
+  dangerSoft: 'bg-fb-negative-soft text-fb-negative-ink border-fb-negative-soft hover:brightness-[0.98]',
 }
 
 const sizeClass: Record<ButtonSize, string> = {
-  sm: 'h-10 px-4 text-sm',
-  md: 'h-12 px-5 text-[15px]',
-  lg: 'h-14 px-6 text-base',
+  sm: 'h-9 px-3.5 text-[14px] font-semibold rounded-[8px] gap-1.5',
+  md: 'h-12 px-[18px] text-[15px] font-semibold rounded-[12px] gap-2',
+  lg: 'h-14 px-[22px] text-[16px] font-bold rounded-[14px] gap-2.5',
 }
 
-export function Button({ children, href, variant = 'primary', size = 'md', className, disabled, ...buttonProps }: ButtonProps) {
+export function Button({
+  children,
+  href,
+  variant = 'primary',
+  size = 'md',
+  full,
+  iconLeft,
+  iconRight,
+  className,
+  disabled,
+  ...buttonProps
+}: ButtonProps) {
   const classes = cn(
-    'fb-focus inline-flex items-center justify-center rounded-button font-semibold tracking-normal transition active:scale-[0.99]',
+    'fbpress inline-flex items-center justify-center border tracking-[-0.012em]',
+    'disabled:bg-fb-card-mute disabled:text-fb-ink-4 disabled:border-fb-line disabled:cursor-not-allowed',
     sizeClass[size],
     variantClass[variant],
-    disabled && 'pointer-events-none opacity-50',
+    full && 'w-full',
     className,
   )
 
-  if (href) {
+  const content = (
+    <>
+      {iconLeft ? <span className="flex shrink-0 items-center">{iconLeft}</span> : null}
+      {children}
+      {iconRight ? <span className="flex shrink-0 items-center">{iconRight}</span> : null}
+    </>
+  )
+
+  if (href && !disabled) {
     return (
       <Link href={href} className={classes} aria-disabled={disabled || undefined}>
-        {children}
+        {content}
       </Link>
     )
   }
 
   return (
     <button className={classes} disabled={disabled} {...buttonProps}>
-      {children}
+      {content}
     </button>
   )
 }

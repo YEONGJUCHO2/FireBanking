@@ -41,7 +41,7 @@ export default function DashboardPage() {
         </MobileAppShell>
       </div>
 
-      <div className="hidden min-h-dvh px-8 py-8 lg:block">
+      <div className="mx-auto hidden min-h-dvh max-w-[1400px] px-6 py-8 lg:block">
         <DesktopDashboard />
       </div>
     </>
