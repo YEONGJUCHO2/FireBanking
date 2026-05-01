@@ -43,14 +43,14 @@ export default function DashboardPage() {
             right={
               <button
                 aria-label="설정"
-                className="fbpress flex size-9 items-center justify-center rounded-full text-fb-ink-2 hover:bg-fb-card-alt"
+                className="fbpress flex size-11 items-center justify-center rounded-full text-fb-ink-2 hover:bg-fb-card-alt"
               >
                 <Icon name="settings" className="size-5" />
               </button>
             }
           />
 
-          <main className="flex-1 overflow-auto px-4 pb-8 pt-5">
+          <main className="flex-1 overflow-auto px-4 pb-28 pt-5">
             {/* month banner */}
             <div className="mb-3 flex items-center justify-between">
               <div>
