@@ -10,7 +10,11 @@ function createSupabaseMock({
   missingPriceInstrumentId?: string;
 } = {}) {
   const upsert = vi.fn(
-    async (_row: Record<string, unknown>, _options: { onConflict: string }) => ({ error: null }),
+    async (row: Record<string, unknown>, options: { onConflict: string }) => {
+      void row;
+      void options;
+      return { error: null };
+    },
   );
   const prices: Record<string, { close_price: number; valuation_date: string } | null> = {
     "instrument-samsung":
