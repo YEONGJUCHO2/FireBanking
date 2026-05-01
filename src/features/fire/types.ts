@@ -5,6 +5,8 @@ export type FireProjectionInput = {
   monthlyNetIncome: number;
   monthlyFixedExpense: number;
   monthlyVariableExpense: number;
+  monthlyDebtInterestExpense: number;
+  monthlyDebtPrincipalPayment: number;
   monthlyRegularInvestment: number;
   annualReturnRate: number;
   fireMultiplier: number;

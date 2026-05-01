@@ -114,6 +114,8 @@ export async function saveR0Snapshot(
     monthlyNetIncome: parsed.data.monthlyNetIncome,
     monthlyFixedExpense: parsed.data.monthlyFixedExpense,
     monthlyVariableExpense: parsed.data.monthlyVariableExpense,
+    monthlyDebtInterestExpense: 0,
+    monthlyDebtPrincipalPayment: 0,
     monthlyRegularInvestment: parsed.data.monthlyRegularInvestment,
     annualReturnRate: 0.05,
     fireMultiplier: 25,

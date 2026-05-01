@@ -10,6 +10,8 @@ describe("calculateFireProjection", () => {
       monthlyNetIncome: 7_200_000,
       monthlyFixedExpense: 2_300_000,
       monthlyVariableExpense: 1_700_000,
+      monthlyDebtInterestExpense: 0,
+      monthlyDebtPrincipalPayment: 0,
       monthlyRegularInvestment: 2_000_000,
       annualReturnRate: 0.05,
       fireMultiplier: 25,
@@ -35,6 +37,8 @@ describe("calculateFireProjection", () => {
       monthlyNetIncome: 3_000_000,
       monthlyFixedExpense: 2_000_000,
       monthlyVariableExpense: 1_500_000,
+      monthlyDebtInterestExpense: 0,
+      monthlyDebtPrincipalPayment: 0,
       monthlyRegularInvestment: 0,
       annualReturnRate: 0.05,
       fireMultiplier: 25,
@@ -55,6 +59,8 @@ describe("calculateFireProjection", () => {
       monthlyNetIncome: 7_200_000,
       monthlyFixedExpense: 2_300_000,
       monthlyVariableExpense: 1_700_000,
+      monthlyDebtInterestExpense: 0,
+      monthlyDebtPrincipalPayment: 0,
       monthlyRegularInvestment: 2_000_000,
       annualReturnRate: 0.05,
       fireMultiplier: 25,
@@ -63,5 +69,27 @@ describe("calculateFireProjection", () => {
 
     expect(result.projectedFireDate?.toISOString()).toBe(startDate.toISOString());
     expect(result.monthsToFire).toBe(0);
+  });
+
+  it("treats debt interest as living expense and principal payment as asset growth", () => {
+    const result = calculateFireProjection({
+      investableNetWorth: 120_000_000,
+      primaryResidenceNetWorth: 0,
+      otherNetWorth: 0,
+      monthlyNetIncome: 7_200_000,
+      monthlyFixedExpense: 2_300_000,
+      monthlyVariableExpense: 1_700_000,
+      monthlyDebtInterestExpense: 300_000,
+      monthlyDebtPrincipalPayment: 500_000,
+      monthlyRegularInvestment: 2_000_000,
+      annualReturnRate: 0.05,
+      fireMultiplier: 25,
+      startDate: new Date("2026-04-01T00:00:00.000Z"),
+    });
+
+    expect(result.monthlyLivingExpense).toBe(4_300_000);
+    expect(result.annualLivingExpense).toBe(51_600_000);
+    expect(result.remainingCash).toBe(400_000);
+    expect(result.monthlyAssetGrowthCapacity).toBe(2_900_000);
   });
 });
