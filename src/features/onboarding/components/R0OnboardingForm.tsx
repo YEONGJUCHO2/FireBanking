@@ -97,7 +97,7 @@ function ManwonInput({ name, label, placeholder, required, initialValue }: Manwo
   }
 
   return (
-    <div className="flex items-center rounded-soft border border-fb-line bg-white shadow-inner-soft focus-within:border-fb-green focus-within:ring-4 focus-within:ring-fb-green/15">
+    <div className="flex items-center rounded-soft border border-fb-line bg-white shadow-inner-soft focus-within:border-fb-trust focus-within:ring-4 focus-within:ring-fb-trust/15">
       <input
         required={required}
         inputMode="numeric"
@@ -106,9 +106,9 @@ function ManwonInput({ name, label, placeholder, required, initialValue }: Manwo
         value={value}
         onChange={handleChange}
         placeholder={formatManwonInput(placeholder)}
-        className="min-w-0 flex-1 rounded-soft bg-transparent px-4 py-3 text-right text-base font-semibold text-fb-ink outline-none placeholder:text-fb-subtle"
+        className="min-w-0 flex-1 rounded-soft bg-transparent px-4 py-3 text-right text-base font-semibold text-fb-ink outline-none placeholder:text-fb-ink-3"
       />
-      <span className="shrink-0 px-4 text-sm font-bold text-fb-muted">만원</span>
+      <span className="shrink-0 px-4 text-sm font-bold text-fb-ink-2">만원</span>
     </div>
   );
 }
@@ -122,9 +122,9 @@ export function R0OnboardingForm({ initialValues = {} }: R0OnboardingFormProps) 
 
   return (
     <form action={formAction} className="grid gap-5">
-      <div className="flex items-center justify-between rounded-card border border-fb-line bg-fb-green-50 px-4 py-3 text-sm text-fb-muted">
+      <div className="flex items-center justify-between rounded-card border border-fb-line bg-fb-trust-soft px-4 py-3 text-sm text-fb-ink-2">
         <span>입력 단위</span>
-        <strong className="text-fb-green">10,000원</strong>
+        <strong className="text-fb-trust">10,000원</strong>
       </div>
       {fields.map(([name, label, placeholder, help, required]) => (
         <label key={name} className="grid gap-2">
@@ -136,18 +136,18 @@ export function R0OnboardingForm({ initialValues = {} }: R0OnboardingFormProps) 
             required={required}
             initialValue={initialValues[name]}
           />
-          <span className="text-xs leading-5 text-fb-muted">{help}</span>
+          <span className="text-xs leading-5 text-fb-ink-2">{help}</span>
         </label>
       ))}
 
       {state.error ? (
-        <p className="rounded-soft bg-fb-danger-bg px-4 py-3 text-sm text-fb-danger">{state.error}</p>
+        <p className="rounded-soft bg-fb-negative-soft px-4 py-3 text-sm text-fb-negative">{state.error}</p>
       ) : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="fb-focus h-14 rounded-button bg-fb-green px-4 py-3 text-sm font-bold text-white shadow-card hover:bg-fb-green-900 disabled:cursor-not-allowed disabled:opacity-60"
+        className="fb-focus h-14 rounded-button bg-fb-trust px-4 py-3 text-sm font-bold text-white shadow-card hover:bg-fb-trust-strong disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending ? "계산 중..." : "다음"}
       </button>

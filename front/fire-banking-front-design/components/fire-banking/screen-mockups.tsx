@@ -13,19 +13,35 @@ import { ProgressStepper } from './progress-stepper'
 import { BottomNav } from './bottom-nav'
 import { Icon } from './icons'
 
-export function PhoneMockup({ children, label, subtitle }: { children: React.ReactNode; label?: string; subtitle?: string }) {
+/**
+ * 7화면 평행 배열용 미니 mockup. 안쪽은 고정 360x780 디자인 폭으로 렌더하고
+ * 외부에서 transform: scale로 축소. showcase 그리드에서 1행 6 ~ 7개 사용.
+ */
+export function PhoneMockup({ children, label, subtitle, index, scale = 0.6 }: { children: React.ReactNode; label?: string; subtitle?: string; index?: number; scale?: number }) {
+  const designWidth = 360
+  const designHeight = 780
   return (
-    <div>
+    <div className="flex flex-col">
       {label ? (
-        <div className="mb-3 flex items-center gap-2">
-          <span className="flex size-6 items-center justify-center rounded-full bg-fb-green text-xs font-bold text-white">•</span>
+        <div className="mb-3 flex items-start gap-2">
+          <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-fb-green text-[10px] font-bold text-white">{index ?? '•'}</span>
           <div>
-            <p className="text-sm font-bold tracking-[-0.03em] text-fb-ink">{label}</p>
-            {subtitle ? <p className="text-xs text-fb-muted">{subtitle}</p> : null}
+            <p className="text-[13px] font-bold tracking-[-0.03em] text-fb-ink leading-tight">{label}</p>
+            {subtitle ? <p className="mt-0.5 text-[11px] text-fb-muted leading-tight">{subtitle}</p> : null}
           </div>
         </div>
       ) : null}
-      <div className="fb-phone-frame h-[760px] w-[320px] overflow-hidden bg-fb-surface">{children}</div>
+      <div
+        className="fb-phone-frame relative overflow-hidden bg-fb-surface"
+        style={{ width: designWidth * scale, height: designHeight * scale }}
+      >
+        <div
+          className="absolute left-0 top-0 origin-top-left"
+          style={{ width: designWidth, height: designHeight, transform: `scale(${scale})` }}
+        >
+          {children}
+        </div>
+      </div>
     </div>
   )
 }
@@ -56,9 +72,12 @@ export function OnboardingScreenPreview() {
     <div>
       <AppHeader title="우리 가정의 기본 정보를 입력해 주세요" subtitle="정확하지 않아도 괜찮아요. 지금은 첫 거리감을 보는 단계예요." />
       <form className="space-y-4 px-5 pb-6">
-        <div className="flex items-center justify-between rounded-card border border-fb-line bg-fb-green-50 px-4 py-3 text-sm text-fb-muted"><span>입력 단위</span><strong className="text-fb-green">만원</strong></div>
-        {onboardingRows.slice(0, 6).map((row) => <MoneyInputRow key={row.label} label={row.label} value={row.value} helper={row.helper} />)}
-        <Button className="w-full" size="lg">다음</Button><ProgressStepper steps={['입력', '확인', '완료']} current={0} />
+        <div className="flex items-center justify-end gap-2 text-[11px] text-fb-muted"><span>단위</span><strong className="text-fb-ink">만원</strong></div>
+        <div className="fb-card divide-y divide-fb-line px-4">
+          {onboardingRows.slice(0, 7).map((row) => <MoneyInputRow key={row.label} label={row.label} value={row.value} />)}
+        </div>
+        <Button className="w-full" size="lg">다음</Button>
+        <ProgressStepper steps={['입력', '확인', '완료']} current={0} />
       </form>
     </div>
   )
@@ -103,7 +122,7 @@ export function LiteScreenPreview() {
           <h1 className="mt-4 text-2xl font-bold tracking-[-0.06em] text-fb-ink">Fire Banking에 초대받았어요!</h1>
           <p className="mt-2 text-sm leading-6 text-fb-muted">서로를 평가하지 않고, 함께 보기 위한 정보만 입력해요.</p>
         </section>
-        <section className="fb-card p-5"><p className="text-sm font-bold text-fb-green">정확하지 않아도 괜찮아요.</p><div className="mt-5 space-y-4">{liteRows.map((row) => <MoneyInputRow key={row.label} label={row.label} value={row.value} soft />)}</div><Button variant="soft" className="mt-5 w-full">지난달과 같아요</Button><Button className="mt-2 w-full">다음</Button></section>
+        <section className="fb-card p-5"><p className="text-sm font-bold text-fb-green">정확하지 않아도 괜찮아요.</p><div className="mt-3 divide-y divide-fb-line">{liteRows.map((row) => <MoneyInputRow key={row.label} label={row.label} value={row.value} soft />)}</div><Button variant="soft" className="mt-5 w-full">지난달과 같아요</Button><Button className="mt-2 w-full">다음</Button></section>
       </div>
     </div>
   )

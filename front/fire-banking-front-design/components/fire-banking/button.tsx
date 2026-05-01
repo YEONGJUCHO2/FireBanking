@@ -30,7 +30,7 @@ const sizeClass: Record<ButtonSize, string> = {
 
 export function Button({ children, href, variant = 'primary', size = 'md', className, disabled, ...buttonProps }: ButtonProps) {
   const classes = cn(
-    'fb-focus inline-flex items-center justify-center rounded-button font-semibold tracking-[-0.02em] transition active:scale-[0.99]',
+    'fb-focus inline-flex items-center justify-center whitespace-nowrap rounded-button font-semibold tracking-[-0.02em] transition active:scale-[0.99]',
     sizeClass[size],
     variantClass[variant],
     disabled && 'pointer-events-none opacity-50',

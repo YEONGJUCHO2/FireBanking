@@ -1,31 +1,66 @@
-import { Button } from './button'
+import { Card } from './card'
 import { Icon } from './icons'
-import Image from 'next/image'
 
-export function InviteCard({ compact = false }: { compact?: boolean }) {
+export function InviteCard({
+  spouseName = '민호',
+  inviteUrl = 'firebanking.app/invite/3a91…',
+  daysLeft = 7,
+}: {
+  spouseName?: string
+  inviteUrl?: string
+  daysLeft?: number
+}) {
   return (
-    <section className="fb-card overflow-hidden p-5">
-      <div className="text-center">
-        <Image src="/fire-banking/invite-mugs.png" alt="" width={144} height={96} className="mx-auto h-24 w-36 object-contain mix-blend-multiply" />
-        <p className="mt-3 text-sm font-bold text-fb-green">배우자 초대</p>
-        <h2 className="mt-1 text-xl font-bold tracking-normal text-fb-ink">배우자가 참여하면 이번 달 결과가 더 또렷해져요.</h2>
-        {!compact ? <p className="mt-2 text-sm leading-6 text-fb-muted">서로를 평가하기보다, 같은 숫자를 보고 같은 편이 되는 체크인입니다.</p> : null}
-      </div>
-
-      {!compact ? (
-        <div className="mt-5 grid gap-2 text-sm leading-6 text-fb-muted">
-          <div className="flex gap-2"><Icon name="check" className="mt-1 size-4 text-fb-green" />각자의 입력이 합쳐져 더 정확한 결과 제공</div>
-          <div className="flex gap-2"><Icon name="shield" className="mt-1 size-4 text-fb-green" />프라이버시는 지키면서 함께 설계</div>
+    <Card tone="inverse" className="p-5">
+      <div className="flex items-center gap-3">
+        <div className="flex size-10 items-center justify-center rounded-full bg-white/12">
+          <Icon name="users" className="size-[22px] text-white" />
         </div>
-      ) : null}
-
-      <div className="mt-5 grid gap-2">
-        <Button href="/invite/demo-token">초대 링크 생성</Button>
-        <div className="grid grid-cols-2 gap-2">
-          <Button variant="secondary"><Icon name="copy" className="mr-2 size-4" />링크 복사</Button>
-          <Button variant="kakao"><Icon name="kakao" className="mr-2 size-4" />카카오톡 공유</Button>
+        <div className="flex-1">
+          <div className="text-[15px] font-bold tracking-[-0.008em] text-white">
+            {spouseName}님이 아직 초대 수락 전이에요
+          </div>
+          <div className="mt-0.5 text-[12px] font-medium text-white/60">
+            링크는 {daysLeft}일간 유효해요
+          </div>
         </div>
       </div>
-    </section>
+
+      <div className="mt-4 flex items-center gap-2 rounded-[12px] bg-white/8 p-3">
+        <span className="fb-num flex-1 truncate text-[13px] font-medium tracking-[0.008em] text-white/85">
+          {inviteUrl}
+        </span>
+        <button
+          type="button"
+          className="fbpress flex h-8 items-center gap-1 rounded-full bg-white/16 px-3 text-[12px] font-bold text-white"
+        >
+          <Icon name="copy" className="size-3.5" />
+          복사
+        </button>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <DarkSecondaryButton iconName="kakao">카카오톡 공유</DarkSecondaryButton>
+        <DarkSecondaryButton iconName="share">다른 앱으로</DarkSecondaryButton>
+      </div>
+    </Card>
+  )
+}
+
+function DarkSecondaryButton({
+  children,
+  iconName,
+}: {
+  children: React.ReactNode
+  iconName: 'kakao' | 'share'
+}) {
+  return (
+    <button
+      type="button"
+      className="fbpress flex h-10 items-center justify-center gap-1.5 rounded-[12px] border border-white/15 bg-white/10 text-[13px] font-semibold text-white"
+    >
+      <Icon name={iconName} className="size-4" />
+      {children}
+    </button>
   )
 }

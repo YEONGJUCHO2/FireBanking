@@ -23,20 +23,20 @@ export function CashflowStrip({
     <section className="fb-card p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-base font-bold tracking-normal text-fb-ink">월 현금흐름 요약</h2>
-        <span className="rounded-full bg-fb-green-100 px-3 py-1 text-xs font-bold text-fb-green">비난 없는 점검</span>
+        <span className="rounded-full bg-fb-trust-soft px-3 py-1 text-xs font-bold text-fb-trust">비난 없는 점검</span>
       </div>
       <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
         {steps.map((step, index) => (
-          <div key={step.label} className="rounded-soft border border-fb-line bg-fb-surface p-3">
-            <p className="text-[11px] font-bold text-fb-muted">{index > 0 ? step.sign : ''} {step.label}</p>
-            <p className={cn('mt-1 text-lg font-bold tracking-normal', step.value < 0 ? 'text-fb-danger' : 'text-fb-ink')}>
+          <div key={step.label} className="rounded-soft border border-fb-line bg-fb-card p-3">
+            <p className="text-[11px] font-bold text-fb-ink-2">{index > 0 ? step.sign : ''} {step.label}</p>
+            <p className={cn('mt-1 text-lg font-bold tracking-normal', step.value < 0 ? 'text-fb-negative' : 'text-fb-ink')}>
               {formatManWon(step.value)}
             </p>
           </div>
         ))}
       </div>
       {remainingMan < 0 ? (
-        <div className="mt-4 rounded-soft bg-fb-danger-bg p-4 text-sm leading-6 text-fb-danger">
+        <div className="mt-4 rounded-soft bg-fb-negative-soft p-4 text-sm leading-6 text-fb-negative">
           현재 입력 기준으로는 월 자산 증가 여력이 크지 않아요. 이번 달에는 고정비와 자동이체를 함께 살펴보면 충분합니다.
         </div>
       ) : null}

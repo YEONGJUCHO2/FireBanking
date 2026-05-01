@@ -8,8 +8,8 @@ export function ProgressStepper({ steps, current }: { steps: string[]; current: 
         const done = index < current
         return (
           <div key={step} className="flex items-center gap-2">
-            <span className={cn('flex size-6 items-center justify-center rounded-full text-xs font-bold', active || done ? 'bg-fb-green text-white' : 'bg-fb-stone text-fb-muted')}>{index + 1}</span>
-            <span className={cn('text-xs font-bold', active ? 'text-fb-green' : 'text-fb-muted')}>{step}</span>
+            <span className={cn('flex size-6 items-center justify-center rounded-full text-xs font-bold', active || done ? 'bg-fb-trust text-white' : 'bg-fb-line text-fb-ink-2')}>{index + 1}</span>
+            <span className={cn('text-xs font-bold', active ? 'text-fb-trust' : 'text-fb-ink-2')}>{step}</span>
           </div>
         )
       })}

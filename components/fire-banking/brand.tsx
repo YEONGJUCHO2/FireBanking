@@ -1,22 +1,49 @@
 import { cn } from '@/lib/cn'
-import { Icon } from './icons'
 
-export function LeafLogo({ className }: { className?: string }) {
+export function BrandMark({ size = 'md', className }: { size?: 'sm' | 'md' | 'lg'; className?: string }) {
+  const dim = size === 'sm' ? 'size-7 text-[12px]' : size === 'lg' ? 'size-9 text-[15px]' : 'size-8 text-[13px]'
   return (
-    <span className={cn('inline-flex size-10 items-center justify-center rounded-full bg-fb-green-100 text-fb-green', className)} aria-hidden="true">
-      <Icon name="leaf" className="size-5" />
+    <span
+      aria-hidden="true"
+      className={cn(
+        'inline-flex shrink-0 items-center justify-center rounded-[10px] bg-fb-ink font-extrabold tracking-[-0.024em] text-white',
+        dim,
+        className,
+      )}
+    >
+      FB
     </span>
   )
 }
 
-export function BrandLockup({ compact = false, tagline = true }: { compact?: boolean; tagline?: boolean }) {
+export function BrandLockup({
+  compact = false,
+  tagline = false,
+  className,
+}: {
+  compact?: boolean
+  tagline?: boolean
+  className?: string
+}) {
   return (
-    <div className="flex items-center gap-3">
-      <LeafLogo className={compact ? 'size-8' : undefined} />
-      <div>
-        <p className={cn('font-semibold tracking-normal text-fb-green-900', compact ? 'text-lg' : 'text-2xl')}>Fire Banking</p>
-        {tagline && !compact ? <p className="mt-0.5 text-xs font-medium text-fb-muted">부부가 함께 보는 월간 FIRE 체크인</p> : null}
+    <div className={cn('flex items-center gap-2.5', className)}>
+      <BrandMark size={compact ? 'sm' : 'md'} />
+      <div className="leading-none">
+        <p
+          className={cn(
+            'font-bold tracking-[-0.012em] text-fb-ink',
+            compact ? 'text-[14px]' : 'text-[16px]',
+          )}
+        >
+          Fire Banking
+        </p>
+        {tagline ? (
+          <p className="mt-1 text-[12px] font-medium text-fb-ink-3">월 1회 부부 재무 체크인</p>
+        ) : null}
       </div>
     </div>
   )
 }
+
+/* Backwards-compat alias for any older imports */
+export const LeafLogo = BrandMark
