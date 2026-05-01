@@ -45,7 +45,9 @@ export function R0Dashboard({ snapshot }: { snapshot: R0Snapshot }) {
           distanceLabel={snapshot.projected_fire_date ? "투자가능 순자산 기준" : undefined}
           state={heroState}
         />
-        <p className="sr-only">투자가능 순자산 기준 예상 도달 시점은 {projectedMonth} 입니다.</p>
+        <p className="sr-only">
+          투자가능 순자산 기준 예상 도달 시점은 <span>{projectedMonth}</span> 입니다.
+        </p>
       </section>
 
       <section className="grid grid-cols-2 gap-3">
