@@ -4,7 +4,7 @@ export type KiwoomConfig = {
   baseUrl: string;
 };
 
-type KiwoomEnv = {
+type KiwoomEnv = Record<string, string | undefined> & {
   KIWOOM_APP_KEY?: string;
   KIWOOM_APP_SECRET?: string;
   KIWOOM_BASE_URL?: string;
