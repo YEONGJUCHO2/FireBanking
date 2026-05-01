@@ -342,11 +342,13 @@ KiwoomDomesticValuationProvider
 생성 방식은 자동이다.
 
 ```text
-생성 주체: 서버 스케줄러 또는 Supabase scheduled job
+생성 주체: 보호된 Next.js cron route handler
 시간 기준: Asia/Seoul
-실행 시점: 매월 마지막 날 장 마감 데이터 확보 이후
+실행 시점: 매일 23:30 KST 호출, 월말이 아니면 no-op
+월말 처리: 월말이면 일일 시세 갱신을 먼저 실행한 뒤 스냅샷 생성
 대상: 해당 월에 활성 자산/부채 입력이 있는 부부 워크스페이스
 멱등성 키: couple_id + snapshot_month
+보호 방식: Authorization: Bearer CRON_SECRET
 ```
 
 사용자에게 월말 확정 버튼을 요구하지 않는다. 사용자는 월간 체크인을 완료하지 않아도, 입력되어 있는 최신 자산/부채 상태 기준으로 월말 자동 스냅샷을 받는다.

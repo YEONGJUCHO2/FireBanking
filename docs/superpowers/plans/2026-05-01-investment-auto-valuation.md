@@ -6,7 +6,7 @@
 
 **Architecture:** Add a focused `assets` feature module beside the existing `fire`, `dashboard`, and `onboarding` modules. Keep valuation and FIRE math in pure TypeScript functions first, then connect Supabase persistence, scheduled jobs, and UI surfaces around those pure functions. Treat Kiwoom as a provider behind a small domestic valuation interface, with Phase 0 required before using real API calls.
 
-**Tech Stack:** Next.js App Router, TypeScript, Supabase Postgres/RLS, Zod, Vitest, Testing Library, scheduled server function or Supabase scheduled job, Kiwoom domestic market data candidate.
+**Tech Stack:** Next.js App Router, TypeScript, Supabase Postgres/RLS, Zod, Vitest, Testing Library, protected Next.js cron route handlers, Kiwoom domestic market data candidate.
 
 ---
 
@@ -35,12 +35,70 @@ Excluded:
 - Sell transaction cash ledger.
 - Portfolio analytics.
 
+## Execution Phases
+
+This is one product release, but implementation must land in smaller engineering phases.
+Do not combine all phases into one unchecked diff.
+
+```text
+Phase A. Calculation and schema foundation
+- Pure asset/liability calculations
+- FIRE projection compatibility
+- Supabase schema and RLS
+- Relationship between existing cashflow snapshots and new asset snapshots
+
+Phase B. Search and manual input
+- Domestic instrument search action/API
+- Holding save action
+- Liability save action
+- Investment/liability panels
+
+Phase C. Price sync infrastructure
+- Provider boundary
+- Kiwoom config shell behind credentials
+- Daily price sync job
+- Protected scheduler route
+
+Phase D. Month-end and dashboard history
+- Month-end snapshot job
+- Protected scheduler route
+- Current estimate versus fixed snapshot dashboard summary
+```
+
+Each phase must have its own focused tests and commit. A later phase can depend on an
+earlier phase, but it must not silently fix earlier phase behavior without adding a
+regression test.
+
+## Snapshot Source Of Truth
+
+The existing `monthly_cashflow_snapshots` table remains the source of truth for monthly
+income, expenses, regular investment, and the R0 FIRE projection fields.
+
+The new `monthly_asset_snapshots` table is a supplemental source of truth for asset,
+liability, valuation-date, and debt-cashflow fields. Dashboard history composes the two
+tables by `couple_id` and month:
+
+```text
+monthly_cashflow_snapshots.month
+  joins monthly_asset_snapshots.snapshot_month
+  on couple_id + month
+```
+
+Existing historical cashflow snapshots are not backfilled in this release. For months
+without an asset snapshot, the dashboard must render the existing R0 values and hide the
+asset auto-valuation summary instead of inventing partial asset history.
+
 ## File Structure
 
 Create:
 
 ```text
 docs/research/2026-05-kiwoom-domestic-valuation-spike.md
+app/api/cron/sync-daily-domestic-prices/route.ts
+app/api/cron/sync-daily-domestic-prices/route.test.ts
+app/api/cron/create-month-end-snapshots/route.ts
+app/api/cron/create-month-end-snapshots/route.test.ts
+src/lib/supabase/admin.ts
 src/features/assets/types.ts
 src/features/assets/lib/assetCalculations.ts
 src/features/assets/lib/assetCalculations.test.ts
@@ -50,6 +108,8 @@ src/features/assets/lib/domesticValuationProvider.ts
 src/features/assets/lib/domesticValuationProvider.test.ts
 src/features/assets/lib/kiwoomDomesticValuationProvider.ts
 src/features/assets/lib/kiwoomDomesticValuationProvider.test.ts
+src/features/assets/actions/searchDomesticInstruments.ts
+src/features/assets/actions/searchDomesticInstruments.test.ts
 src/features/assets/actions/saveHolding.ts
 src/features/assets/actions/saveHolding.test.ts
 src/features/assets/actions/saveLiability.ts
@@ -71,6 +131,8 @@ Modify:
 src/features/fire/types.ts
 src/features/fire/lib/calculateFireProjection.ts
 src/features/fire/lib/calculateFireProjection.test.ts
+src/features/onboarding/actions/saveR0Snapshot.ts
+src/features/onboarding/actions/saveR0Snapshot.test.ts
 src/features/dashboard/components/R0Dashboard.tsx
 src/features/dashboard/components/R0Dashboard.test.tsx
 app/dashboard/page.tsx
@@ -83,7 +145,7 @@ src/lib/env.ts
 
 - Create: `docs/research/2026-05-kiwoom-domestic-valuation-spike.md`
 
-- [ ] **Step 1: Verify Kiwoom domestic ETF support**
+- [x] **Step 1: Verify Kiwoom domestic ETF support**
 
 Manual research must answer these concrete questions:
 
@@ -128,7 +190,7 @@ Write exactly one decision:
 - Stop and evaluate a market-data provider.
 ```
 
-- [ ] **Step 2: Stop if spike is FAIL**
+- [x] **Step 2: Stop if spike is FAIL**
 
 Do not implement `KiwoomDomesticValuationProvider` if the spike verdict is `FAIL`.
 
@@ -138,7 +200,16 @@ Expected result:
 Provider implementation waits until a viable domestic data source is confirmed.
 ```
 
-- [ ] **Step 3: Commit spike document**
+Actual result:
+
+```text
+Verdict: CONDITIONAL
+Decision: Proceed with provider boundary and non-live implementation.
+Live Kiwoom calls remain gated on credentials, fixed outbound IP, rate limit,
+pricing, and real-symbol verification.
+```
+
+- [x] **Step 3: Commit spike document**
 
 Run:
 
@@ -157,6 +228,8 @@ git commit -m "docs: research domestic valuation provider"
 - Modify: `src/features/fire/types.ts`
 - Modify: `src/features/fire/lib/calculateFireProjection.ts`
 - Modify: `src/features/fire/lib/calculateFireProjection.test.ts`
+- Modify: `src/features/onboarding/actions/saveR0Snapshot.ts`
+- Modify: `src/features/onboarding/actions/saveR0Snapshot.test.ts`
 
 - [ ] **Step 1: Write failing calculation tests**
 
@@ -361,22 +434,36 @@ const monthlyAssetGrowthCapacity =
 
 Update existing tests by passing `monthlyDebtInterestExpense: 0` and `monthlyDebtPrincipalPayment: 0`, then add one test proving interest increases living expense and principal increases growth capacity.
 
-- [ ] **Step 5: Run tests and verify GREEN**
+- [ ] **Step 5: Update existing FIRE projection caller**
+
+`calculateFireProjection` is currently called by `src/features/onboarding/actions/saveR0Snapshot.ts`.
+Update that caller to pass zero debt values until asset/liability data is connected:
+
+```ts
+monthlyDebtInterestExpense: 0,
+monthlyDebtPrincipalPayment: 0,
+```
+
+Update `src/features/onboarding/actions/saveR0Snapshot.test.ts` so the existing R0
+onboarding path still saves a snapshot successfully after the `FireProjectionInput`
+type changes.
+
+- [ ] **Step 6: Run tests and verify GREEN**
 
 Run:
 
 ```bash
-npm run test -- src/features/assets/lib/assetCalculations.test.ts src/features/fire/lib/calculateFireProjection.test.ts
+npm run test -- src/features/assets/lib/assetCalculations.test.ts src/features/fire/lib/calculateFireProjection.test.ts src/features/onboarding/actions/saveR0Snapshot.test.ts
 ```
 
 Expected: all tests pass.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 Run:
 
 ```bash
-git add src/features/assets/types.ts src/features/assets/lib/assetCalculations.ts src/features/assets/lib/assetCalculations.test.ts src/features/fire/types.ts src/features/fire/lib/calculateFireProjection.ts src/features/fire/lib/calculateFireProjection.test.ts
+git add src/features/assets/types.ts src/features/assets/lib/assetCalculations.ts src/features/assets/lib/assetCalculations.test.ts src/features/fire/types.ts src/features/fire/lib/calculateFireProjection.ts src/features/fire/lib/calculateFireProjection.test.ts src/features/onboarding/actions/saveR0Snapshot.ts src/features/onboarding/actions/saveR0Snapshot.test.ts
 git commit -m "feat: calculate asset liabilities for FIRE"
 ```
 
@@ -464,6 +551,14 @@ create table public.monthly_asset_snapshots (
   unique (couple_id, snapshot_month)
 );
 
+create index asset_holdings_couple_id_idx on public.asset_holdings(couple_id);
+create index asset_holdings_instrument_id_idx on public.asset_holdings(instrument_id);
+create index asset_liabilities_couple_id_idx on public.asset_liabilities(couple_id);
+create index asset_price_snapshots_instrument_date_idx
+on public.asset_price_snapshots(instrument_id, valuation_date desc);
+create index monthly_asset_snapshots_couple_month_idx
+on public.monthly_asset_snapshots(couple_id, snapshot_month desc);
+
 alter table public.asset_instruments enable row level security;
 alter table public.asset_holdings enable row level security;
 alter table public.asset_liabilities enable row level security;
@@ -527,7 +622,27 @@ rg -n "enable row level security|create policy" supabase/migrations/0006_asset_l
 
 Expected: every new table has RLS enabled and at least one read policy.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 3: Confirm write boundary for background jobs**
+
+`asset_price_snapshots` and `monthly_asset_snapshots` are written only by scheduled
+server code using a service-role Supabase client. Do not add browser/user insert or
+update policies for these tables in the first release.
+
+Add `src/lib/supabase/admin.ts` later in the scheduler phase, not in this migration
+commit, unless tests require it earlier.
+
+- [ ] **Step 4: Confirm relation to existing cashflow snapshots**
+
+Document in this task's commit message or PR notes:
+
+```text
+monthly_cashflow_snapshots = income/expense/R0 projection source
+monthly_asset_snapshots = asset/liability/valuation source
+dashboard composes both by couple_id + month
+no historical backfill in this release
+```
+
+- [ ] **Step 5: Commit**
 
 Run:
 
@@ -754,7 +869,10 @@ export function createKiwoomConfig(env: NodeJS.ProcessEnv): KiwoomConfig | null 
 }
 ```
 
-Do not implement live API calls until Task 0 has `PASS` or `CONDITIONAL`.
+Do not implement live API calls until Task 0 has `PASS`.
+For the current `CONDITIONAL` verdict, implement only the provider boundary, config
+validation, fake provider tests, and live-call seams. Keep real Kiwoom network calls
+behind a later credentials/IP/rate-limit verification task.
 
 - [ ] **Step 5: Run tests**
 
@@ -775,7 +893,64 @@ git add src/features/assets/lib/domesticValuationProvider.ts src/features/assets
 git commit -m "feat: add domestic valuation provider boundary"
 ```
 
-## Task 5: Holding And Liability Server Actions
+## Task 5: Domestic Instrument Search Action
+
+**Files:**
+
+- Create: `src/features/assets/actions/searchDomesticInstruments.ts`
+- Create: `src/features/assets/actions/searchDomesticInstruments.test.ts`
+
+- [ ] **Step 1: Write search action tests**
+
+Create tests that verify:
+
+```ts
+it("returns domestic stock and ETF results from the provider");
+it("upserts searched domestic instruments into asset_instruments");
+it("does not show US-listed tickers such as VOO as auto-valuation candidates");
+it("returns a Korean error when the provider is unavailable");
+```
+
+Use a fake provider in tests. Do not call Kiwoom live.
+
+- [ ] **Step 2: Implement search action/API boundary**
+
+Implement a server action or route handler that:
+
+- Requires an authenticated user.
+- Accepts a plain text query.
+- Calls `DomesticValuationProvider.searchInstruments(query)`.
+- Normalizes symbols and names with `normalizeDomesticInstrument`.
+- Upserts returned instruments into `asset_instruments` on `(market, symbol)`.
+- Returns cached DB rows with `instrument_id` so `saveHolding` does not need to
+  create instruments blindly.
+
+If Kiwoom credentials are missing, return a recoverable Korean error:
+
+```text
+종목 검색을 준비 중이에요. 잠시 후 다시 시도해주세요.
+```
+
+- [ ] **Step 3: Run search action tests**
+
+Run:
+
+```bash
+npm run test -- src/features/assets/actions/searchDomesticInstruments.test.ts
+```
+
+Expected: pass.
+
+- [ ] **Step 4: Commit**
+
+Run:
+
+```bash
+git add src/features/assets/actions/searchDomesticInstruments.ts src/features/assets/actions/searchDomesticInstruments.test.ts
+git commit -m "feat: search domestic instruments"
+```
+
+## Task 6: Holding And Liability Server Actions
 
 **Files:**
 
@@ -841,8 +1016,16 @@ Both actions must:
 
 - Require authenticated user.
 - Require admin membership.
+- Require `instrument_id` from `searchDomesticInstruments`; do not accept free-form
+  US ticker text in `saveHolding`.
 - Return Korean error messages on validation/auth/persistence failure.
 - Revalidate `/dashboard`.
+
+If `instrument_id` is missing or does not reference an active KR instrument, return:
+
+```text
+종목 검색 결과에서 보유 종목을 선택해주세요.
+```
 
 - [ ] **Step 4: Run action tests**
 
@@ -863,7 +1046,7 @@ git add src/features/assets/actions/saveHolding.ts src/features/assets/actions/s
 git commit -m "feat: save asset holdings and liabilities"
 ```
 
-## Task 6: Investment And Liability UI Panels
+## Task 7: Investment And Liability UI Panels
 
 **Files:**
 
@@ -933,7 +1116,7 @@ git add src/features/assets/components/InvestmentAssetPanel.tsx src/features/ass
 git commit -m "feat: add asset liability input panels"
 ```
 
-## Task 7: Daily Price Sync Job
+## Task 8: Daily Price Sync Job
 
 **Files:**
 
@@ -993,7 +1176,7 @@ git add src/features/assets/jobs/syncDailyDomesticPrices.ts src/features/assets/
 git commit -m "feat: sync daily domestic prices"
 ```
 
-## Task 8: Month-End Snapshot Job
+## Task 9: Month-End Snapshot Job
 
 **Files:**
 
@@ -1052,7 +1235,95 @@ git add src/features/assets/jobs/createMonthEndSnapshots.ts src/features/assets/
 git commit -m "feat: create month-end asset snapshots"
 ```
 
-## Task 9: Dashboard History Integration
+## Task 10: Scheduler Routes
+
+**Files:**
+
+- Create: `src/lib/supabase/admin.ts`
+- Create: `app/api/cron/sync-daily-domestic-prices/route.ts`
+- Create: `app/api/cron/sync-daily-domestic-prices/route.test.ts`
+- Create: `app/api/cron/create-month-end-snapshots/route.ts`
+- Create: `app/api/cron/create-month-end-snapshots/route.test.ts`
+- Modify: `src/lib/env.ts`
+
+- [ ] **Step 1: Implement service-role Supabase client**
+
+Create `src/lib/supabase/admin.ts` using:
+
+```text
+NEXT_PUBLIC_SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY
+```
+
+This client is server-only and must never be imported by Client Components.
+
+- [ ] **Step 2: Write cron route tests**
+
+Test both cron routes:
+
+```ts
+it("rejects missing or invalid CRON_SECRET");
+it("calls the underlying job when CRON_SECRET is valid");
+it("returns JSON counts and warnings");
+```
+
+For the month-end route, also test:
+
+```ts
+it("exits without creating snapshots when today is not the KST month-end date");
+```
+
+- [ ] **Step 3: Implement protected route handlers**
+
+Use protected Next.js route handlers:
+
+```text
+GET /api/cron/sync-daily-domestic-prices
+GET /api/cron/create-month-end-snapshots
+```
+
+Both routes require:
+
+```text
+Authorization: Bearer ${CRON_SECRET}
+```
+
+Operational schedule:
+
+```text
+Daily price sync:
+- Run once per day after provider has the latest close.
+- Recommended schedule: every day 06:30 KST.
+
+Month-end snapshot:
+- Scheduler may call daily at 23:30 KST.
+- Route exits unless the current Asia/Seoul date is the calendar month-end date.
+- On KST month-end, run daily price sync first, then create snapshots.
+```
+
+This avoids relying on a cron expression that can directly express "last day of month"
+on every hosting provider.
+
+- [ ] **Step 4: Run route tests**
+
+Run:
+
+```bash
+npm run test -- app/api/cron/sync-daily-domestic-prices/route.test.ts app/api/cron/create-month-end-snapshots/route.test.ts
+```
+
+Expected: pass.
+
+- [ ] **Step 5: Commit**
+
+Run:
+
+```bash
+git add src/lib/supabase/admin.ts app/api/cron/sync-daily-domestic-prices app/api/cron/create-month-end-snapshots src/lib/env.ts
+git commit -m "feat: add asset valuation scheduler routes"
+```
+
+## Task 11: Dashboard History Integration
 
 **Files:**
 
@@ -1069,6 +1340,13 @@ expect(screen.getByText("현재 추정치")).toBeInTheDocument();
 expect(screen.getByText("월말 스냅샷")).toBeInTheDocument();
 expect(screen.getByText(/마지막 거래일/)).toBeInTheDocument();
 expect(screen.getByText(/정기투자 \\+ 빚 감소 \\+ 남은 돈/)).toBeInTheDocument();
+```
+
+Also add regression tests proving:
+
+```ts
+it("renders existing R0 dashboard when asset snapshot summary is missing");
+it("does not invent asset auto-valuation history for months before monthly_asset_snapshots exist");
 ```
 
 - [ ] **Step 2: Update dashboard props and display**
@@ -1097,6 +1375,16 @@ Show quiet labels:
 자동평가 포함 · 마지막 거래일 YYYY-MM-DD 기준
 정기투자 + 빚 감소 + 남은 돈
 ```
+
+Dashboard data loading must compose:
+
+```text
+monthly_cashflow_snapshots.month
+  + optional monthly_asset_snapshots.snapshot_month
+```
+
+If no matching `monthly_asset_snapshots` row exists, render the existing R0 dashboard
+state and omit the auto-valuation summary.
 
 - [ ] **Step 3: Run dashboard tests**
 
@@ -1168,15 +1456,19 @@ Expected:
 Spec coverage:
 
 - Domestic listed holdings: Tasks 2, 4, 5, 7.
-- Search plus quantity input: Tasks 5, 6.
-- Pension/IRP account category: Tasks 2, 5, 6, 9.
-- Liabilities and debt cashflow: Tasks 1, 2, 5, 6, 9.
-- Daily price sync: Task 7.
-- Month-end automatic snapshots: Tasks 3, 8.
-- Dashboard history/current estimate distinction: Task 9.
+- Search plus quantity input: Tasks 5, 6, 7.
+- Pension/IRP account category: Tasks 2, 6, 7, 11.
+- Liabilities and debt cashflow: Tasks 1, 2, 6, 7, 11.
+- Daily price sync: Tasks 8, 10.
+- Month-end automatic snapshots: Tasks 3, 9, 10.
+- Dashboard history/current estimate distinction: Task 11.
 - Provider spike before live API: Task 0.
 
 Known sequencing guard:
 
-- Do not implement live Kiwoom API calls before Task 0 passes.
-- If Task 0 fails, replace Task 4 provider implementation with the selected alternative and update this plan before proceeding.
+- Do not implement live Kiwoom API calls while Task 0 is `CONDITIONAL`.
+- The current approved path is provider boundary plus fake-provider-backed flows.
+- Live Kiwoom calls require a follow-up verification task with App Key/App Secret,
+  fixed outbound IP, rate limit, pricing, and real 005930/360750/379810 calls.
+- If Task 0 later becomes `FAIL`, replace Task 4 provider implementation with the
+  selected alternative and update this plan before proceeding.
