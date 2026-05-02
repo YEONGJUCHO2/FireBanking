@@ -1,3 +1,6 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import { Button, Card, SectionHeader, StatusPill } from "@/components/fire-banking";
 import { formatKrw } from "@/src/lib/format";
 
@@ -28,8 +31,98 @@ const recommendations = [
   "SOL 미국배당다우존스",
 ];
 
+const searchableInstruments = [
+  {
+    id: "sample-samsung",
+    symbol: "005930",
+    displayName: "삼성전자",
+    quantity: 18,
+    valuationAmount: 1_530_000,
+    valuationDate: "2026-05-29",
+  },
+  {
+    id: "sample-tiger-sp500",
+    symbol: "360750",
+    displayName: "TIGER 미국S&P500",
+    quantity: 10,
+    valuationAmount: 210_000,
+    valuationDate: "2026-05-29",
+  },
+  {
+    id: "sample-kodex-nasdaq",
+    symbol: "379810",
+    displayName: "KODEX 미국나스닥100",
+    quantity: 10,
+    valuationAmount: 185_000,
+    valuationDate: "2026-05-29",
+  },
+];
+
 export function InvestmentAssetPanel({ holdings = defaultHoldings }: { holdings?: HoldingView[] }) {
-  const total = holdings.reduce((sum, holding) => sum + holding.valuationAmount, 0);
+  const [items, setItems] = useState(holdings);
+  const [query, setQuery] = useState("");
+  const [submittedQuery, setSubmittedQuery] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingQuantity, setEditingQuantity] = useState("");
+  const total = items.reduce((sum, holding) => sum + holding.valuationAmount, 0);
+  const searchResults = useMemo(() => {
+    const normalized = submittedQuery.trim().toLowerCase();
+
+    if (!normalized) {
+      return [];
+    }
+
+    return searchableInstruments.filter(
+      (instrument) =>
+        instrument.displayName.toLowerCase().includes(normalized) ||
+        instrument.symbol.includes(normalized),
+    );
+  }, [submittedQuery]);
+
+  const handleSearch = () => {
+    setSubmittedQuery(query);
+  };
+
+  const addHolding = (holding: HoldingView) => {
+    setItems((current) => {
+      if (current.some((item) => item.id === holding.id)) {
+        return current;
+      }
+
+      return [...current, holding];
+    });
+  };
+
+  const startEdit = (holding: HoldingView) => {
+    setEditingId(holding.id);
+    setEditingQuantity(String(holding.quantity));
+  };
+
+  const saveQuantity = (holdingId: string) => {
+    const nextQuantity = Number(editingQuantity);
+
+    if (!Number.isFinite(nextQuantity) || nextQuantity <= 0) {
+      return;
+    }
+
+    setItems((current) =>
+      current.map((item) =>
+        item.id === holdingId
+          ? {
+              ...item,
+              quantity: nextQuantity,
+              valuationAmount: Math.round((item.valuationAmount / item.quantity) * nextQuantity),
+            }
+          : item,
+      ),
+    );
+    setEditingId(null);
+    setEditingQuantity("");
+  };
+
+  const deleteHolding = (holdingId: string) => {
+    setItems((current) => current.filter((item) => item.id !== holdingId));
+  };
 
   return (
     <Card className="p-5 md:p-6">
@@ -48,8 +141,21 @@ export function InvestmentAssetPanel({ holdings = defaultHoldings }: { holdings?
                 자동 시세는 국내 상장 종목부터 지원해요.
               </p>
             </div>
-            <Button type="button" variant="secondary" size="sm" className="shrink-0 whitespace-nowrap">
-              검색 준비중
+          </div>
+
+          <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_auto]">
+            <label className="sr-only" htmlFor="domestic-instrument-query">
+              종목 검색어
+            </label>
+            <input
+              id="domestic-instrument-query"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-medium text-fb-ink outline-none focus:border-fb-trust"
+              placeholder="삼성전자, 005930, TIGER..."
+            />
+            <Button type="button" variant="secondary" size="sm" onClick={handleSearch}>
+              검색
             </Button>
           </div>
 
@@ -64,34 +170,81 @@ export function InvestmentAssetPanel({ holdings = defaultHoldings }: { holdings?
             ))}
           </div>
 
+          {submittedQuery ? (
+            <div className="mt-4 grid gap-2">
+              {searchResults.length === 0 ? (
+                <p className="rounded-[12px] bg-fb-card-alt px-3 py-3 text-[13px] font-medium text-fb-ink-3">
+                  검색 결과가 없어요.
+                </p>
+              ) : (
+                searchResults.map((result) => (
+                  <div
+                    key={result.id}
+                    className="flex items-center justify-between gap-3 rounded-[12px] border border-fb-line bg-fb-card-alt px-3 py-2"
+                  >
+                    <div>
+                      <p className="text-[13px] font-bold text-fb-ink">{result.displayName}</p>
+                      <p className="mt-0.5 text-[12px] text-fb-ink-3">{result.symbol}</p>
+                    </div>
+                    <Button type="button" variant="secondary" size="sm" onClick={() => addHolding(result)}>
+                      {result.displayName} 추가
+                    </Button>
+                  </div>
+                ))
+              )}
+            </div>
+          ) : null}
+
           <div className="mt-5 border-t border-fb-line pt-4">
-            {holdings.length === 0 ? (
+            {items.length === 0 ? (
               <p className="rounded-[12px] bg-fb-card-alt px-3 py-3 text-[13px] font-medium text-fb-ink-3">
                 아직 등록한 종목이 없어요.
               </p>
             ) : (
               <div className="grid gap-3">
-                {holdings.map((holding) => (
+                {items.map((holding) => (
                   <div
                     key={holding.id}
                     className="grid gap-3 rounded-[12px] border border-fb-line bg-white p-3 md:grid-cols-[1fr_auto]"
                   >
                     <div>
                       <p className="text-[14px] font-bold text-fb-ink">{holding.displayName}</p>
-                      <p className="mt-1 text-[12px] text-fb-ink-3">
-                        {holding.symbol} · {holding.quantity.toLocaleString("ko-KR")}주 · 마지막 거래일{" "}
-                        {holding.valuationDate} 기준
-                      </p>
+                      {editingId === holding.id ? (
+                        <div className="mt-2 flex items-center gap-2">
+                          <label className="sr-only" htmlFor={`${holding.id}-quantity`}>
+                            {holding.displayName} 보유 수량
+                          </label>
+                          <input
+                            id={`${holding.id}-quantity`}
+                            value={editingQuantity}
+                            onChange={(event) => setEditingQuantity(event.target.value)}
+                            className="h-9 w-24 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
+                            inputMode="decimal"
+                          />
+                          <span className="text-[12px] font-medium text-fb-ink-3">주</span>
+                        </div>
+                      ) : (
+                        <p className="mt-1 text-[12px] text-fb-ink-3">
+                          {holding.symbol} · {holding.quantity.toLocaleString("ko-KR")}주 · 마지막 거래일{" "}
+                          {holding.valuationDate} 기준
+                        </p>
+                      )}
                     </div>
                     <div className="flex items-center justify-between gap-3 md:justify-end">
                       <p className="fb-num text-[15px] font-bold text-fb-ink">
                         {formatKrw(holding.valuationAmount)}
                       </p>
                       <div className="flex gap-1.5">
-                        <Button type="button" variant="ghost" size="sm">
-                          수량 수정
-                        </Button>
-                        <Button type="button" variant="dangerSoft" size="sm">
+                        {editingId === holding.id ? (
+                          <Button type="button" variant="secondary" size="sm" onClick={() => saveQuantity(holding.id)}>
+                            저장
+                          </Button>
+                        ) : (
+                          <Button type="button" variant="ghost" size="sm" onClick={() => startEdit(holding)}>
+                            수량 수정
+                          </Button>
+                        )}
+                        <Button type="button" variant="dangerSoft" size="sm" onClick={() => deleteHolding(holding.id)}>
                           삭제
                         </Button>
                       </div>
