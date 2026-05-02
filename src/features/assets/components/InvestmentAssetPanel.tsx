@@ -20,9 +20,12 @@ export type HoldingView = {
   accountCategory?: "general" | "pension_savings" | "irp" | "other";
 };
 
+type AccountCategory = NonNullable<HoldingView["accountCategory"]>;
+
 type SearchableHoldingView = HoldingView & {
   instrumentId?: string;
   lastClosePrice?: number;
+  lastCloseDate?: string;
 };
 
 const defaultHoldings: HoldingView[] = [
@@ -37,6 +40,20 @@ const defaultHoldings: HoldingView[] = [
 ];
 
 const SEARCH_RESULTS_PAGE_SIZE = 3;
+
+const accountCategoryOptions: Array<{ value: AccountCategory; label: string }> = [
+  { value: "general", label: "일반" },
+  { value: "pension_savings", label: "연금저축" },
+  { value: "irp", label: "IRP" },
+  { value: "other", label: "기타" },
+];
+
+const accountCategoryLabels: Record<AccountCategory, string> = {
+  general: "일반",
+  pension_savings: "연금저축",
+  irp: "IRP",
+  other: "기타",
+};
 
 const searchableInstruments: SearchableHoldingView[] = [
   {
@@ -103,11 +120,12 @@ export function InvestmentAssetPanel({
   );
   const [searchError, setSearchError] = useState<string | null>(null);
   const [searchPage, setSearchPage] = useState(0);
+  const [addQuantity, setAddQuantity] = useState("1");
+  const [addAccountCategory, setAddAccountCategory] = useState<AccountCategory>("general");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingQuantity, setEditingQuantity] = useState("");
   const searchRequestId = useRef(0);
   const searchDebounceId = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const total = items.reduce((sum, holding) => sum + holding.valuationAmount, 0);
   const localSearchResults = useMemo(() => {
     const normalized = submittedQuery.trim().toLowerCase();
 
@@ -191,6 +209,7 @@ export function InvestmentAssetPanel({
           symbol: instrument.symbol,
           displayName: instrument.displayName,
           lastClosePrice: instrument.lastClosePrice,
+          lastCloseDate: instrument.lastCloseDate,
           quantity: 1,
           valuationAmount: 0,
           valuationDate: "가격 확인 중",
@@ -202,6 +221,12 @@ export function InvestmentAssetPanel({
   const handleSearch = () => runSearch(query);
 
   const addHolding = (holding: SearchableHoldingView) => {
+    const nextQuantity = Number(addQuantity);
+
+    if (!Number.isFinite(nextQuantity) || nextQuantity <= 0) {
+      return;
+    }
+
     if (items.some((item) => item.symbol === holding.symbol)) {
       return;
     }
@@ -209,8 +234,8 @@ export function InvestmentAssetPanel({
     if (coupleId) {
       const formData = new FormData();
       formData.set("coupleId", coupleId);
-      formData.set("quantity", String(holding.quantity));
-      formData.set("accountCategory", "general");
+      formData.set("quantity", String(nextQuantity));
+      formData.set("accountCategory", addAccountCategory);
       formData.set(holding.instrumentId ? "instrumentId" : "symbol", holding.instrumentId ?? holding.symbol);
       startTransition(async () => {
         const result = holding.instrumentId
@@ -228,7 +253,17 @@ export function InvestmentAssetPanel({
         return current;
       }
 
-      return [...current, holding];
+      const unitPrice = holding.lastClosePrice ?? holding.valuationAmount / holding.quantity;
+
+      return [
+        ...current,
+        {
+          ...holding,
+          quantity: nextQuantity,
+          valuationAmount: Math.round(unitPrice * nextQuantity),
+          accountCategory: addAccountCategory,
+        },
+      ];
     });
   };
 
@@ -298,7 +333,7 @@ export function InvestmentAssetPanel({
         action={<StatusPill label={isPending ? "저장 중" : "국내 상장 우선"} status="info" />}
       />
 
-      <div className="mt-5 grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
+      <div className="mt-5 grid gap-5">
         <section className="rounded-[16px] border border-fb-line bg-white p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -335,6 +370,37 @@ export function InvestmentAssetPanel({
             </Button>
           </div>
 
+          <div className="mt-3 grid gap-2 rounded-[12px] border border-fb-line bg-fb-card-alt p-3 sm:grid-cols-[minmax(0,1fr)_120px]">
+            <label
+              className="grid min-w-0 gap-1 text-[12px] font-bold text-fb-ink-2"
+              htmlFor="holding-account-category"
+            >
+              계좌 유형
+              <select
+                id="holding-account-category"
+                value={addAccountCategory}
+                onChange={(event) => setAddAccountCategory(event.target.value as AccountCategory)}
+                className="h-10 w-full min-w-0 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
+              >
+                {accountCategoryOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid min-w-0 gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="holding-add-quantity">
+              추가 수량
+              <input
+                id="holding-add-quantity"
+                value={addQuantity}
+                onChange={(event) => setAddQuantity(event.target.value)}
+                className="h-10 w-full min-w-0 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
+                inputMode="decimal"
+              />
+            </label>
+          </div>
+
           {submittedQuery ? (
             <div
               data-testid="instrument-autocomplete-slot"
@@ -352,16 +418,24 @@ export function InvestmentAssetPanel({
                 visibleSearchResults.map((result) => (
                   <div
                     key={result.id}
-                    className="flex min-h-11 items-center justify-between gap-3 rounded-[10px] bg-fb-card-alt px-3 py-2"
+                    className="grid min-h-11 gap-2 rounded-[10px] bg-fb-card-alt px-3 py-2 sm:grid-cols-[1fr_auto] sm:items-center"
                   >
                     <div className="min-w-0">
                       <p className="truncate text-[13px] font-bold text-fb-ink">{result.displayName}</p>
                       <p className="mt-0.5 text-[12px] text-fb-ink-3">
                         {result.symbol}
-                        {result.lastClosePrice ? ` · 전일 종가 ${formatKrw(result.lastClosePrice)}` : ""}
+                        {result.lastClosePrice
+                          ? ` · ${result.lastCloseDate ? `${result.lastCloseDate} 종가` : "마지막 거래일 종가"} ${formatKrw(result.lastClosePrice)}`
+                          : ""}
                       </p>
                     </div>
-                    <Button type="button" variant="secondary" size="sm" onClick={() => addHolding(result)}>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      className="w-full sm:w-auto"
+                      onClick={() => addHolding(result)}
+                    >
                       추가
                     </Button>
                   </div>
@@ -405,10 +479,15 @@ export function InvestmentAssetPanel({
                 {items.map((holding) => (
                   <div
                     key={holding.id}
-                    className="grid gap-3 rounded-[12px] border border-fb-line bg-white p-3 md:grid-cols-[1fr_auto]"
+                    className="grid gap-3 rounded-[12px] border border-fb-line bg-white p-3"
                   >
                     <div>
-                      <p className="text-[14px] font-bold text-fb-ink">{holding.displayName}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-[14px] font-bold text-fb-ink">{holding.displayName}</p>
+                        <span className="rounded-full bg-fb-trust-soft px-2 py-0.5 text-[11px] font-bold text-fb-trust-ink">
+                          {accountCategoryLabels[holding.accountCategory ?? "general"]}
+                        </span>
+                      </div>
                       {editingId === holding.id ? (
                         <div className="mt-2 flex items-center gap-2">
                           <label className="sr-only" htmlFor={`${holding.id}-quantity`}>
@@ -430,11 +509,11 @@ export function InvestmentAssetPanel({
                         </p>
                       )}
                     </div>
-                    <div className="flex items-center justify-between gap-3 md:justify-end">
+                    <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
                       <p className="fb-num text-[15px] font-bold text-fb-ink">
                         {formatKrw(holding.valuationAmount)}
                       </p>
-                      <div className="flex gap-1.5">
+                      <div className="grid grid-cols-2 gap-1.5 sm:flex">
                         {editingId === holding.id ? (
                           <Button type="button" variant="secondary" size="sm" onClick={() => saveQuantity(holding.id)}>
                             저장
@@ -456,16 +535,15 @@ export function InvestmentAssetPanel({
           </div>
         </section>
 
-        <section className="rounded-[16px] border border-fb-line bg-fb-card-alt p-4">
-          <div className="flex items-baseline justify-between gap-3">
-            <p className="text-[13px] font-bold text-fb-ink">미국상장 수동 계산</p>
-            <p className="fb-num text-[15px] font-bold text-fb-trust">{formatKrw(total)}</p>
-          </div>
+        <details className="rounded-[16px] border border-fb-line bg-fb-card-alt p-4">
+          <summary className="cursor-pointer text-[13px] font-bold text-fb-ink">
+            해외거래소 직접 보유
+          </summary>
           <p className="mt-2 text-[12px] leading-5 text-fb-ink-3">
-            미국상장 ETF는 이번 버전에서 가격과 환율을 직접 넣어 원화 평가액만 계산해요.
+            VOO, SPY, QQQ처럼 미국 거래소에 직접 상장된 자산만 수동으로 계산해요. TIGER·ACE 같은 국내상장 ETF는 위 종목 검색으로 추가해요.
           </p>
 
-          <div className="mt-4 grid grid-cols-2 gap-2 text-[12px] font-semibold text-fb-ink-2">
+          <div className="mt-4 grid gap-2 text-[12px] font-semibold text-fb-ink-2 sm:grid-cols-2 lg:grid-cols-5">
             {["티커/이름", "보유 수량", "1주 가격(USD)", "적용 환율", "계산된 원화 평가액"].map((label) => (
               <div key={label} className="rounded-[10px] border border-fb-line bg-white px-3 py-2">
                 {label}
@@ -476,7 +554,7 @@ export function InvestmentAssetPanel({
           <p className="mt-4 rounded-[12px] bg-white px-3 py-3 text-[12px] leading-5 text-fb-ink-3">
             연금저축/IRP는 표시 순자산에는 포함하고 기본 FIRE 계산에서는 제외해요.
           </p>
-        </section>
+        </details>
       </div>
     </Card>
   );

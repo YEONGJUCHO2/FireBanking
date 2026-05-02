@@ -38,7 +38,25 @@ function createProvider(): DomesticValuationProvider {
 
   return {
     searchInstruments: vi.fn(async () => instruments),
-    getLastClosePrice: vi.fn(),
+    getLastClosePrice: vi.fn(async (symbol: string) => {
+      if (symbol === "005930") {
+        return {
+          symbol,
+          valuationDate: "2026-04-30",
+          closePrice: 85_000,
+          provider: "kiwoom",
+          fetchedAt: "2026-05-02T00:00:00.000Z",
+        };
+      }
+
+      return {
+        symbol,
+        valuationDate: "2026-04-30",
+        closePrice: 26_160,
+        provider: "kiwoom",
+        fetchedAt: "2026-05-02T00:00:00.000Z",
+      };
+    }),
   };
 }
 
@@ -110,7 +128,8 @@ describe("searchDomesticInstrumentsWithProvider", () => {
         displayName: "삼성전자",
         instrumentType: "stock",
         currency: "KRW",
-        lastClosePrice: 85_300,
+        lastClosePrice: 85_000,
+        lastCloseDate: "2026-04-30",
       },
       {
         id: "instrument-tiger",
@@ -119,9 +138,21 @@ describe("searchDomesticInstrumentsWithProvider", () => {
         displayName: "TIGER 미국S&P500",
         instrumentType: "etf",
         currency: "KRW",
-        lastClosePrice: 21_000,
+        lastClosePrice: 26_160,
+        lastCloseDate: "2026-04-30",
       },
     ]);
+  });
+
+  it("overrides stale master list prices with latest daily close prices", async () => {
+    const refs = createSupabaseMock();
+    const provider = createProvider();
+    mocks.createSupabaseServerClient.mockResolvedValue(refs.supabase);
+
+    await searchDomesticInstrumentsWithProvider({}, createFormData("미국"), provider);
+
+    expect(provider.getLastClosePrice).toHaveBeenCalledWith("005930", expect.any(String));
+    expect(provider.getLastClosePrice).toHaveBeenCalledWith("360750", expect.any(String));
   });
 
   it("upserts searched domestic instruments into asset_instruments", async () => {
@@ -169,7 +200,8 @@ describe("searchDomesticInstrumentsWithProvider", () => {
         displayName: "삼성전자",
         instrumentType: "stock",
         currency: "KRW",
-        lastClosePrice: 85_300,
+        lastClosePrice: 85_000,
+        lastCloseDate: "2026-04-30",
       },
       {
         id: "search-360750",
@@ -178,7 +210,8 @@ describe("searchDomesticInstrumentsWithProvider", () => {
         displayName: "TIGER 미국S&P500",
         instrumentType: "etf",
         currency: "KRW",
-        lastClosePrice: 21_000,
+        lastClosePrice: 26_160,
+        lastCloseDate: "2026-04-30",
       },
     ]);
     expect(refs.upsert).not.toHaveBeenCalled();

@@ -61,6 +61,7 @@ function toResult(
     instrumentType: row.instrument_type,
     currency: row.currency,
     lastClosePrice: instrument?.lastClosePrice,
+    lastCloseDate: instrument?.lastCloseDate,
   };
 }
 
@@ -79,6 +80,38 @@ function getDefaultDomesticValuationProvider(): DomesticValuationProvider | null
   }
 
   return createKiwoomDomesticValuationProvider({ config });
+}
+
+async function enrichWithLatestClosePrices(
+  instruments: DomesticInstrument[],
+  provider: DomesticValuationProvider,
+) {
+  const asOfDate = getTodayInKorea();
+
+  return Promise.all(
+    instruments.map(async (instrument) => {
+      const closePrice = await provider.getLastClosePrice(instrument.symbol, asOfDate).catch(() => null);
+
+      if (!closePrice) {
+        return instrument;
+      }
+
+      return {
+        ...instrument,
+        lastClosePrice: closePrice.closePrice,
+        lastCloseDate: closePrice.valuationDate,
+      };
+    }),
+  );
+}
+
+function getTodayInKorea() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
 }
 
 export async function searchDomesticInstrumentsWithProvider(
@@ -105,11 +138,13 @@ export async function searchDomesticInstrumentsWithProvider(
     return { error: PROVIDER_UNAVAILABLE_ERROR };
   }
 
-  const instruments = await provider.searchInstruments(query).catch(() => null);
+  const searchedInstruments = await provider.searchInstruments(query).catch(() => null);
 
-  if (!instruments) {
+  if (!searchedInstruments) {
     return { error: "종목 검색이 잠시 지연되고 있어요. 조금 뒤 다시 시도해주세요." };
   }
+
+  const instruments = await enrichWithLatestClosePrices(searchedInstruments, provider);
 
   if (instruments.length === 0) {
     return { instruments: [] };

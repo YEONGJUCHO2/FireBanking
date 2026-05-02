@@ -35,6 +35,8 @@ type KiwoomInstrumentRow = {
 type KiwoomDailyPriceRow = {
   date?: string;
   close_pric?: string;
+  dt?: string;
+  cur_prc?: string;
 };
 
 const KOREA_STOCK_MARKETS = [
@@ -98,8 +100,23 @@ export function createKiwoomDomesticValuationProvider({
     apiId: string,
     body: TBody,
   ) => {
+    return requestDomesticApi("/api/dostk/stkinfo", apiId, body);
+  };
+
+  const requestDomesticChart = async <TBody extends Record<string, string>>(
+    apiId: string,
+    body: TBody,
+  ) => {
+    return requestDomesticApi("/api/dostk/chart", apiId, body);
+  };
+
+  const requestDomesticApi = async <TBody extends Record<string, string>>(
+    path: string,
+    apiId: string,
+    body: TBody,
+  ) => {
     const token = await requestToken();
-    const response = await fetcher(`${trimTrailingSlash(config.baseUrl)}/api/dostk/stkinfo`, {
+    const response = await fetcher(`${trimTrailingSlash(config.baseUrl)}${path}`, {
       method: "POST",
       headers: {
         "content-type": "application/json;charset=UTF-8",
@@ -165,26 +182,35 @@ export function createKiwoomDomesticValuationProvider({
         });
       }
 
-      return results;
+      return results.sort((left, right) => {
+        const leftRank = rankInstrumentSearchResult(left, normalizedQuery);
+        const rightRank = rankInstrumentSearchResult(right, normalizedQuery);
+
+        if (leftRank !== rightRank) {
+          return leftRank - rightRank;
+        }
+
+        return left.displayName.localeCompare(right.displayName, "ko-KR");
+      });
     },
 
     async getLastClosePrice(symbol: string, asOfDate: string): Promise<DomesticClosePrice | null> {
-      const body = (await requestDomesticStock("ka10086", {
+      const body = (await requestDomesticChart("ka10081", {
         stk_cd: normalizeSymbol(symbol),
-        qry_dt: compactDate(asOfDate),
-        indc_tp: "0",
-      })) as { daly_stkpc?: KiwoomDailyPriceRow[] };
-      const row = (body.daly_stkpc ?? []).find((candidate) => {
-        const date = parseKiwoomDate(candidate.date);
-        return Boolean(date && Number.isFinite(parseKiwoomNumber(candidate.close_pric)));
+        base_dt: compactDate(asOfDate),
+        upd_stkpc_tp: "1",
+      })) as { stk_dt_pole_chart_qry?: KiwoomDailyPriceRow[] };
+      const row = (body.stk_dt_pole_chart_qry ?? []).find((candidate) => {
+        const date = parseKiwoomDate(candidate.dt ?? candidate.date);
+        return Boolean(date && Number.isFinite(parseKiwoomNumber(candidate.cur_prc ?? candidate.close_pric)));
       });
 
       if (!row) {
         return null;
       }
 
-      const valuationDate = parseKiwoomDate(row.date);
-      const closePrice = parseKiwoomNumber(row.close_pric);
+      const valuationDate = parseKiwoomDate(row.dt ?? row.date);
+      const closePrice = parseKiwoomNumber(row.cur_prc ?? row.close_pric);
 
       if (!valuationDate || !Number.isFinite(closePrice)) {
         return null;
@@ -221,6 +247,26 @@ function inferInstrumentType(
   fallback: DomesticInstrumentType,
 ): DomesticInstrumentType {
   return row.marketName?.toLowerCase().includes("etf") ? "etf" : fallback;
+}
+
+function rankInstrumentSearchResult(instrument: DomesticInstrument, normalizedQuery: string) {
+  const normalizedName = normalizeSearchText(instrument.displayName);
+
+  if (instrument.symbol === normalizedQuery || normalizedName === normalizedQuery) {
+    return 0;
+  }
+
+  if (instrument.symbol.startsWith(normalizedQuery) || normalizedName.startsWith(normalizedQuery)) {
+    return 1;
+  }
+
+  return 2 + getDerivativeVariantPenalty(normalizedName);
+}
+
+function getDerivativeVariantPenalty(normalizedName: string) {
+  return ["선물", "레버리지", "인버스", "합성"].some((keyword) => normalizedName.includes(keyword))
+    ? 2
+    : 0;
 }
 
 function preferEtfInstrument(

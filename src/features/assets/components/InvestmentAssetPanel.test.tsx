@@ -46,13 +46,14 @@ describe("InvestmentAssetPanel", () => {
     mocks.refresh.mockReset();
   });
 
-  it("shows domestic search and manual US-listed calculation", () => {
+  it("shows domestic search and de-emphasizes direct US-listed manual calculation", () => {
     render(<InvestmentAssetPanel />);
 
     expect(screen.getByText("투자자산")).toBeInTheDocument();
     expect(screen.getByText("종목 검색")).toBeInTheDocument();
     expect(screen.queryByText("VOO")).not.toBeInTheDocument();
-    expect(screen.getByText("미국상장 수동 계산")).toBeInTheDocument();
+    expect(screen.getByText("해외거래소 직접 보유")).toBeInTheDocument();
+    expect(screen.getByText(/VOO, SPY, QQQ처럼 미국 거래소에 직접 상장된 자산만 수동으로 계산해요/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "수량 수정" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "삭제" })).toBeInTheDocument();
   });
@@ -68,10 +69,14 @@ describe("InvestmentAssetPanel", () => {
     render(<InvestmentAssetPanel holdings={[]} />);
 
     fireEvent.change(screen.getByLabelText("종목 검색어"), { target: { value: "삼성" } });
+    fireEvent.change(screen.getByLabelText("추가 수량"), { target: { value: "7" } });
+    fireEvent.change(screen.getByLabelText("계좌 유형"), { target: { value: "irp" } });
     fireEvent.click(screen.getByRole("button", { name: "검색" }));
     fireEvent.click(screen.getByRole("button", { name: "추가" }));
 
     expect(screen.getAllByText("삼성전자").length).toBeGreaterThan(0);
+    expect(screen.getByText(/7주/)).toBeInTheDocument();
+    expect(within(screen.getByTestId("holdings-section")).getByText("IRP")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "수량 수정" }));
     fireEvent.change(screen.getByLabelText("삼성전자 보유 수량"), { target: { value: "25" } });
@@ -117,7 +122,8 @@ describe("InvestmentAssetPanel", () => {
           displayName: "포스코퓨처엠",
           instrumentType: "stock",
           currency: "KRW",
-          lastClosePrice: 261_000,
+          lastClosePrice: 252_000,
+          lastCloseDate: "2026-04-30",
         },
       ],
     });
@@ -125,6 +131,8 @@ describe("InvestmentAssetPanel", () => {
     render(<InvestmentAssetPanel coupleId="couple-1" holdings={[]} />);
 
     fireEvent.change(screen.getByLabelText("종목 검색어"), { target: { value: "포스코" } });
+    fireEvent.change(screen.getByLabelText("추가 수량"), { target: { value: "3" } });
+    fireEvent.change(screen.getByLabelText("계좌 유형"), { target: { value: "pension_savings" } });
     fireEvent.click(screen.getByRole("button", { name: "검색" }));
 
     await waitFor(() => {
@@ -139,7 +147,8 @@ describe("InvestmentAssetPanel", () => {
     const submitted = mocks.saveHolding.mock.calls[0][1] as FormData;
     expect(submitted.get("coupleId")).toBe("couple-1");
     expect(submitted.get("instrumentId")).toBe("instrument-posco");
-    expect(submitted.get("quantity")).toBe("1");
+    expect(submitted.get("quantity")).toBe("3");
+    expect(submitted.get("accountCategory")).toBe("pension_savings");
   });
 
   it("uses live domestic instrument search even before a couple exists", async () => {
@@ -177,7 +186,8 @@ describe("InvestmentAssetPanel", () => {
           displayName: "포스코퓨처엠",
           instrumentType: "stock",
           currency: "KRW",
-          lastClosePrice: 261_000,
+          lastClosePrice: 252_000,
+          lastCloseDate: "2026-04-30",
         },
         {
           id: "instrument-posco-holdings",
@@ -240,7 +250,8 @@ describe("InvestmentAssetPanel", () => {
           displayName: "포스코퓨처엠",
           instrumentType: "stock",
           currency: "KRW",
-          lastClosePrice: 261_000,
+          lastClosePrice: 252_000,
+          lastCloseDate: "2026-04-30",
         },
       ],
     });
@@ -269,7 +280,8 @@ describe("InvestmentAssetPanel", () => {
           displayName: "포스코퓨처엠",
           instrumentType: "stock",
           currency: "KRW",
-          lastClosePrice: 261_000,
+          lastClosePrice: 252_000,
+          lastCloseDate: "2026-04-30",
         },
       ],
     });
@@ -280,7 +292,7 @@ describe("InvestmentAssetPanel", () => {
     const autocompleteSlot = await screen.findByTestId("instrument-autocomplete-slot");
 
     await waitFor(() => {
-      expect(within(autocompleteSlot).getByText(/전일 종가 ₩261,000/)).toBeInTheDocument();
+      expect(within(autocompleteSlot).getByText(/2026-04-30 종가 ₩252,000/)).toBeInTheDocument();
     });
     expect(within(autocompleteSlot).getByRole("button", { name: "추가" })).toBeInTheDocument();
     expect(within(autocompleteSlot).queryByRole("button", { name: "포스코퓨처엠 추가" })).not.toBeInTheDocument();

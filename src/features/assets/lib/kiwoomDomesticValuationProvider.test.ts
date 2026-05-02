@@ -58,6 +58,14 @@ describe("createKiwoomDomesticValuationProvider", () => {
     await expect(provider.searchInstruments("포스코")).resolves.toEqual([
       {
         market: "KR",
+        symbol: "003670",
+        displayName: "포스코퓨처엠",
+        instrumentType: "stock",
+        currency: "KRW",
+        lastClosePrice: 261_000,
+      },
+      {
+        market: "KR",
         symbol: "005490",
         displayName: "POSCO홀딩스",
         instrumentType: "stock",
@@ -71,14 +79,6 @@ describe("createKiwoomDomesticValuationProvider", () => {
         instrumentType: "etf",
         currency: "KRW",
         lastClosePrice: 8_730,
-      },
-      {
-        market: "KR",
-        symbol: "003670",
-        displayName: "포스코퓨처엠",
-        instrumentType: "stock",
-        currency: "KRW",
-        lastClosePrice: 261_000,
       },
     ]);
     expect(fetcher).toHaveBeenCalledWith(
@@ -105,36 +105,68 @@ describe("createKiwoomDomesticValuationProvider", () => {
     );
   });
 
-  it("returns the latest daily close price from Kiwoom daily price API", async () => {
+  it("ranks exact domestic ETF name matches before derivative variants", async () => {
     const fetcher = vi
       .fn()
       .mockResolvedValueOnce(jsonResponse({ token: "access-token", token_type: "bearer" }))
+      .mockResolvedValueOnce(jsonResponse({ list: [] }))
+      .mockResolvedValueOnce(jsonResponse({ list: [] }))
       .mockResolvedValueOnce(
         jsonResponse({
-          daly_stkpc: [
-            { date: "20260529", close_pric: "+85300" },
-            { date: "20260528", close_pric: "84000" },
+          list: [
+            { code: "143850", name: "TIGER 미국S&P500선물(H)", marketName: "ETF", lastPrice: "00072835" },
+            { code: "225040", name: "TIGER 미국S&P500레버리지(합성 H)", marketName: "ETF", lastPrice: "00059820" },
+            { code: "360750", name: "TIGER 미국S&P500", marketName: "ETF", lastPrice: "00021000" },
           ],
         }),
       );
     const provider = createKiwoomDomesticValuationProvider({
       config: { appKey: "app-key", appSecret: "app-secret", baseUrl: "https://api.example.com" },
       fetcher,
-      now: () => new Date("2026-05-30T00:00:00.000Z"),
     });
 
-    await expect(provider.getLastClosePrice("005930", "2026-05-30")).resolves.toEqual({
-      symbol: "005930",
-      valuationDate: "2026-05-29",
-      closePrice: 85_300,
+    const results = await provider.searchInstruments("TIGER 미국S&P500");
+
+    expect(results[0]).toEqual({
+      market: "KR",
+      symbol: "360750",
+      displayName: "TIGER 미국S&P500",
+      instrumentType: "etf",
+      currency: "KRW",
+      lastClosePrice: 21_000,
+    });
+  });
+
+  it("returns the latest daily close price from Kiwoom daily price API", async () => {
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ token: "access-token", token_type: "bearer" }))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          stk_dt_pole_chart_qry: [
+            { dt: "20260430", cur_prc: "252000" },
+            { dt: "20260429", cur_prc: "261000" },
+          ],
+        }),
+      );
+    const provider = createKiwoomDomesticValuationProvider({
+      config: { appKey: "app-key", appSecret: "app-secret", baseUrl: "https://api.example.com" },
+      fetcher,
+      now: () => new Date("2026-05-02T00:00:00.000Z"),
+    });
+
+    await expect(provider.getLastClosePrice("003670", "2026-05-02")).resolves.toEqual({
+      symbol: "003670",
+      valuationDate: "2026-04-30",
+      closePrice: 252_000,
       provider: "kiwoom",
-      fetchedAt: "2026-05-30T00:00:00.000Z",
+      fetchedAt: "2026-05-02T00:00:00.000Z",
     });
     expect(fetcher).toHaveBeenLastCalledWith(
-      "https://api.example.com/api/dostk/stkinfo",
+      "https://api.example.com/api/dostk/chart",
       expect.objectContaining({
-        headers: expect.objectContaining({ "api-id": "ka10086" }),
-        body: JSON.stringify({ stk_cd: "005930", qry_dt: "20260530", indc_tp: "0" }),
+        headers: expect.objectContaining({ "api-id": "ka10081" }),
+        body: JSON.stringify({ stk_cd: "003670", base_dt: "20260502", upd_stkpc_tp: "1" }),
       }),
     );
   });
