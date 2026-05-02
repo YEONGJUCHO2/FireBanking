@@ -49,7 +49,10 @@ function toUpsertRow(instrument: DomesticInstrument) {
   };
 }
 
-function toResult(row: AssetInstrumentRow): SearchDomesticInstrumentResult {
+function toResult(
+  row: AssetInstrumentRow,
+  instrument?: DomesticInstrument,
+): SearchDomesticInstrumentResult {
   return {
     id: row.id,
     market: row.market,
@@ -57,6 +60,14 @@ function toResult(row: AssetInstrumentRow): SearchDomesticInstrumentResult {
     displayName: row.display_name,
     instrumentType: row.instrument_type,
     currency: row.currency,
+    lastClosePrice: instrument?.lastClosePrice,
+  };
+}
+
+function toEphemeralResult(instrument: DomesticInstrument): SearchDomesticInstrumentResult {
+  return {
+    id: `search-${instrument.symbol}`,
+    ...instrument,
   };
 }
 
@@ -90,18 +101,22 @@ export async function searchDomesticInstrumentsWithProvider(
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    return { error: "로그인이 필요합니다." };
-  }
-
   if (!provider) {
     return { error: PROVIDER_UNAVAILABLE_ERROR };
   }
 
-  const instruments = await provider.searchInstruments(query);
+  const instruments = await provider.searchInstruments(query).catch(() => null);
+
+  if (!instruments) {
+    return { error: "종목 검색이 잠시 지연되고 있어요. 조금 뒤 다시 시도해주세요." };
+  }
 
   if (instruments.length === 0) {
     return { instruments: [] };
+  }
+
+  if (!user) {
+    return { instruments: instruments.map(toEphemeralResult) };
   }
 
   const { data, error } = await supabase
@@ -113,7 +128,13 @@ export async function searchDomesticInstrumentsWithProvider(
     return { error: "종목 검색 결과를 저장하지 못했습니다." };
   }
 
-  return { instruments: (data as AssetInstrumentRow[]).map(toResult) };
+  const instrumentsBySymbol = new Map(instruments.map((instrument) => [instrument.symbol, instrument]));
+
+  return {
+    instruments: (data as AssetInstrumentRow[]).map((row) =>
+      toResult(row, instrumentsBySymbol.get(row.symbol)),
+    ),
+  };
 }
 
 export async function searchDomesticInstruments(

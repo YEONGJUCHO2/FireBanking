@@ -31,19 +31,23 @@ describe("createKiwoomDomesticValuationProvider", () => {
       .mockResolvedValueOnce(
         jsonResponse({
           list: [
-            { code: "005930", name: "삼성전자" },
-            { code: "005490", name: "포스코홀딩스" },
+            { code: "005930", name: "삼성전자", lastPrice: "00085300" },
+            { code: "005490", name: "POSCO홀딩스", lastPrice: "00469000" },
+            { code: "469170", name: "ACE 포스코그룹포커스", marketName: "ETF", lastPrice: "00008730" },
           ],
         }),
       )
       .mockResolvedValueOnce(
         jsonResponse({
-          list: [{ code: "003670", name: "포스코퓨처엠" }],
+          list: [{ code: "003670", name: "포스코퓨처엠", lastPrice: "00261000" }],
         }),
       )
       .mockResolvedValueOnce(
         jsonResponse({
-          list: [{ code: "360750", name: "TIGER 미국S&P500" }],
+          list: [
+            { code: "360750", name: "TIGER 미국S&P500", lastPrice: "00021000" },
+            { code: "469170", name: "ACE 포스코그룹포커스", marketName: "ETF", lastPrice: "00008730" },
+          ],
         }),
       );
     const provider = createKiwoomDomesticValuationProvider({
@@ -55,9 +59,18 @@ describe("createKiwoomDomesticValuationProvider", () => {
       {
         market: "KR",
         symbol: "005490",
-        displayName: "포스코홀딩스",
+        displayName: "POSCO홀딩스",
         instrumentType: "stock",
         currency: "KRW",
+        lastClosePrice: 469_000,
+      },
+      {
+        market: "KR",
+        symbol: "469170",
+        displayName: "ACE 포스코그룹포커스",
+        instrumentType: "etf",
+        currency: "KRW",
+        lastClosePrice: 8_730,
       },
       {
         market: "KR",
@@ -65,6 +78,7 @@ describe("createKiwoomDomesticValuationProvider", () => {
         displayName: "포스코퓨처엠",
         instrumentType: "stock",
         currency: "KRW",
+        lastClosePrice: 261_000,
       },
     ]);
     expect(fetcher).toHaveBeenCalledWith(

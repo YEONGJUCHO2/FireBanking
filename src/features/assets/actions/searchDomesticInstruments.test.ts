@@ -24,6 +24,7 @@ function createProvider(): DomesticValuationProvider {
       displayName: "삼성전자",
       instrumentType: "stock",
       currency: "KRW",
+      lastClosePrice: 85_300,
     },
     {
       market: "KR",
@@ -31,6 +32,7 @@ function createProvider(): DomesticValuationProvider {
       displayName: "TIGER 미국S&P500",
       instrumentType: "etf",
       currency: "KRW",
+      lastClosePrice: 21_000,
     },
   ] satisfies DomesticInstrument[];
 
@@ -108,6 +110,7 @@ describe("searchDomesticInstrumentsWithProvider", () => {
         displayName: "삼성전자",
         instrumentType: "stock",
         currency: "KRW",
+        lastClosePrice: 85_300,
       },
       {
         id: "instrument-tiger",
@@ -116,6 +119,7 @@ describe("searchDomesticInstrumentsWithProvider", () => {
         displayName: "TIGER 미국S&P500",
         instrumentType: "etf",
         currency: "KRW",
+        lastClosePrice: 21_000,
       },
     ]);
   });
@@ -145,6 +149,39 @@ describe("searchDomesticInstrumentsWithProvider", () => {
       ],
       { onConflict: "market,symbol" },
     );
+  });
+
+  it("returns provider search results without upserting when the user is signed out", async () => {
+    const refs = createSupabaseMock({ user: null });
+    mocks.createSupabaseServerClient.mockResolvedValue(refs.supabase);
+
+    const result = await searchDomesticInstrumentsWithProvider(
+      {},
+      createFormData("삼성"),
+      createProvider(),
+    );
+
+    expect(result.instruments).toEqual([
+      {
+        id: "search-005930",
+        market: "KR",
+        symbol: "005930",
+        displayName: "삼성전자",
+        instrumentType: "stock",
+        currency: "KRW",
+        lastClosePrice: 85_300,
+      },
+      {
+        id: "search-360750",
+        market: "KR",
+        symbol: "360750",
+        displayName: "TIGER 미국S&P500",
+        instrumentType: "etf",
+        currency: "KRW",
+        lastClosePrice: 21_000,
+      },
+    ]);
+    expect(refs.upsert).not.toHaveBeenCalled();
   });
 
   it("does not show US-listed tickers such as VOO as auto-valuation candidates", async () => {

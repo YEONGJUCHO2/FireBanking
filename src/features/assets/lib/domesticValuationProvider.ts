@@ -6,6 +6,7 @@ export type DomesticInstrument = {
   displayName: string;
   instrumentType: DomesticInstrumentType;
   currency: "KRW";
+  lastClosePrice?: number;
 };
 
 export type DomesticClosePrice = {
@@ -25,6 +26,7 @@ export function normalizeDomesticInstrument(input: {
   symbol: string;
   displayName: string;
   instrumentType: DomesticInstrumentType;
+  lastClosePrice?: number;
 }): DomesticInstrument {
   return {
     market: "KR",
@@ -32,5 +34,6 @@ export function normalizeDomesticInstrument(input: {
     displayName: input.displayName,
     instrumentType: input.instrumentType,
     currency: "KRW",
+    lastClosePrice: input.lastClosePrice,
   };
 }

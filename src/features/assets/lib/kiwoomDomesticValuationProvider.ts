@@ -28,6 +28,8 @@ type KiwoomTokenResponse = {
 type KiwoomInstrumentRow = {
   code?: string;
   name?: string;
+  marketName?: string;
+  lastPrice?: string;
 };
 
 type KiwoomDailyPriceRow = {
@@ -116,7 +118,7 @@ export function createKiwoomDomesticValuationProvider({
 
   return {
     async searchInstruments(query: string): Promise<DomesticInstrument[]> {
-      const normalizedQuery = query.trim().toLowerCase();
+      const normalizedQuery = normalizeSearchText(query);
       if (!normalizedQuery) {
         return [];
       }
@@ -137,19 +139,29 @@ export function createKiwoomDomesticValuationProvider({
           }
 
           const matches =
-            symbol.includes(normalizedQuery) || displayName.toLowerCase().includes(normalizedQuery);
+            symbol.includes(normalizedQuery) ||
+            normalizeSearchText(displayName).includes(normalizedQuery);
 
-          if (!matches || results.some((instrument) => instrument.symbol === symbol)) {
+          const instrumentType = inferInstrumentType(row, market.instrumentType);
+          const existingIndex = results.findIndex((instrument) => instrument.symbol === symbol);
+
+          if (!matches) {
             return;
           }
 
-          results.push(
-            normalizeDomesticInstrument({
-              symbol,
-              displayName,
-              instrumentType: market.instrumentType,
-            }),
-          );
+          const instrument = normalizeDomesticInstrument({
+            symbol,
+            displayName,
+            instrumentType,
+            lastClosePrice: parseOptionalKiwoomNumber(row.lastPrice),
+          });
+
+          if (existingIndex >= 0) {
+            results[existingIndex] = preferEtfInstrument(results[existingIndex], instrument);
+            return;
+          }
+
+          results.push(instrument);
         });
       }
 
@@ -200,6 +212,24 @@ function normalizeSymbol(value: string | undefined) {
     .trim();
 }
 
+function normalizeSearchText(value: string) {
+  return value.trim().toLowerCase().replaceAll("posco", "포스코");
+}
+
+function inferInstrumentType(
+  row: KiwoomInstrumentRow,
+  fallback: DomesticInstrumentType,
+): DomesticInstrumentType {
+  return row.marketName?.toLowerCase().includes("etf") ? "etf" : fallback;
+}
+
+function preferEtfInstrument(
+  current: DomesticInstrument,
+  candidate: DomesticInstrument,
+): DomesticInstrument {
+  return current.instrumentType === "etf" ? current : candidate;
+}
+
 function compactDate(value: string) {
   return value.replaceAll("-", "").slice(0, 8);
 }
@@ -216,4 +246,9 @@ function parseKiwoomDate(value: string | undefined) {
 
 function parseKiwoomNumber(value: string | undefined) {
   return Math.abs(Number(String(value ?? "").replaceAll(",", "").trim()));
+}
+
+function parseOptionalKiwoomNumber(value: string | undefined) {
+  const parsed = parseKiwoomNumber(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, SectionHeader, StatusPill } from "@/components/fire-banking";
 import { deleteHolding as deleteHoldingAction } from "@/src/features/assets/actions/deleteHolding";
@@ -22,6 +22,7 @@ export type HoldingView = {
 
 type SearchableHoldingView = HoldingView & {
   instrumentId?: string;
+  lastClosePrice?: number;
 };
 
 const defaultHoldings: HoldingView[] = [
@@ -35,12 +36,7 @@ const defaultHoldings: HoldingView[] = [
   },
 ];
 
-const recommendations = [
-  "TIGER 미국S&P500",
-  "KODEX 미국나스닥100",
-  "ACE 미국배당다우존스",
-  "SOL 미국배당다우존스",
-];
+const SEARCH_RESULTS_PAGE_SIZE = 3;
 
 const searchableInstruments: SearchableHoldingView[] = [
   {
@@ -50,6 +46,7 @@ const searchableInstruments: SearchableHoldingView[] = [
     quantity: 18,
     valuationAmount: 1_530_000,
     valuationDate: "2026-05-29",
+    lastClosePrice: 85_000,
   },
   {
     id: "sample-tiger-sp500",
@@ -58,6 +55,7 @@ const searchableInstruments: SearchableHoldingView[] = [
     quantity: 10,
     valuationAmount: 210_000,
     valuationDate: "2026-05-29",
+    lastClosePrice: 21_000,
   },
   {
     id: "sample-kodex-nasdaq",
@@ -66,6 +64,7 @@ const searchableInstruments: SearchableHoldingView[] = [
     quantity: 10,
     valuationAmount: 185_000,
     valuationDate: "2026-05-29",
+    lastClosePrice: 18_500,
   },
   {
     id: "sample-posco-future-m",
@@ -74,6 +73,7 @@ const searchableInstruments: SearchableHoldingView[] = [
     quantity: 1,
     valuationAmount: 250_000,
     valuationDate: "2026-05-29",
+    lastClosePrice: 250_000,
   },
   {
     id: "sample-posco-holdings",
@@ -82,6 +82,7 @@ const searchableInstruments: SearchableHoldingView[] = [
     quantity: 1,
     valuationAmount: 370_000,
     valuationDate: "2026-05-29",
+    lastClosePrice: 370_000,
   },
 ];
 
@@ -101,8 +102,11 @@ export function InvestmentAssetPanel({
     null,
   );
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [searchPage, setSearchPage] = useState(0);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingQuantity, setEditingQuantity] = useState("");
+  const searchRequestId = useRef(0);
+  const searchDebounceId = useRef<ReturnType<typeof setTimeout> | null>(null);
   const total = items.reduce((sum, holding) => sum + holding.valuationAmount, 0);
   const localSearchResults = useMemo(() => {
     const normalized = submittedQuery.trim().toLowerCase();
@@ -118,47 +122,84 @@ export function InvestmentAssetPanel({
     );
   }, [submittedQuery]);
   const searchResults = serverSearchResults ?? localSearchResults;
+  const totalSearchPages = Math.max(1, Math.ceil(searchResults.length / SEARCH_RESULTS_PAGE_SIZE));
+  const visibleSearchResults = searchResults.slice(
+    searchPage * SEARCH_RESULTS_PAGE_SIZE,
+    searchPage * SEARCH_RESULTS_PAGE_SIZE + SEARCH_RESULTS_PAGE_SIZE,
+  );
 
-  const handleSearch = () => {
-    if (coupleId) {
-      const formData = new FormData();
-      formData.set("query", query);
-      startTransition(async () => {
-        const result = await searchDomesticInstruments({}, formData);
+  useEffect(() => {
+    return () => {
+      if (searchDebounceId.current) {
+        clearTimeout(searchDebounceId.current);
+      }
+    };
+  }, []);
 
-        if (result.error) {
-          setSearchError(result.error);
-          setServerSearchResults([]);
-          setSubmittedQuery(query);
-          return;
-        }
+  const runSearch = (nextQuery: string, options: { defer?: boolean } = {}) => {
+    const normalizedQuery = nextQuery.trim();
 
-        setSearchError(null);
-        setServerSearchResults(
-          (result.instruments ?? []).map((instrument) => ({
-            id: `search-${instrument.symbol}`,
-            instrumentId: instrument.id,
-            symbol: instrument.symbol,
-            displayName: instrument.displayName,
-            quantity: 1,
-            valuationAmount: 0,
-            valuationDate: "가격 확인 중",
-          })),
-        );
-        setSubmittedQuery(query);
-      });
-      return;
+    if (searchDebounceId.current) {
+      clearTimeout(searchDebounceId.current);
+      searchDebounceId.current = null;
     }
 
     setServerSearchResults(null);
     setSearchError(null);
-    setSubmittedQuery(query);
+    setSubmittedQuery(nextQuery);
+    setSearchPage(0);
+
+    if (!normalizedQuery) {
+      searchRequestId.current += 1;
+      return;
+    }
+
+    if (options.defer) {
+      searchDebounceId.current = setTimeout(() => {
+        runSearch(normalizedQuery);
+      }, 350);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.set("query", normalizedQuery);
+    const requestId = searchRequestId.current + 1;
+    searchRequestId.current = requestId;
+
+    startTransition(async () => {
+      const result = await searchDomesticInstruments({}, formData);
+
+      if (requestId !== searchRequestId.current) {
+        return;
+      }
+
+      if (!result) {
+        return;
+      }
+
+      if (result.error) {
+        setSearchError(result.error);
+        setServerSearchResults(null);
+        return;
+      }
+
+      setSearchError(null);
+      setServerSearchResults(
+        (result.instruments ?? []).map((instrument) => ({
+          id: `search-${instrument.symbol}`,
+          instrumentId: coupleId ? instrument.id : undefined,
+          symbol: instrument.symbol,
+          displayName: instrument.displayName,
+          lastClosePrice: instrument.lastClosePrice,
+          quantity: 1,
+          valuationAmount: 0,
+          valuationDate: "가격 확인 중",
+        })),
+      );
+    });
   };
 
-  const searchRecommended = (instrumentName: string) => {
-    setQuery(instrumentName);
-    setSubmittedQuery(instrumentName);
-  };
+  const handleSearch = () => runSearch(query);
 
   const addHolding = (holding: SearchableHoldingView) => {
     if (items.some((item) => item.symbol === holding.symbol)) {
@@ -275,7 +316,11 @@ export function InvestmentAssetPanel({
             <input
               id="domestic-instrument-query"
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                const nextQuery = event.target.value;
+                setQuery(nextQuery);
+                runSearch(nextQuery, { defer: true });
+              }}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   event.preventDefault();
@@ -283,56 +328,74 @@ export function InvestmentAssetPanel({
                 }
               }}
               className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-medium text-fb-ink outline-none focus:border-fb-trust"
-              placeholder="삼성전자, 005930, TIGER..."
+              placeholder="삼성전자, 에코프로, 005930..."
             />
             <Button type="button" variant="secondary" size="sm" onClick={handleSearch}>
               검색
             </Button>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            {recommendations.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => searchRecommended(item)}
-                className="fbpress rounded-full border border-fb-line bg-fb-card-alt px-3 py-1.5 text-[12px] font-semibold text-fb-ink-2 hover:bg-white"
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-
           {submittedQuery ? (
-            <div className="mt-4 grid gap-2">
+            <div
+              data-testid="instrument-autocomplete-slot"
+              className="mt-2 grid gap-1.5 rounded-[12px] border border-fb-line bg-white p-2"
+            >
               {searchError ? (
-                <p className="rounded-[12px] bg-fb-card-alt px-3 py-3 text-[13px] font-medium text-fb-ink-3">
+                <p className="rounded-[10px] bg-fb-card-alt px-3 py-2 text-[13px] font-medium text-fb-ink-3">
                   {searchError}
                 </p>
               ) : searchResults.length === 0 ? (
-                <p className="rounded-[12px] bg-fb-card-alt px-3 py-3 text-[13px] font-medium text-fb-ink-3">
+                <p className="rounded-[10px] bg-fb-card-alt px-3 py-2 text-[13px] font-medium text-fb-ink-3">
                   검색 결과가 없어요.
                 </p>
               ) : (
-                searchResults.map((result) => (
+                visibleSearchResults.map((result) => (
                   <div
                     key={result.id}
-                    className="flex items-center justify-between gap-3 rounded-[12px] border border-fb-line bg-fb-card-alt px-3 py-2"
+                    className="flex min-h-11 items-center justify-between gap-3 rounded-[10px] bg-fb-card-alt px-3 py-2"
                   >
-                    <div>
-                      <p className="text-[13px] font-bold text-fb-ink">{result.displayName}</p>
-                      <p className="mt-0.5 text-[12px] text-fb-ink-3">{result.symbol}</p>
+                    <div className="min-w-0">
+                      <p className="truncate text-[13px] font-bold text-fb-ink">{result.displayName}</p>
+                      <p className="mt-0.5 text-[12px] text-fb-ink-3">
+                        {result.symbol}
+                        {result.lastClosePrice ? ` · 전일 종가 ${formatKrw(result.lastClosePrice)}` : ""}
+                      </p>
                     </div>
                     <Button type="button" variant="secondary" size="sm" onClick={() => addHolding(result)}>
-                      {result.displayName} 추가
+                      추가
                     </Button>
                   </div>
                 ))
               )}
+              {!searchError && searchResults.length > SEARCH_RESULTS_PAGE_SIZE ? (
+                <div className="flex h-8 items-center justify-between gap-2 px-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={searchPage === 0}
+                    onClick={() => setSearchPage((page) => Math.max(0, page - 1))}
+                  >
+                    이전 검색 결과
+                  </Button>
+                  <span className="fb-num text-[12px] font-bold text-fb-ink-3">
+                    {searchPage + 1} / {totalSearchPages}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={searchPage >= totalSearchPages - 1}
+                    onClick={() => setSearchPage((page) => Math.min(totalSearchPages - 1, page + 1))}
+                  >
+                    다음 검색 결과
+                  </Button>
+                </div>
+              ) : null}
             </div>
           ) : null}
 
-          <div className="mt-5 border-t border-fb-line pt-4">
+          <div data-testid="holdings-section" className="mt-5 border-t border-fb-line pt-4">
             {items.length === 0 ? (
               <p className="rounded-[12px] bg-fb-card-alt px-3 py-3 text-[13px] font-medium text-fb-ink-3">
                 아직 등록한 종목이 없어요.
