@@ -134,30 +134,45 @@ export function LiabilityPanel({
               {items.map((liability) => (
                 <div
                   key={liability.id}
-                  className="grid gap-3 rounded-[12px] border border-fb-line bg-white p-3 md:grid-cols-[1fr_auto]"
+                  className={`grid gap-3 rounded-[12px] border border-fb-line bg-white p-3 ${
+                    editingId === liability.id ? "" : "md:grid-cols-[1fr_auto]"
+                  }`}
                 >
                   <div>
                     <p className="text-[14px] font-bold text-fb-ink">{liability.label}</p>
                     {editingId === liability.id ? (
-                      <div className="mt-3 grid gap-2 sm:grid-cols-3">
-                        <MoneyInput
-                          id={`${liability.id}-balance`}
-                          label={`${liability.label} 잔액`}
-                          value={draft.balanceManwon}
-                          onChange={(value) => setDraft((current) => ({ ...current, balanceManwon: value }))}
-                        />
-                        <MoneyInput
-                          id={`${liability.id}-interest`}
-                          label={`${liability.label} 월 이자`}
-                          value={draft.interestManwon}
-                          onChange={(value) => setDraft((current) => ({ ...current, interestManwon: value }))}
-                        />
-                        <MoneyInput
-                          id={`${liability.id}-principal`}
-                          label={`${liability.label} 월 원금상환`}
-                          value={draft.principalManwon}
-                          onChange={(value) => setDraft((current) => ({ ...current, principalManwon: value }))}
-                        />
+                      <div className="mt-3 rounded-[12px] bg-fb-card-alt p-3">
+                        <div className="grid gap-3 sm:grid-cols-3">
+                          <MoneyInput
+                            id={`${liability.id}-balance`}
+                            label={`${liability.label} 잔액`}
+                            helper="대출 잔액"
+                            value={draft.balanceManwon}
+                            onChange={(value) => setDraft((current) => ({ ...current, balanceManwon: value }))}
+                          />
+                          <MoneyInput
+                            id={`${liability.id}-interest`}
+                            label={`${liability.label} 월 이자`}
+                            helper="월 이자"
+                            value={draft.interestManwon}
+                            onChange={(value) => setDraft((current) => ({ ...current, interestManwon: value }))}
+                          />
+                          <MoneyInput
+                            id={`${liability.id}-principal`}
+                            label={`${liability.label} 월 원금상환`}
+                            helper="월 원금상환"
+                            value={draft.principalManwon}
+                            onChange={(value) =>
+                              setDraft((current) => ({ ...current, principalManwon: value }))
+                            }
+                          />
+                        </div>
+                        <div className="mt-3 flex items-center justify-between gap-3 border-t border-fb-line pt-3">
+                          <p className="text-[12px] font-medium text-fb-ink-3">입력 단위는 만원이에요.</p>
+                          <Button type="button" variant="secondary" size="sm" onClick={() => saveEdit(liability.id)}>
+                            저장
+                          </Button>
+                        </div>
                       </div>
                     ) : (
                       <p className="mt-1 text-[12px] text-fb-ink-3">
@@ -167,17 +182,15 @@ export function LiabilityPanel({
                     )}
                   </div>
                   <div className="flex items-center justify-between gap-3 md:justify-end">
-                    <p className="fb-num text-[15px] font-bold text-fb-ink">
-                      {formatKrw(liability.balanceAmount)}
-                    </p>
-                    {editingId === liability.id ? (
-                      <Button type="button" variant="secondary" size="sm" onClick={() => saveEdit(liability.id)}>
-                        저장
-                      </Button>
-                    ) : (
+                    {editingId === liability.id ? null : (
+                      <>
+                        <p className="fb-num text-[15px] font-bold text-fb-ink">
+                          {formatKrw(liability.balanceAmount)}
+                        </p>
                       <Button type="button" variant="secondary" size="sm" onClick={() => startEdit(liability)}>
                         부채 수정
                       </Button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -193,25 +206,28 @@ export function LiabilityPanel({
 function MoneyInput({
   id,
   label,
+  helper,
   value,
   onChange,
 }: {
   id: string;
   label: string;
+  helper: string;
   value: string;
   onChange: (value: string) => void;
 }) {
   return (
     <div>
-      <label className="sr-only" htmlFor={id}>
-        {label}
+      <label className="text-[12px] font-bold text-fb-ink-2" htmlFor={id}>
+        {helper}
       </label>
       <input
         id={id}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-9 w-full rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
+        className="mt-1 h-10 w-full rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
         inputMode="numeric"
+        aria-label={label}
       />
       <p className="mt-1 text-[11px] font-medium text-fb-ink-3">만원</p>
     </div>
