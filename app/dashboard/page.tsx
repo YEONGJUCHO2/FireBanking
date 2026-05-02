@@ -113,6 +113,8 @@ export default function DashboardPage() {
               />
             </div>
 
+            <AssetManagementLink />
+
             <section className="mt-6 space-y-3">
               <SectionHeader title="배우자 초대" />
               <InviteCard />
@@ -145,7 +147,30 @@ export default function DashboardPage() {
 
       <div className="hidden min-h-dvh bg-fb-page px-8 py-10 lg:block">
         <DesktopDashboard footerAction={<SignOutButton />} />
+        <div className="mx-auto mt-6 w-full max-w-[1280px]">
+          <AssetManagementLink />
+        </div>
       </div>
     </>
+  );
+}
+
+function AssetManagementLink() {
+  return (
+    <Link
+      href="/assets"
+      className="fbpress mt-4 flex items-center gap-3.5 rounded-[20px] border border-fb-line bg-white p-5"
+    >
+      <span className="flex size-11 items-center justify-center rounded-[14px] bg-fb-trust-soft text-fb-trust-ink">
+        <Icon name="wallet" className="size-[22px]" />
+      </span>
+      <span className="flex-1">
+        <span className="block text-[14px] font-bold text-fb-ink">자산·부채 관리</span>
+        <span className="mt-0.5 block text-[12px] font-medium text-fb-ink-3">
+          자동평가 자산과 빚 정보를 따로 정리해요
+        </span>
+      </span>
+      <Icon name="chevron-right" className="size-5 text-fb-ink-3" />
+    </Link>
   );
 }
