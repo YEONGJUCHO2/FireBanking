@@ -15,7 +15,8 @@ const data = {
   homeMan: 38_000,
   investableMan: 13_500,
   otherMan: 1_500,
-  fireTargetMan: 40_000,
+  targetMonthlyExpenseMan: 300,
+  fireTargetMan: 90_000,
   incomeMan: 850,
   fixedMan: 350,
   variableMan: 220,
@@ -103,21 +104,23 @@ export function DesktopDashboard({
           <div className="flex flex-col gap-5">
             <Card radius="hero" className="p-8">
               <div className="flex items-baseline justify-between">
-                <div className="text-[13px] font-medium text-fb-ink-3">우리 가족 표시 순자산</div>
-                <StatusPill tone="positive">↑ {dashboardData.netDeltaMan} 만원 vs 3월</StatusPill>
+                <div className="text-[13px] font-medium text-fb-ink-3">예상 FIRE 도달까지</div>
+                <StatusPill tone="trust">월 {dashboardData.targetMonthlyExpenseMan}만원 기준</StatusPill>
               </div>
               <div className="fb-num mt-2 flex items-baseline gap-1.5">
                 <span className="text-[64px] font-bold leading-none tracking-[-0.030em] text-fb-ink">
-                  {dashboardData.totalNetWorthMan.toLocaleString('ko-KR')}
+                  {dashboardData.fireYears}년 {dashboardData.fireMonths}개월
                 </span>
-                <span className="text-[22px] font-bold text-fb-ink-2">만원</span>
               </div>
+              <p className="mt-3 text-[13px] font-medium text-fb-ink-3">
+                FIRE 목표자산은 목표 월 생활비 × 12 × 25배로 계산해요.
+              </p>
 
               <div className="mt-7 grid grid-cols-4 gap-5 border-t border-fb-line pt-6">
-                <Stat label="거주 부동산" value={dashboardData.homeMan} />
-                <Stat label="투자가능 (FIRE)" value={dashboardData.investableMan} highlight />
-                <Stat label="기타 순자산" value={dashboardData.otherMan} />
-                <Stat label="FIRE 목표" value={dashboardData.fireTargetMan} muted />
+                <Stat label="목표 월 생활비" value={dashboardData.targetMonthlyExpenseMan} />
+                <Stat label="FIRE 목표자산" value={dashboardData.fireTargetMan} muted />
+                <Stat label="FIRE 계산 순자산" value={dashboardData.investableMan} highlight />
+                <Stat label="월 자산 증가 여력" value={dashboardData.monthlyAddMan} />
               </div>
             </Card>
 
@@ -159,7 +162,7 @@ export function DesktopDashboard({
               <div className="mt-6 grid grid-cols-3 gap-6">
                 <DStat label="월 자산 증가 여력" value={`+${dashboardData.monthlyAddMan}`} unit="만원" trust />
                 <DStat label="이번 달 저축률" value="21" unit="%" />
-                <DStat label="FIRE 도달 시점" value="2034. 8." />
+                <DStat label="FIRE 도달 시점" value={`${dashboardData.fireYears}년 ${dashboardData.fireMonths}개월 후`} />
               </div>
             </Card>
           </div>

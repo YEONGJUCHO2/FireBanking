@@ -2,6 +2,29 @@ import { describe, expect, it } from "vitest";
 import { calculateFireProjection } from "./calculateFireProjection";
 
 describe("calculateFireProjection", () => {
+  it("uses a user-selected FIRE monthly spending goal for the target asset", () => {
+    const result = calculateFireProjection({
+      investableNetWorth: 120_000_000,
+      primaryResidenceNetWorth: 0,
+      otherNetWorth: 0,
+      monthlyNetIncome: 7_200_000,
+      targetMonthlyExpense: 3_000_000,
+      monthlyFixedExpense: 2_300_000,
+      monthlyVariableExpense: 1_700_000,
+      monthlyDebtInterestExpense: 0,
+      monthlyDebtPrincipalPayment: 0,
+      monthlyRegularInvestment: 2_000_000,
+      annualReturnRate: 0.05,
+      fireMultiplier: 25,
+      startDate: new Date("2026-04-01T00:00:00.000Z"),
+    });
+
+    expect(result.monthlyLivingExpense).toBe(3_000_000);
+    expect(result.annualLivingExpense).toBe(36_000_000);
+    expect(result.fireTargetAsset).toBe(900_000_000);
+    expect(result.remainingCash).toBe(1_200_000);
+  });
+
   it("calculates target asset and monthly growth capacity from total inputs", () => {
     const result = calculateFireProjection({
       investableNetWorth: 120_000_000,

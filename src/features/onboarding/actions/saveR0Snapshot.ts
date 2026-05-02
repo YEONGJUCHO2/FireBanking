@@ -20,10 +20,9 @@ export async function saveR0Snapshot(
   formData: FormData,
 ): Promise<SaveR0SnapshotState> {
   const parsed = r0OnboardingSchema.safeParse({
+    targetMonthlyExpense: formData.get("targetMonthlyExpense"),
     monthlyNetIncome: formData.get("monthlyNetIncome"),
     investableNetWorth: formData.get("investableNetWorth"),
-    primaryResidenceNetWorth: formData.get("primaryResidenceNetWorth"),
-    otherNetWorth: formData.get("otherNetWorth"),
     monthlyFixedExpense: formData.get("monthlyFixedExpense"),
     monthlyVariableExpense: formData.get("monthlyVariableExpense"),
     monthlyRegularInvestment: formData.get("monthlyRegularInvestment"),
@@ -109,9 +108,10 @@ export async function saveR0Snapshot(
   const month = currentMonthDate();
   const projection = calculateFireProjection({
     investableNetWorth: parsed.data.investableNetWorth,
-    primaryResidenceNetWorth: parsed.data.primaryResidenceNetWorth,
-    otherNetWorth: parsed.data.otherNetWorth,
+    primaryResidenceNetWorth: 0,
+    otherNetWorth: 0,
     monthlyNetIncome: parsed.data.monthlyNetIncome,
+    targetMonthlyExpense: parsed.data.targetMonthlyExpense,
     monthlyFixedExpense: parsed.data.monthlyFixedExpense,
     monthlyVariableExpense: parsed.data.monthlyVariableExpense,
     monthlyDebtInterestExpense: 0,
@@ -129,8 +129,8 @@ export async function saveR0Snapshot(
       month,
       total_income: parsed.data.monthlyNetIncome,
       investable_net_worth: parsed.data.investableNetWorth,
-      primary_residence_net_worth: parsed.data.primaryResidenceNetWorth,
-      other_net_worth: parsed.data.otherNetWorth,
+      primary_residence_net_worth: 0,
+      other_net_worth: 0,
       total_net_worth_for_display: projection.totalNetWorthForDisplay,
       fire_calculation_net_worth: projection.fireCalculationNetWorth,
       fixed_expense: parsed.data.monthlyFixedExpense,

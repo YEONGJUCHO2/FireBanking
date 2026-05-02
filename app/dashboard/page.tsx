@@ -26,7 +26,8 @@ const baseData = {
   homeMan: 38_000,
   investableMan: 13_500,
   otherMan: 1_500,
-  fireTargetMan: 40_000,
+  targetMonthlyExpenseMan: 300,
+  fireTargetMan: 90_000,
   incomeMan: 850,
   fixedMan: 350,
   variableMan: 220,
@@ -38,7 +39,7 @@ const baseData = {
 
 export default async function DashboardPage() {
   const assetData = await getAssetManagementData();
-  const data = deriveDashboardData(assetData);
+  const data = withFireDistance(deriveDashboardData(assetData));
   const percent = Math.max(0, Math.min(1, data.investableMan / data.fireTargetMan));
 
   return (
@@ -75,12 +76,12 @@ export default async function DashboardPage() {
             </div>
 
             <NetWorthHero
-              totalManWon={data.totalNetWorthMan}
-              deltaManWon={data.netWorthDeltaMan}
-              homeManWon={data.homeMan}
-              investableManWon={data.investableMan}
-              otherManWon={data.otherMan}
+              targetMonthlyExpenseManWon={data.targetMonthlyExpenseMan}
+              fireNetWorthManWon={data.investableMan}
+              monthlyGrowthManWon={data.monthlyAddMan}
               fireTargetManWon={data.fireTargetMan}
+              years={data.fireYears}
+              months={data.fireMonths}
             />
 
             <div className="mt-4">
@@ -242,4 +243,52 @@ function deriveDashboardData({
 
 function isRetirementAccount(accountCategory?: "general" | "pension_savings" | "irp" | "other") {
   return accountCategory === "pension_savings" || accountCategory === "irp";
+}
+
+function withFireDistance<T extends typeof baseData & { linkedAssetCount: number }>(data: T): T {
+  const monthsToFire = calculateMonthsToFire({
+    currentMan: data.investableMan,
+    targetMan: data.fireTargetMan,
+    monthlyGrowthMan: data.monthlyAddMan,
+  });
+
+  if (monthsToFire == null) {
+    return { ...data, fireYears: 0, fireMonths: 0 };
+  }
+
+  return {
+    ...data,
+    fireYears: Math.floor(monthsToFire / 12),
+    fireMonths: monthsToFire % 12,
+  };
+}
+
+function calculateMonthsToFire({
+  currentMan,
+  targetMan,
+  monthlyGrowthMan,
+}: {
+  currentMan: number;
+  targetMan: number;
+  monthlyGrowthMan: number;
+}) {
+  if (currentMan >= targetMan) {
+    return 0;
+  }
+
+  if (monthlyGrowthMan <= 0) {
+    return null;
+  }
+
+  const monthlyReturnRate = Math.pow(1.05, 1 / 12) - 1;
+  let simulated = currentMan;
+
+  for (let month = 1; month <= 12 * 100; month += 1) {
+    simulated = simulated * (1 + monthlyReturnRate) + monthlyGrowthMan;
+    if (simulated >= targetMan) {
+      return month;
+    }
+  }
+
+  return null;
 }

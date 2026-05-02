@@ -20,7 +20,8 @@ const data = {
   homeMan: 38_000,
   investableMan: 13_500,
   otherMan: 1_500,
-  fireTargetMan: 40_000,
+  targetMonthlyExpenseMan: 300,
+  fireTargetMan: 90_000,
   incomeMan: 850,
   fixedMan: 350,
   variableMan: 220,
@@ -62,12 +63,12 @@ export function DashboardMobile() {
         </div>
 
         <NetWorthHero
-          totalManWon={data.totalNetWorthMan}
-          deltaManWon={data.netWorthDeltaMan}
-          homeManWon={data.homeMan}
-          investableManWon={data.investableMan}
-          otherManWon={data.otherMan}
+          targetMonthlyExpenseManWon={data.targetMonthlyExpenseMan}
+          fireNetWorthManWon={data.investableMan}
+          monthlyGrowthManWon={data.monthlyAddMan}
           fireTargetManWon={data.fireTargetMan}
+          years={data.fireYears}
+          months={data.fireMonths}
         />
 
         <div className="mt-4">

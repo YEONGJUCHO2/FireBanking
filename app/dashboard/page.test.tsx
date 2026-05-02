@@ -26,6 +26,9 @@ describe("DashboardPage", () => {
     expect(screen.getByText("안녕하세요, 지윤님")).toBeInTheDocument();
     expect(screen.getAllByText("이번 달 부부 체크인").length).toBeGreaterThan(0);
     expect(screen.getByText("이번 달 결과를 같이 봐요.")).toBeInTheDocument();
+    expect(screen.getAllByText("예상 FIRE 도달까지").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("목표 월 생활비").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("FIRE 목표자산").length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: /자산·부채 관리/ })[0]).toHaveAttribute(
       "href",
       "/assets",
@@ -72,9 +75,10 @@ describe("DashboardPage", () => {
 
     render(await DashboardPage());
 
-    expect(screen.getByText("투자가능")).toBeInTheDocument();
+    expect(screen.getAllByText("FIRE 계산 순자산").length).toBeGreaterThan(0);
     expect(screen.getAllByText("252").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("기타 순자산").length).toBeGreaterThan(0);
+    expect(screen.queryByText("거주 부동산")).not.toBeInTheDocument();
+    expect(screen.queryByText("기타 순자산")).not.toBeInTheDocument();
     expect(screen.queryByText("연금/IRP 별도")).not.toBeInTheDocument();
     expect(screen.getAllByText(/3개 등록 자산이 대시보드에 반영 중/).length).toBeGreaterThan(0);
   });

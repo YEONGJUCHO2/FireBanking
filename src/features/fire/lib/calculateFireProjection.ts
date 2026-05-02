@@ -12,8 +12,10 @@ export function calculateFireProjection(input: FireProjectionInput): FireProject
   const totalNetWorthForDisplay =
     input.investableNetWorth + input.primaryResidenceNetWorth + input.otherNetWorth;
   const fireCalculationNetWorth = input.investableNetWorth;
-  const monthlyLivingExpense =
+  const targetMonthlyExpense =
+    input.targetMonthlyExpense ??
     input.monthlyFixedExpense + input.monthlyVariableExpense + input.monthlyDebtInterestExpense;
+  const monthlyLivingExpense = targetMonthlyExpense;
   const annualLivingExpense = monthlyLivingExpense * 12;
   const fireTargetAsset = annualLivingExpense * input.fireMultiplier;
   const remainingAmount = Math.max(fireTargetAsset - fireCalculationNetWorth, 0);

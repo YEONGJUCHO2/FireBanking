@@ -7,13 +7,12 @@ import { Icon } from './icons'
 import { StatusPill } from './status-pill'
 
 export type OnboardingValues = {
+  goalExpense: number
   income: number
   fixed: number
   variable: number
   save: number
   investable: number
-  home: number
-  other: number
 }
 
 type StepKey = keyof OnboardingValues
@@ -32,9 +31,19 @@ type Step = {
 
 const STEPS: Step[] = [
   {
+    key: 'goalExpense',
+    group: 'FIRE 기준 설정',
+    groupIdx: 1,
+    groupOf: 3,
+    title: '은퇴 후 매달\n얼마로 살고 싶나요?',
+    sub: '이 금액이 FIRE 목표자산의 기준이 돼요.\n월 목표 생활비 × 12 × 25배로 계산합니다.',
+    helper: '아직 모르겠으면 현재 생활비 기준으로 시작해도 괜찮아요.',
+    shortLabel: '목표 월 생활비',
+  },
+  {
     key: 'income',
     group: '내 캐시플로우',
-    groupIdx: 1,
+    groupIdx: 2,
     groupOf: 3,
     title: '내 세후 월수입은\n얼마나 되나요?',
     sub: '본인 기준이에요.\n배우자 분은 초대 후 따로 입력하면 합산돼요.',
@@ -44,17 +53,17 @@ const STEPS: Step[] = [
   {
     key: 'fixed',
     group: '내 캐시플로우',
-    groupIdx: 1,
+    groupIdx: 2,
     groupOf: 3,
-    title: '내가 책임지는\n월 고정비는요?',
-    sub: '내 명의 구독·보험·통신비처럼\n매달 비슷하게 빠져나가는 지출.',
-    helper: '공과금/관리비는 분담분만 적어주세요.',
+    title: '월 고정비는\n어떻게 잡을까요?',
+    sub: '빠르게 총액을 넣어도 되고,\n시뮬레이터로 쪼개서 더 정확히 잡아도 돼요.',
+    helper: '주거비, 보험, 통신, 구독처럼 매달 반복되는 돈입니다.',
     shortLabel: '내 월 고정비',
   },
   {
     key: 'variable',
     group: '내 캐시플로우',
-    groupIdx: 1,
+    groupIdx: 2,
     groupOf: 3,
     title: '내 평소 한 달\n변동비는 얼마쯤이죠?',
     sub: '식비, 외식, 쇼핑처럼 그때그때 다른 지출.\n본인 카드/계좌 기준이에요.',
@@ -64,7 +73,7 @@ const STEPS: Step[] = [
   {
     key: 'save',
     group: '내 캐시플로우',
-    groupIdx: 1,
+    groupIdx: 2,
     groupOf: 3,
     title: '매달 내가 저축·투자로\n빠져나가는 돈은요?',
     sub: '본인 명의 자동이체 합계.\n비상금 적립도 포함해 주세요.',
@@ -73,46 +82,23 @@ const STEPS: Step[] = [
   },
   {
     key: 'investable',
-    group: '가구 공동 자산',
-    groupIdx: 2,
+    group: 'FIRE 자산',
+    groupIdx: 3,
     groupOf: 3,
-    title: '투자가능 순자산은\n부부 합쳐서 얼마쯤?',
-    sub: '현금성 + 투자 자산을 부부 합산으로요.\nFIRE 거리감 계산의 핵심 숫자예요.',
-    helper: '대출/카드 미결제는 빼고 적어주세요.',
-    shortLabel: '가구 투자가능 순자산',
-  },
-  {
-    key: 'home',
-    group: '가구 공동 자산',
-    groupIdx: 2,
-    groupOf: 3,
-    title: '거주 부동산\n순자산이 있어요?',
-    sub: '시세에서 대출을 뺀 값.\n표시 순자산엔 포함되지만 FIRE 계산엔 빠져요.',
-    helper: '없거나 잘 모르면 건너뛰어도 돼요.',
-    shortLabel: '거주 부동산 순자산',
-    optional: true,
-  },
-  {
-    key: 'other',
-    group: '가구 공동 자산',
-    groupIdx: 2,
-    groupOf: 3,
-    title: '기타 자산도\n있을까요?',
-    sub: '자동차, 보증금처럼 환금성 낮은 자산.\n부부 합쳐서요.',
-    helper: '없으면 건너뛰어도 좋아요.',
-    shortLabel: '기타 자산',
-    optional: true,
+    title: '내가 확인 가능한\n투자가능 자산은요?',
+    sub: '현금성 자산, 주식, ETF처럼 FIRE 생활비를 만들 수 있는 자산이에요.\n배우자 몫은 초대 후 따로 받거나 확인 요청할 수 있어요.',
+    helper: '부동산과 기타자산은 나중에 자산 관리 총괄에서 따로 정리해요.',
+    shortLabel: '내 투자가능 순자산',
   },
 ]
 
 const DEFAULT_VALUES: OnboardingValues = {
+  goalExpense: 300,
   income: 0,
   fixed: 0,
   variable: 0,
   save: 0,
   investable: 0,
-  home: 0,
-  other: 0,
 }
 
 export function OnboardingStepper({
@@ -210,8 +196,8 @@ export function OnboardingStepper({
               <br />
               결과를 함께 볼까요?
             </h1>
-            <p className="mt-3.5 text-[14px] font-medium leading-[1.55] text-fb-ink-2">
-              언제든 대시보드에서 다시 고칠 수 있어요.
+              <p className="mt-3.5 text-[14px] font-medium leading-[1.55] text-fb-ink-2">
+              목표 생활비와 투자가능 자산 기준으로 첫 FIRE 거리감을 계산해요.
             </p>
 
             <div className="mt-6 flex flex-col gap-2.5">
@@ -260,6 +246,15 @@ export function OnboardingStepper({
                 onSubmit={next}
               />
               <p className="mt-3.5 text-[12px] font-medium leading-[1.55] text-fb-ink-3">{step.helper}</p>
+
+              {step.key === 'goalExpense' ? (
+                <GoalChoicePanel
+                  currentExpense={values.fixed + values.variable}
+                  onUseCurrent={() => setVal('goalExpense', values.fixed + values.variable || 300)}
+                />
+              ) : null}
+
+              {step.key === 'fixed' || step.key === 'variable' ? <SimulatorChoicePanel /> : null}
 
               {prevValues &&
               prevValues[step.key] != null &&
@@ -311,6 +306,63 @@ export function OnboardingStepper({
         )}
       </BottomCta>
     </div>
+  )
+}
+
+function GoalChoicePanel({
+  currentExpense,
+  onUseCurrent,
+}: {
+  currentExpense: number
+  onUseCurrent: () => void
+}) {
+  return (
+    <div className="mt-4 grid gap-2.5">
+      <button
+        type="button"
+        onClick={onUseCurrent}
+        className="fbpress flex items-center justify-between rounded-[16px] border border-fb-line bg-white px-4 py-3 text-left"
+      >
+        <span>
+          <span className="block text-[13px] font-bold text-fb-ink">현재 생활비 기준으로 시작</span>
+          <span className="mt-0.5 block text-[12px] font-medium text-fb-ink-3">
+            {currentExpense > 0 ? `${currentExpense.toLocaleString('ko-KR')}만원을 적용` : '입력 후 다시 누를 수 있어요'}
+          </span>
+        </span>
+        <Icon name="check" className="size-4 text-fb-trust" />
+      </button>
+      <button
+        type="button"
+        onClick={() => window.location.assign('/subscribe')}
+        className="fbpress flex items-center justify-between rounded-[16px] border border-fb-trust-soft bg-fb-trust-soft px-4 py-3 text-left"
+      >
+        <span>
+          <span className="block text-[13px] font-bold text-fb-trust-ink">고정비 시뮬레이터로 더 정확히 보기</span>
+          <span className="mt-0.5 block text-[12px] font-medium text-fb-trust-ink/75">
+            반복 지출을 쪼개서 목표 월 생활비를 잡아요
+          </span>
+        </span>
+        <Icon name="chevron-right" className="size-4 text-fb-trust" />
+      </button>
+    </div>
+  )
+}
+
+function SimulatorChoicePanel() {
+  return (
+    <button
+      type="button"
+      onClick={() => window.location.assign('/subscribe')}
+      className="fbpress mt-4 flex w-full items-center justify-between rounded-[16px] border border-fb-line bg-white px-4 py-3 text-left"
+    >
+      <span>
+        <span className="block text-[13px] font-bold text-fb-ink">고정비 시뮬레이터 사용</span>
+        <span className="mt-0.5 block text-[12px] font-medium text-fb-ink-3">
+          총액이 애매하면 항목별로 나눠서 계산할 수 있어요
+        </span>
+      </span>
+      <Icon name="chevron-right" className="size-4 text-fb-ink-3" />
+    </button>
   )
 }
 

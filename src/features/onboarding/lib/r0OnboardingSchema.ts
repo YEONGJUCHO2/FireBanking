@@ -24,16 +24,10 @@ const requiredManwonInput = z.preprocess(
     .transform((value) => value * 10_000),
 );
 
-const optionalManwonInput = z.preprocess((value) => {
-  const normalized = stripCommaString(value);
-  return normalized === "" || normalized === null || normalized === undefined ? 0 : normalized;
-}, requiredManwonInput);
-
 export const r0OnboardingSchema = z.object({
+  targetMonthlyExpense: requiredManwonInput,
   monthlyNetIncome: requiredManwonInput,
   investableNetWorth: requiredManwonInput,
-  primaryResidenceNetWorth: optionalManwonInput,
-  otherNetWorth: optionalManwonInput,
   monthlyFixedExpense: requiredManwonInput,
   monthlyVariableExpense: requiredManwonInput,
   monthlyRegularInvestment: requiredManwonInput,

@@ -2,60 +2,49 @@ import { Card } from './card'
 import { cn } from '@/lib/cn'
 
 type NetWorthHeroProps = {
-  /** 표시 순자산 (만원) */
-  totalManWon: number
-  /** 전월 대비 Δ (만원, signed) */
-  deltaManWon?: number
-  /** 거주 부동산 (만원) */
-  homeManWon: number
-  /** 투자가능 — FIRE 계산 (만원) */
-  investableManWon: number
-  /** 기타 자산 (만원) */
-  otherManWon: number
-  /** FIRE 목표 자산 (만원) */
+  /** 목표 월 생활비 (만원) */
+  targetMonthlyExpenseManWon: number
+  /** FIRE 계산 순자산 (만원) */
+  fireNetWorthManWon: number
+  /** 월 자산 증가 여력 (만원) */
+  monthlyGrowthManWon: number
+  /** FIRE 목표 자산 (만원): 목표 월 생활비 × 12 × 25 */
   fireTargetManWon: number
+  years?: number
+  months?: number
   className?: string
 }
 
 export function NetWorthHero({
-  totalManWon,
-  deltaManWon,
-  homeManWon,
-  investableManWon,
-  otherManWon,
+  targetMonthlyExpenseManWon,
+  fireNetWorthManWon,
+  monthlyGrowthManWon,
   fireTargetManWon,
+  years,
+  months,
   className,
 }: NetWorthHeroProps) {
+  const hasDistance = years != null && months != null
+
   return (
     <Card radius="hero" className={cn('p-6', className)}>
-      <p className="text-[13px] font-medium text-fb-ink-3">우리 가족 표시 순자산</p>
+      <p className="text-[13px] font-medium text-fb-ink-3">예상 FIRE 도달까지</p>
       <div className="fb-num mt-1.5 flex items-baseline gap-1.5">
         <span className="text-[44px] font-bold leading-[1.1] tracking-[-0.024em] text-fb-ink">
-          {totalManWon.toLocaleString('ko-KR')}
+          {hasDistance ? `${years}년 ${months}개월` : '계산 대기'}
         </span>
-        <span className="text-[18px] font-bold text-fb-ink-2">만원</span>
       </div>
-      {deltaManWon != null ? (
-        <div className="mt-2 flex items-center gap-2">
-          <span
-            className={cn(
-              'fb-num text-[13px] font-semibold',
-              deltaManWon >= 0 ? 'text-fb-positive' : 'text-fb-negative',
-            )}
-          >
-            {deltaManWon >= 0 ? '↑' : '↓'} {Math.abs(deltaManWon).toLocaleString('ko-KR')}만원
-          </span>
-          <span className="text-[12px] font-medium text-fb-ink-3">지난 달 대비</span>
-        </div>
-      ) : null}
+      <p className="mt-2 text-[12px] font-medium leading-5 text-fb-ink-3">
+        월 {targetMonthlyExpenseManWon.toLocaleString('ko-KR')}만원 생활비 기준 · 연 5%, 25배 룰
+      </p>
 
       <div className="my-5 fb-divider" />
 
       <div className="grid grid-cols-2 gap-x-4 gap-y-4">
-        <BreakdownItem label="거주 부동산" value={homeManWon} />
-        <BreakdownItem label="투자가능" value={investableManWon} highlight badge="FIRE" />
-        <BreakdownItem label="기타 순자산" value={otherManWon} />
-        <BreakdownItem label="FIRE 목표" value={fireTargetManWon} />
+        <BreakdownItem label="목표 월 생활비" value={targetMonthlyExpenseManWon} />
+        <BreakdownItem label="FIRE 목표자산" value={fireTargetManWon} highlight />
+        <BreakdownItem label="FIRE 계산 순자산" value={fireNetWorthManWon} highlight badge="FIRE" />
+        <BreakdownItem label="월 자산 증가 여력" value={monthlyGrowthManWon} />
       </div>
     </Card>
   )
