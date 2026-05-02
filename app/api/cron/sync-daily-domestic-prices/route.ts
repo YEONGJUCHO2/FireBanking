@@ -1,5 +1,9 @@
 import type { DomesticValuationProvider } from "@/src/features/assets/lib/domesticValuationProvider";
 import {
+  createKiwoomConfig,
+  createKiwoomDomesticValuationProvider,
+} from "@/src/features/assets/lib/kiwoomDomesticValuationProvider";
+import {
   syncDailyDomesticPrices,
   type SyncDailyDomesticPricesSupabase,
 } from "@/src/features/assets/jobs/syncDailyDomesticPrices";
@@ -21,6 +25,16 @@ function createNonLiveDomesticProvider(): DomesticValuationProvider {
   };
 }
 
+function createDomesticProvider() {
+  const kiwoomConfig = createKiwoomConfig(process.env);
+
+  if (!kiwoomConfig) {
+    return createNonLiveDomesticProvider();
+  }
+
+  return createKiwoomDomesticValuationProvider({ config: kiwoomConfig });
+}
+
 export async function GET(request: Request) {
   if (!isAuthorized(request)) {
     return Response.json({ error: "unauthorized" }, { status: 401 });
@@ -28,7 +42,7 @@ export async function GET(request: Request) {
 
   const result = await syncDailyDomesticPrices({
     supabase: createSupabaseAdminClient() as unknown as SyncDailyDomesticPricesSupabase,
-    provider: createNonLiveDomesticProvider(),
+    provider: createDomesticProvider(),
     asOfDate: currentDateKey(),
   });
 

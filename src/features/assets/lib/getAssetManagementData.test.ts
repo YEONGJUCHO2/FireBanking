@@ -13,6 +13,7 @@ function createQueryResult<T>(data: T, error: unknown = null) {
   const builder = {
     select: vi.fn(() => builder),
     eq: vi.fn(() => builder),
+    in: vi.fn(() => builder),
     order: vi.fn(() => builder),
     limit: vi.fn(() => builder),
     maybeSingle: vi.fn(async () => ({ data, error })),
@@ -48,6 +49,7 @@ describe("getAssetManagementData", () => {
         quantity: 25,
         account_category: "irp",
         asset_instruments: {
+          id: "instrument-1",
           symbol: "005930",
           display_name: "삼성전자",
         },
@@ -62,15 +64,24 @@ describe("getAssetManagementData", () => {
         monthly_principal_amount: 300_000,
       },
     ];
+    const priceSnapshots = [
+      {
+        instrument_id: "instrument-1",
+        valuation_date: "2026-05-30",
+        close_price: 90_000,
+      },
+    ];
     const membershipQuery = createQueryResult({ couple_id: "couple-1" });
     const holdingsQuery = createQueryResult(holdings);
     const liabilitiesQuery = createQueryResult(liabilities);
+    const pricesQuery = createQueryResult(priceSnapshots);
     const supabase = {
       auth: { getUser: vi.fn(async () => ({ data: { user: { id: "user-1" } } })) },
       from: vi.fn((table: string) => {
         if (table === "couple_members") return membershipQuery;
         if (table === "asset_holdings") return holdingsQuery;
         if (table === "asset_liabilities") return liabilitiesQuery;
+        if (table === "asset_price_snapshots") return pricesQuery;
         throw new Error(`Unexpected table: ${table}`);
       }),
     };
@@ -84,8 +95,8 @@ describe("getAssetManagementData", () => {
           symbol: "005930",
           displayName: "삼성전자",
           quantity: 25,
-          valuationAmount: 2_125_000,
-          valuationDate: "2026-05-29",
+          valuationAmount: 2_250_000,
+          valuationDate: "2026-05-30",
           accountCategory: "irp",
         },
       ],

@@ -5,7 +5,10 @@ import type {
   DomesticInstrumentType,
   DomesticValuationProvider,
 } from "@/src/features/assets/lib/domesticValuationProvider";
-import { createKiwoomConfig } from "@/src/features/assets/lib/kiwoomDomesticValuationProvider";
+import {
+  createKiwoomConfig,
+  createKiwoomDomesticValuationProvider,
+} from "@/src/features/assets/lib/kiwoomDomesticValuationProvider";
 import { createSupabaseServerClient } from "@/src/lib/supabase/server";
 
 const PROVIDER_UNAVAILABLE_ERROR = "종목 검색을 준비 중이에요. 잠시 후 다시 시도해주세요.";
@@ -64,7 +67,7 @@ function getDefaultDomesticValuationProvider(): DomesticValuationProvider | null
     return null;
   }
 
-  return null;
+  return createKiwoomDomesticValuationProvider({ config });
 }
 
 export async function searchDomesticInstrumentsWithProvider(

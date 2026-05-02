@@ -1,12 +1,50 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { InvestmentAssetPanel } from "./InvestmentAssetPanel";
 
+const mocks = vi.hoisted(() => ({
+  searchDomesticInstruments: vi.fn(),
+  saveHolding: vi.fn(),
+  saveKnownDomesticHolding: vi.fn(),
+  updateHolding: vi.fn(),
+  deleteHolding: vi.fn(),
+  refresh: vi.fn(),
+}));
+
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ refresh: vi.fn() }),
+  useRouter: () => ({ refresh: mocks.refresh }),
+}));
+
+vi.mock("@/src/features/assets/actions/searchDomesticInstruments", () => ({
+  searchDomesticInstruments: mocks.searchDomesticInstruments,
+}));
+
+vi.mock("@/src/features/assets/actions/saveHolding", () => ({
+  saveHolding: mocks.saveHolding,
+}));
+
+vi.mock("@/src/features/assets/actions/saveKnownDomesticHolding", () => ({
+  saveKnownDomesticHolding: mocks.saveKnownDomesticHolding,
+}));
+
+vi.mock("@/src/features/assets/actions/updateHolding", () => ({
+  updateHolding: mocks.updateHolding,
+}));
+
+vi.mock("@/src/features/assets/actions/deleteHolding", () => ({
+  deleteHolding: mocks.deleteHolding,
 }));
 
 describe("InvestmentAssetPanel", () => {
+  beforeEach(() => {
+    mocks.searchDomesticInstruments.mockReset();
+    mocks.saveHolding.mockReset();
+    mocks.saveKnownDomesticHolding.mockReset();
+    mocks.updateHolding.mockReset();
+    mocks.deleteHolding.mockReset();
+    mocks.refresh.mockReset();
+  });
+
   it("shows domestic search, recommended instruments, and manual US-listed calculation", () => {
     render(<InvestmentAssetPanel />);
 
@@ -70,5 +108,39 @@ describe("InvestmentAssetPanel", () => {
     expect(screen.getByText("003670")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "포스코홀딩스 추가" })).toBeInTheDocument();
     expect(screen.getByText("005490")).toBeInTheDocument();
+  });
+
+  it("uses live domestic instrument search and saves selected instrument ids for a couple", async () => {
+    mocks.searchDomesticInstruments.mockResolvedValue({
+      instruments: [
+        {
+          id: "instrument-posco",
+          market: "KR",
+          symbol: "003670",
+          displayName: "포스코퓨처엠",
+          instrumentType: "stock",
+          currency: "KRW",
+        },
+      ],
+    });
+    mocks.saveHolding.mockResolvedValue({ success: true });
+    render(<InvestmentAssetPanel coupleId="couple-1" holdings={[]} />);
+
+    fireEvent.change(screen.getByLabelText("종목 검색어"), { target: { value: "포스코" } });
+    fireEvent.click(screen.getByRole("button", { name: "검색" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "포스코퓨처엠 추가" })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "포스코퓨처엠 추가" }));
+
+    await waitFor(() => {
+      expect(mocks.saveHolding).toHaveBeenCalled();
+    });
+    const submitted = mocks.saveHolding.mock.calls[0][1] as FormData;
+    expect(submitted.get("coupleId")).toBe("couple-1");
+    expect(submitted.get("instrumentId")).toBe("instrument-posco");
+    expect(submitted.get("quantity")).toBe("1");
   });
 });

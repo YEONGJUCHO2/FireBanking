@@ -4,7 +4,9 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, SectionHeader, StatusPill } from "@/components/fire-banking";
 import { deleteHolding as deleteHoldingAction } from "@/src/features/assets/actions/deleteHolding";
+import { saveHolding } from "@/src/features/assets/actions/saveHolding";
 import { saveKnownDomesticHolding } from "@/src/features/assets/actions/saveKnownDomesticHolding";
+import { searchDomesticInstruments } from "@/src/features/assets/actions/searchDomesticInstruments";
 import { updateHolding } from "@/src/features/assets/actions/updateHolding";
 import { formatKrw } from "@/src/lib/format";
 
@@ -16,6 +18,10 @@ export type HoldingView = {
   valuationAmount: number;
   valuationDate: string;
   accountCategory?: "general" | "pension_savings" | "irp" | "other";
+};
+
+type SearchableHoldingView = HoldingView & {
+  instrumentId?: string;
 };
 
 const defaultHoldings: HoldingView[] = [
@@ -36,7 +42,7 @@ const recommendations = [
   "SOL 미국배당다우존스",
 ];
 
-const searchableInstruments = [
+const searchableInstruments: SearchableHoldingView[] = [
   {
     id: "sample-samsung",
     symbol: "005930",
@@ -91,10 +97,14 @@ export function InvestmentAssetPanel({
   const [items, setItems] = useState(holdings);
   const [query, setQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
+  const [serverSearchResults, setServerSearchResults] = useState<SearchableHoldingView[] | null>(
+    null,
+  );
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingQuantity, setEditingQuantity] = useState("");
   const total = items.reduce((sum, holding) => sum + holding.valuationAmount, 0);
-  const searchResults = useMemo(() => {
+  const localSearchResults = useMemo(() => {
     const normalized = submittedQuery.trim().toLowerCase();
 
     if (!normalized) {
@@ -107,8 +117,41 @@ export function InvestmentAssetPanel({
         instrument.symbol.includes(normalized),
     );
   }, [submittedQuery]);
+  const searchResults = serverSearchResults ?? localSearchResults;
 
   const handleSearch = () => {
+    if (coupleId) {
+      const formData = new FormData();
+      formData.set("query", query);
+      startTransition(async () => {
+        const result = await searchDomesticInstruments({}, formData);
+
+        if (result.error) {
+          setSearchError(result.error);
+          setServerSearchResults([]);
+          setSubmittedQuery(query);
+          return;
+        }
+
+        setSearchError(null);
+        setServerSearchResults(
+          (result.instruments ?? []).map((instrument) => ({
+            id: `search-${instrument.symbol}`,
+            instrumentId: instrument.id,
+            symbol: instrument.symbol,
+            displayName: instrument.displayName,
+            quantity: 1,
+            valuationAmount: 0,
+            valuationDate: "가격 확인 중",
+          })),
+        );
+        setSubmittedQuery(query);
+      });
+      return;
+    }
+
+    setServerSearchResults(null);
+    setSearchError(null);
     setSubmittedQuery(query);
   };
 
@@ -117,7 +160,7 @@ export function InvestmentAssetPanel({
     setSubmittedQuery(instrumentName);
   };
 
-  const addHolding = (holding: HoldingView) => {
+  const addHolding = (holding: SearchableHoldingView) => {
     if (items.some((item) => item.symbol === holding.symbol)) {
       return;
     }
@@ -125,11 +168,13 @@ export function InvestmentAssetPanel({
     if (coupleId) {
       const formData = new FormData();
       formData.set("coupleId", coupleId);
-      formData.set("symbol", holding.symbol);
       formData.set("quantity", String(holding.quantity));
       formData.set("accountCategory", "general");
+      formData.set(holding.instrumentId ? "instrumentId" : "symbol", holding.instrumentId ?? holding.symbol);
       startTransition(async () => {
-        const result = await saveKnownDomesticHolding({}, formData);
+        const result = holding.instrumentId
+          ? await saveHolding({}, formData)
+          : await saveKnownDomesticHolding({}, formData);
         if (result.success) {
           router.refresh();
         }
@@ -260,7 +305,11 @@ export function InvestmentAssetPanel({
 
           {submittedQuery ? (
             <div className="mt-4 grid gap-2">
-              {searchResults.length === 0 ? (
+              {searchError ? (
+                <p className="rounded-[12px] bg-fb-card-alt px-3 py-3 text-[13px] font-medium text-fb-ink-3">
+                  {searchError}
+                </p>
+              ) : searchResults.length === 0 ? (
                 <p className="rounded-[12px] bg-fb-card-alt px-3 py-3 text-[13px] font-medium text-fb-ink-3">
                   검색 결과가 없어요.
                 </p>

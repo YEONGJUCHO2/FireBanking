@@ -9,6 +9,7 @@ type AssetManagementData = {
 };
 
 type InstrumentRow = {
+  id?: string | null;
   symbol?: string | null;
   display_name?: string | null;
 };
@@ -26,6 +27,12 @@ type LiabilityRow = {
   balance_amount: number | string;
   monthly_interest_amount: number | string;
   monthly_principal_amount: number | string;
+};
+
+type PriceSnapshotRow = {
+  instrument_id: string;
+  valuation_date: string;
+  close_price: number | string;
 };
 
 const domesticPriceSeed: Record<string, { unitPrice: number; valuationDate: string }> = {
@@ -83,22 +90,47 @@ export async function getAssetManagementData(): Promise<AssetManagementData> {
         .eq("couple_id", coupleId)
         .order("created_at", { ascending: true }),
     ]);
+  const parsedHoldingRows = (holdingRows ?? []) as HoldingRow[];
+  const instrumentIds = parsedHoldingRows
+    .map((row) => getInstrument(row.asset_instruments)?.id)
+    .filter((id): id is string => Boolean(id));
+  const { data: priceRows, error: pricesError } =
+    instrumentIds.length === 0
+      ? { data: [], error: null }
+      : await supabase
+          .from("asset_price_snapshots")
+          .select("instrument_id,valuation_date,close_price")
+          .in("instrument_id", instrumentIds)
+          .order("valuation_date", { ascending: false });
 
   return {
     coupleId,
-    holdings: holdingsError ? [] : mapHoldings((holdingRows ?? []) as HoldingRow[]),
+    holdings: holdingsError
+      ? []
+      : mapHoldings(
+          parsedHoldingRows,
+          pricesError ? [] : ((priceRows ?? []) as PriceSnapshotRow[]),
+        ),
     liabilities: liabilitiesError ? [] : mapLiabilities((liabilityRows ?? []) as LiabilityRow[]),
   };
 }
 
-function mapHoldings(rows: HoldingRow[]): HoldingView[] {
+function mapHoldings(rows: HoldingRow[], priceRows: PriceSnapshotRow[]): HoldingView[] {
+  const latestPrices = new Map<string, PriceSnapshotRow>();
+  priceRows.forEach((row) => {
+    if (!latestPrices.has(row.instrument_id)) {
+      latestPrices.set(row.instrument_id, row);
+    }
+  });
+
   return rows.map((row) => {
-    const instrument = Array.isArray(row.asset_instruments)
-      ? row.asset_instruments[0]
-      : row.asset_instruments;
+    const instrument = getInstrument(row.asset_instruments);
     const symbol = instrument?.symbol ?? "";
     const quantity = Number(row.quantity);
-    const price = domesticPriceSeed[symbol] ?? { unitPrice: 0, valuationDate: "2026-05-29" };
+    const syncedPrice = instrument?.id ? latestPrices.get(instrument.id) : undefined;
+    const price = syncedPrice
+      ? { unitPrice: Number(syncedPrice.close_price), valuationDate: syncedPrice.valuation_date }
+      : domesticPriceSeed[symbol] ?? { unitPrice: 0, valuationDate: "2026-05-29" };
 
     return {
       id: row.id,
@@ -110,6 +142,10 @@ function mapHoldings(rows: HoldingRow[]): HoldingView[] {
       accountCategory: row.account_category ?? "general",
     };
   });
+}
+
+function getInstrument(value: HoldingRow["asset_instruments"]) {
+  return Array.isArray(value) ? value[0] : value;
 }
 
 function mapLiabilities(rows: LiabilityRow[]): LiabilityView[] {
