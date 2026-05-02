@@ -12,6 +12,7 @@ import {
 import { createSupabaseServerClient } from "@/src/lib/supabase/server";
 
 const PROVIDER_UNAVAILABLE_ERROR = "종목 검색을 준비 중이에요. 잠시 후 다시 시도해주세요.";
+const DOMESTIC_ETF_BRAND_QUERIES = new Set(["ACE", "KODEX", "KOSEF", "RISE", "SOL", "TIGER"]);
 
 export type SearchDomesticInstrumentResult = DomesticInstrument & {
   id: string;
@@ -36,7 +37,13 @@ function getQuery(formData: FormData) {
 }
 
 function isLikelyUsListedTicker(query: string) {
-  return /^[A-Z]{1,5}$/.test(query);
+  const normalizedQuery = query.trim().toUpperCase();
+
+  if (DOMESTIC_ETF_BRAND_QUERIES.has(normalizedQuery)) {
+    return false;
+  }
+
+  return /^[A-Z]{1,5}$/.test(normalizedQuery);
 }
 
 function toUpsertRow(instrument: DomesticInstrument) {

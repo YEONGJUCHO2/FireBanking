@@ -227,6 +227,17 @@ describe("searchDomesticInstrumentsWithProvider", () => {
     expect(mocks.createSupabaseServerClient).not.toHaveBeenCalled();
   });
 
+  it("searches domestic ETF brand queries such as TIGER instead of treating them as US tickers", async () => {
+    const refs = createSupabaseMock();
+    const provider = createProvider();
+    mocks.createSupabaseServerClient.mockResolvedValue(refs.supabase);
+
+    const result = await searchDomesticInstrumentsWithProvider({}, createFormData("TIGER"), provider);
+
+    expect(provider.searchInstruments).toHaveBeenCalledWith("TIGER");
+    expect(result.instruments?.some((instrument) => instrument.displayName === "TIGER 미국S&P500")).toBe(true);
+  });
+
   it("returns a Korean error when the provider is unavailable", async () => {
     const refs = createSupabaseMock();
     mocks.createSupabaseServerClient.mockResolvedValue(refs.supabase);
