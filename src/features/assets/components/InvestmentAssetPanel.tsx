@@ -553,9 +553,6 @@ export function InvestmentAssetPanel({
                     <section key={section.value} data-testid={`holdings-section-${section.value}`} className="grid gap-2">
                       <div className="flex items-center justify-between gap-2">
                         <h3 className="text-[12px] font-bold text-fb-ink-2">{section.title}</h3>
-                        <span className="fb-num text-[12px] font-bold text-fb-ink-3">
-                          {section.holdings.length}
-                        </span>
                       </div>
                       <div className="grid gap-3">
                         {section.holdings.map((holding) => (

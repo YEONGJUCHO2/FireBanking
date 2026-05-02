@@ -25,10 +25,18 @@ const data = {
   fireMonths: 4,
 }
 
+type DesktopDashboardData = typeof data
+
 const navItems = ['대시보드', '체크인', '시뮬레이터', '히스토리'] as const
 
-export function DesktopDashboard({ footerAction }: { footerAction?: ReactNode }) {
-  const percent = Math.max(0, Math.min(1, data.investableMan / data.fireTargetMan))
+export function DesktopDashboard({
+  footerAction,
+  data: dashboardData = data,
+}: {
+  footerAction?: ReactNode
+  data?: DesktopDashboardData
+}) {
+  const percent = Math.max(0, Math.min(1, dashboardData.investableMan / dashboardData.fireTargetMan))
   return (
     <section className="mx-auto w-full max-w-[1280px] rounded-[28px] border border-fb-line bg-white">
       {/* topbar */}
@@ -96,20 +104,20 @@ export function DesktopDashboard({ footerAction }: { footerAction?: ReactNode })
             <Card radius="hero" className="p-8">
               <div className="flex items-baseline justify-between">
                 <div className="text-[13px] font-medium text-fb-ink-3">우리 가족 표시 순자산</div>
-                <StatusPill tone="positive">↑ {data.netDeltaMan} 만원 vs 3월</StatusPill>
+                <StatusPill tone="positive">↑ {dashboardData.netDeltaMan} 만원 vs 3월</StatusPill>
               </div>
               <div className="fb-num mt-2 flex items-baseline gap-1.5">
                 <span className="text-[64px] font-bold leading-none tracking-[-0.030em] text-fb-ink">
-                  {data.totalNetWorthMan.toLocaleString('ko-KR')}
+                  {dashboardData.totalNetWorthMan.toLocaleString('ko-KR')}
                 </span>
                 <span className="text-[22px] font-bold text-fb-ink-2">만원</span>
               </div>
 
               <div className="mt-7 grid grid-cols-4 gap-5 border-t border-fb-line pt-6">
-                <Stat label="거주 부동산" value={data.homeMan} />
-                <Stat label="투자가능 (FIRE)" value={data.investableMan} highlight />
-                <Stat label="기타 순자산" value={data.otherMan} />
-                <Stat label="FIRE 목표" value={data.fireTargetMan} muted />
+                <Stat label="거주 부동산" value={dashboardData.homeMan} />
+                <Stat label="투자가능 (FIRE)" value={dashboardData.investableMan} highlight />
+                <Stat label="기타 순자산" value={dashboardData.otherMan} />
+                <Stat label="FIRE 목표" value={dashboardData.fireTargetMan} muted />
               </div>
             </Card>
 
@@ -142,14 +150,14 @@ export function DesktopDashboard({ footerAction }: { footerAction?: ReactNode })
 
               <FireTimelineWide
                 percent={percent}
-                years={data.fireYears}
-                months={data.fireMonths}
-                fireValueManWon={data.fireTargetMan}
-                hereValueManWon={data.investableMan}
+                years={dashboardData.fireYears}
+                months={dashboardData.fireMonths}
+                fireValueManWon={dashboardData.fireTargetMan}
+                hereValueManWon={dashboardData.investableMan}
               />
 
               <div className="mt-6 grid grid-cols-3 gap-6">
-                <DStat label="월 자산 증가 여력" value={`+${data.monthlyAddMan}`} unit="만원" trust />
+                <DStat label="월 자산 증가 여력" value={`+${dashboardData.monthlyAddMan}`} unit="만원" trust />
                 <DStat label="이번 달 저축률" value="21" unit="%" />
                 <DStat label="FIRE 도달 시점" value="2034. 8." />
               </div>
@@ -175,12 +183,12 @@ export function DesktopDashboard({ footerAction }: { footerAction?: ReactNode })
               <div className="mb-3 h-[2px] w-6 rounded-[2px] bg-fb-ink" />
               <h3 className="text-[17px] font-bold text-fb-ink">이번 달 현금흐름</h3>
               <div className="mt-4 flex flex-col gap-3">
-                <CFRow label="월 세후 수입" value={`+${data.incomeMan}`} />
-                <CFRow label="고정비" value={`−${data.fixedMan}`} />
-                <CFRow label="변동비" value={`−${data.variableMan}`} />
-                <CFRow label="저축 / 투자" value={`−${data.saveMan}`} trust />
+                <CFRow label="월 세후 수입" value={`+${dashboardData.incomeMan}`} />
+                <CFRow label="고정비" value={`−${dashboardData.fixedMan}`} />
+                <CFRow label="변동비" value={`−${dashboardData.variableMan}`} />
+                <CFRow label="저축 / 투자" value={`−${dashboardData.saveMan}`} trust />
                 <div className="fb-divider" />
-                <CFRow label="자산 증가 여력" value={`+${data.monthlyAddMan}`} hero />
+                <CFRow label="자산 증가 여력" value={`+${dashboardData.monthlyAddMan}`} hero />
               </div>
             </Card>
           </div>

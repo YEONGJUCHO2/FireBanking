@@ -1,10 +1,27 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import DashboardPage from "./page";
 
+const mocks = vi.hoisted(() => ({
+  getAssetManagementData: vi.fn(),
+}));
+
+vi.mock("@/src/features/assets/lib/getAssetManagementData", () => ({
+  getAssetManagementData: mocks.getAssetManagementData,
+}));
+
 describe("DashboardPage", () => {
-  it("keeps asset and liability management panels out of the home dashboard", () => {
-    render(<DashboardPage />);
+  beforeEach(() => {
+    mocks.getAssetManagementData.mockReset();
+    mocks.getAssetManagementData.mockResolvedValue({
+      coupleId: null,
+      holdings: undefined,
+      liabilities: undefined,
+    });
+  });
+
+  it("keeps asset and liability management panels out of the home dashboard", async () => {
+    render(await DashboardPage());
 
     expect(screen.getByText("안녕하세요, 지윤님")).toBeInTheDocument();
     expect(screen.getAllByText("이번 달 부부 체크인").length).toBeGreaterThan(0);
@@ -16,5 +33,49 @@ describe("DashboardPage", () => {
     expect(screen.queryByText("종목 검색")).not.toBeInTheDocument();
     expect(screen.queryByText("부채 수정")).not.toBeInTheDocument();
     expect(screen.queryByText("검색 준비중")).not.toBeInTheDocument();
+  });
+
+  it("links registered assets to dashboard net worth while excluding pension and IRP from FIRE assets", async () => {
+    mocks.getAssetManagementData.mockResolvedValue({
+      coupleId: "couple-1",
+      holdings: [
+        {
+          id: "holding-general",
+          symbol: "003670",
+          displayName: "포스코퓨처엠",
+          quantity: 1,
+          valuationAmount: 2_520_000,
+          valuationDate: "2026-04-30",
+          accountCategory: "general",
+        },
+        {
+          id: "holding-pension",
+          symbol: "360750",
+          displayName: "TIGER 미국S&P500",
+          quantity: 10,
+          valuationAmount: 261_600,
+          valuationDate: "2026-04-30",
+          accountCategory: "pension_savings",
+        },
+        {
+          id: "holding-irp",
+          symbol: "453850",
+          displayName: "ACE 미국S&P500채권혼합액티브",
+          quantity: 5,
+          valuationAmount: 50_000,
+          valuationDate: "2026-04-30",
+          accountCategory: "irp",
+        },
+      ],
+      liabilities: [],
+    });
+
+    render(await DashboardPage());
+
+    expect(screen.getByText("투자가능")).toBeInTheDocument();
+    expect(screen.getAllByText("252").length).toBeGreaterThan(0);
+    expect(screen.getByText("연금/IRP 별도")).toBeInTheDocument();
+    expect(screen.getAllByText("31").length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/3개 등록 자산이 대시보드에 반영 중/).length).toBeGreaterThan(0);
   });
 });

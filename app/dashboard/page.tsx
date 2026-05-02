@@ -13,9 +13,15 @@ import {
 import { Card, SectionHeader } from "@/components/fire-banking/card";
 import { CheckinRow } from "@/components/fire-banking/checkin-row";
 import { Icon } from "@/components/fire-banking/icons";
+import { getAssetManagementData } from "@/src/features/assets/lib/getAssetManagementData";
 import { SignOutButton } from "@/src/features/auth/components/SignOutButton";
 
-const data = {
+type DashboardData = typeof baseData & {
+  retirementMan: number;
+  linkedAssetCount: number;
+};
+
+const baseData = {
   totalNetWorthMan: 51_500,
   netWorthDeltaMan: 320,
   homeMan: 38_000,
@@ -31,7 +37,9 @@ const data = {
   fireMonths: 4,
 };
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const assetData = await getAssetManagementData();
+  const data = deriveDashboardData(assetData);
   const percent = Math.max(0, Math.min(1, data.investableMan / data.fireTargetMan));
 
   return (
@@ -74,6 +82,7 @@ export default function DashboardPage() {
               investableManWon={data.investableMan}
               otherManWon={data.otherMan}
               fireTargetManWon={data.fireTargetMan}
+              retirementManWon={data.retirementMan}
             />
 
             <div className="mt-4">
@@ -146,16 +155,19 @@ export default function DashboardPage() {
       </div>
 
       <div className="hidden min-h-dvh bg-fb-page px-8 py-10 lg:block">
-        <DesktopDashboard footerAction={<SignOutButton />} />
+        <DesktopDashboard
+          footerAction={<SignOutButton />}
+          data={{ ...data, netDeltaMan: data.netWorthDeltaMan }}
+        />
         <div className="mx-auto mt-6 w-full max-w-[1280px]">
-          <AssetManagementLink />
+          <AssetManagementLink linkedAssetCount={data.linkedAssetCount} />
         </div>
       </div>
     </>
   );
 }
 
-function AssetManagementLink() {
+function AssetManagementLink({ linkedAssetCount }: { linkedAssetCount?: number }) {
   return (
     <Link
       href="/assets"
@@ -167,10 +179,71 @@ function AssetManagementLink() {
       <span className="flex-1">
         <span className="block text-[14px] font-bold text-fb-ink">자산·부채 관리</span>
         <span className="mt-0.5 block text-[12px] font-medium text-fb-ink-3">
-          자동평가 자산과 빚 정보를 따로 정리해요
+          {linkedAssetCount
+            ? `${linkedAssetCount.toLocaleString("ko-KR")}개 등록 자산이 대시보드에 반영 중`
+            : "자동평가 자산과 빚 정보를 따로 정리해요"}
         </span>
       </span>
       <Icon name="chevron-right" className="size-5 text-fb-ink-3" />
     </Link>
   );
+}
+
+function deriveDashboardData({
+  holdings,
+  liabilities,
+}: {
+  holdings?: Array<{
+    valuationAmount: number;
+    accountCategory?: "general" | "pension_savings" | "irp" | "other";
+  }>;
+  liabilities?: Array<{
+    balanceAmount: number;
+    purpose?: "residence" | "investment" | "lifestyle_credit" | "other";
+  }>;
+}): DashboardData {
+  const registeredHoldings = holdings ?? [];
+  const registeredLiabilities = liabilities ?? [];
+
+  if (registeredHoldings.length === 0 && registeredLiabilities.length === 0) {
+    return { ...baseData, retirementMan: 0, linkedAssetCount: 0 };
+  }
+
+  const displayedHoldingAmount = registeredHoldings.reduce(
+    (total, holding) => total + holding.valuationAmount,
+    0,
+  );
+  const fireIncludedHoldingAmount = registeredHoldings
+    .filter((holding) => !isRetirementAccount(holding.accountCategory))
+    .reduce((total, holding) => total + holding.valuationAmount, 0);
+  const retirementAmount = displayedHoldingAmount - fireIncludedHoldingAmount;
+  const totalLiabilityAmount = registeredLiabilities.reduce(
+    (total, liability) => total + liability.balanceAmount,
+    0,
+  );
+  const fireIncludedLiabilityAmount = registeredLiabilities
+    .filter((liability) => liability.purpose !== "residence")
+    .reduce((total, liability) => total + liability.balanceAmount, 0);
+
+  const totalNetWorthMan = Math.round(
+    (baseData.homeMan * 10_000 + baseData.otherMan * 10_000 + displayedHoldingAmount - totalLiabilityAmount) /
+      10_000,
+  );
+  const investableMan = Math.max(
+    0,
+    Math.round((fireIncludedHoldingAmount - fireIncludedLiabilityAmount) / 10_000),
+  );
+
+  return {
+    ...baseData,
+    totalNetWorthMan,
+    investableMan,
+    otherMan: baseData.otherMan,
+    retirementMan: Math.round(retirementAmount / 10_000),
+    linkedAssetCount: registeredHoldings.length,
+  };
+}
+
+function isRetirementAccount(accountCategory?: "general" | "pension_savings" | "irp" | "other") {
+  return accountCategory === "pension_savings" || accountCategory === "irp";
 }

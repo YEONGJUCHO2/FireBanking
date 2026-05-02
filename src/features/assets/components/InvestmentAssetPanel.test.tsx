@@ -134,6 +134,7 @@ describe("InvestmentAssetPanel", () => {
     expect(within(generalSection).getByText("포스코퓨처엠")).toBeInTheDocument();
     expect(within(generalSection).getByText("일반")).toBeInTheDocument();
     expect(within(generalSection).getByText("003670")).toBeInTheDocument();
+    expect(within(generalSection).queryByText("1")).not.toBeInTheDocument();
     expect(within(pensionSection).getByText("TIGER 미국S&P500")).toBeInTheDocument();
     expect(within(irpSection).getByText("ACE 미국S&P500채권혼합액티브")).toBeInTheDocument();
     expect(screen.queryByText(/마지막 거래일/)).not.toBeInTheDocument();
