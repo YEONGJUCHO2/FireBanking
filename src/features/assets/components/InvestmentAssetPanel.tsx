@@ -61,6 +61,22 @@ const searchableInstruments = [
     valuationAmount: 185_000,
     valuationDate: "2026-05-29",
   },
+  {
+    id: "sample-posco-future-m",
+    symbol: "003670",
+    displayName: "포스코퓨처엠",
+    quantity: 1,
+    valuationAmount: 250_000,
+    valuationDate: "2026-05-29",
+  },
+  {
+    id: "sample-posco-holdings",
+    symbol: "005490",
+    displayName: "포스코홀딩스",
+    quantity: 1,
+    valuationAmount: 370_000,
+    valuationDate: "2026-05-29",
+  },
 ];
 
 export function InvestmentAssetPanel({

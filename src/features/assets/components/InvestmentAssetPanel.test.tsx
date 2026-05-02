@@ -59,4 +59,16 @@ describe("InvestmentAssetPanel", () => {
 
     expect(screen.getByRole("button", { name: "TIGER 미국S&P500 추가" })).toBeInTheDocument();
   });
+
+  it("shows Korean individual stocks such as POSCO Future M and POSCO Holdings", () => {
+    render(<InvestmentAssetPanel holdings={[]} />);
+
+    fireEvent.change(screen.getByLabelText("종목 검색어"), { target: { value: "포스코" } });
+    fireEvent.click(screen.getByRole("button", { name: "검색" }));
+
+    expect(screen.getByRole("button", { name: "포스코퓨처엠 추가" })).toBeInTheDocument();
+    expect(screen.getByText("003670")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "포스코홀딩스 추가" })).toBeInTheDocument();
+    expect(screen.getByText("005490")).toBeInTheDocument();
+  });
 });

@@ -30,6 +30,8 @@ type LiabilityRow = {
 
 const domesticPriceSeed: Record<string, { unitPrice: number; valuationDate: string }> = {
   "005930": { unitPrice: 85_000, valuationDate: "2026-05-29" },
+  "003670": { unitPrice: 250_000, valuationDate: "2026-05-29" },
+  "005490": { unitPrice: 370_000, valuationDate: "2026-05-29" },
   "360750": { unitPrice: 21_000, valuationDate: "2026-05-29" },
   "379810": { unitPrice: 18_500, valuationDate: "2026-05-29" },
 };
