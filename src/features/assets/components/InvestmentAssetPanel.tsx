@@ -96,6 +96,11 @@ export function InvestmentAssetPanel({
     setSubmittedQuery(query);
   };
 
+  const searchRecommended = (instrumentName: string) => {
+    setQuery(instrumentName);
+    setSubmittedQuery(instrumentName);
+  };
+
   const addHolding = (holding: HoldingView) => {
     if (items.some((item) => item.symbol === holding.symbol)) {
       return;
@@ -210,6 +215,12 @@ export function InvestmentAssetPanel({
               id="domestic-instrument-query"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  handleSearch();
+                }
+              }}
               className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-medium text-fb-ink outline-none focus:border-fb-trust"
               placeholder="삼성전자, 005930, TIGER..."
             />
@@ -220,12 +231,14 @@ export function InvestmentAssetPanel({
 
           <div className="mt-4 flex flex-wrap gap-2">
             {recommendations.map((item) => (
-              <span
+              <button
                 key={item}
-                className="rounded-full border border-fb-line bg-fb-card-alt px-3 py-1.5 text-[12px] font-semibold text-fb-ink-2"
+                type="button"
+                onClick={() => searchRecommended(item)}
+                className="fbpress rounded-full border border-fb-line bg-fb-card-alt px-3 py-1.5 text-[12px] font-semibold text-fb-ink-2 hover:bg-white"
               >
                 {item}
-              </span>
+              </button>
             ))}
           </div>
 

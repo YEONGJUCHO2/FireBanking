@@ -46,4 +46,17 @@ describe("InvestmentAssetPanel", () => {
     expect(screen.queryByText(/25주/)).not.toBeInTheDocument();
     expect(screen.getByText("아직 등록한 종목이 없어요.")).toBeInTheDocument();
   });
+
+  it("lets a user search by pressing Enter and clicking a recommended domestic ETF", () => {
+    render(<InvestmentAssetPanel holdings={[]} />);
+
+    fireEvent.change(screen.getByLabelText("종목 검색어"), { target: { value: "379810" } });
+    fireEvent.keyDown(screen.getByLabelText("종목 검색어"), { key: "Enter" });
+
+    expect(screen.getByRole("button", { name: "KODEX 미국나스닥100 추가" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "TIGER 미국S&P500" }));
+
+    expect(screen.getByRole("button", { name: "TIGER 미국S&P500 추가" })).toBeInTheDocument();
+  });
 });
