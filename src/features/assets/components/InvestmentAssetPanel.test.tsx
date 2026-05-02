@@ -75,19 +75,85 @@ describe("InvestmentAssetPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "추가" }));
 
     expect(screen.getAllByText("삼성전자").length).toBeGreaterThan(0);
-    expect(screen.getByText(/7주/)).toBeInTheDocument();
-    expect(within(screen.getByTestId("holdings-section")).getByText("IRP")).toBeInTheDocument();
+    expect(within(screen.getByTestId("holdings-section-irp")).getByText("삼성전자")).toBeInTheDocument();
+    expect(within(screen.getByTestId("holdings-section-irp")).getAllByText("IRP").length).toBeGreaterThan(0);
+    expect(within(screen.getByTestId("holdings-section-irp")).getByText("005930")).toBeInTheDocument();
+    expect(screen.queryByText(/마지막 거래일/)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "수량 수정" }));
     fireEvent.change(screen.getByLabelText("삼성전자 보유 수량"), { target: { value: "25" } });
     fireEvent.click(screen.getByRole("button", { name: "저장" }));
 
-    expect(screen.getByText(/25주/)).toBeInTheDocument();
+    expect(screen.getByText("₩2,125,000")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "삭제" }));
 
-    expect(screen.queryByText(/25주/)).not.toBeInTheDocument();
+    expect(screen.queryByText("₩2,125,000")).not.toBeInTheDocument();
     expect(screen.getByText("아직 등록한 종목이 없어요.")).toBeInTheDocument();
+  });
+
+  it("separates holdings by account category and keeps symbols beside category chips", () => {
+    render(
+      <InvestmentAssetPanel
+        holdings={[
+          {
+            id: "general-posco",
+            symbol: "003670",
+            displayName: "포스코퓨처엠",
+            quantity: 1,
+            valuationAmount: 252_000,
+            valuationDate: "2026-04-30",
+            accountCategory: "general",
+          },
+          {
+            id: "pension-tiger",
+            symbol: "360750",
+            displayName: "TIGER 미국S&P500",
+            quantity: 10,
+            valuationAmount: 261_600,
+            valuationDate: "2026-04-30",
+            accountCategory: "pension_savings",
+          },
+          {
+            id: "irp-ace",
+            symbol: "453850",
+            displayName: "ACE 미국S&P500채권혼합액티브",
+            quantity: 5,
+            valuationAmount: 50_000,
+            valuationDate: "2026-04-30",
+            accountCategory: "irp",
+          },
+        ]}
+      />,
+    );
+
+    const generalSection = screen.getByTestId("holdings-section-general");
+    const pensionSection = screen.getByTestId("holdings-section-pension_savings");
+    const irpSection = screen.getByTestId("holdings-section-irp");
+
+    expect(within(generalSection).getByText("포스코퓨처엠")).toBeInTheDocument();
+    expect(within(generalSection).getByText("일반")).toBeInTheDocument();
+    expect(within(generalSection).getByText("003670")).toBeInTheDocument();
+    expect(within(pensionSection).getByText("TIGER 미국S&P500")).toBeInTheDocument();
+    expect(within(irpSection).getByText("ACE 미국S&P500채권혼합액티브")).toBeInTheDocument();
+    expect(screen.queryByText(/마지막 거래일/)).not.toBeInTheDocument();
+  });
+
+  it("calculates direct overseas exchange holdings from manual inputs", () => {
+    render(<InvestmentAssetPanel holdings={[]} />);
+
+    fireEvent.click(screen.getByText("해외거래소 직접 보유"));
+    fireEvent.change(screen.getByLabelText("티커/이름"), { target: { value: "VOO" } });
+    fireEvent.change(screen.getByLabelText("보유 수량"), { target: { value: "2" } });
+    fireEvent.change(screen.getByLabelText("1주 가격 USD"), { target: { value: "500" } });
+    fireEvent.change(screen.getByLabelText("적용 환율"), { target: { value: "1400" } });
+
+    expect(screen.getByText("₩1,400,000")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "계산 결과 추가" }));
+
+    expect(screen.getByText("VOO")).toBeInTheDocument();
+    expect(screen.getByText("2주 · $500 · ₩1,400")).toBeInTheDocument();
   });
 
   it("lets a user search by pressing Enter", () => {

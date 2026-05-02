@@ -28,6 +28,15 @@ type SearchableHoldingView = HoldingView & {
   lastCloseDate?: string;
 };
 
+type OverseasManualHolding = {
+  id: string;
+  name: string;
+  quantity: number;
+  usdPrice: number;
+  exchangeRate: number;
+  valuationAmount: number;
+};
+
 const defaultHoldings: HoldingView[] = [
   {
     id: "sample-samsung",
@@ -54,6 +63,13 @@ const accountCategoryLabels: Record<AccountCategory, string> = {
   irp: "IRP",
   other: "기타",
 };
+
+const accountSections: Array<{ value: AccountCategory; title: string }> = [
+  { value: "general", title: "일반 계좌" },
+  { value: "pension_savings", title: "연금저축" },
+  { value: "irp", title: "IRP" },
+  { value: "other", title: "기타" },
+];
 
 const searchableInstruments: SearchableHoldingView[] = [
   {
@@ -124,6 +140,11 @@ export function InvestmentAssetPanel({
   const [addAccountCategory, setAddAccountCategory] = useState<AccountCategory>("general");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingQuantity, setEditingQuantity] = useState("");
+  const [overseasName, setOverseasName] = useState("");
+  const [overseasQuantity, setOverseasQuantity] = useState("");
+  const [overseasUsdPrice, setOverseasUsdPrice] = useState("");
+  const [overseasExchangeRate, setOverseasExchangeRate] = useState("");
+  const [overseasHoldings, setOverseasHoldings] = useState<OverseasManualHolding[]>([]);
   const searchRequestId = useRef(0);
   const searchDebounceId = useRef<ReturnType<typeof setTimeout> | null>(null);
   const localSearchResults = useMemo(() => {
@@ -144,6 +165,19 @@ export function InvestmentAssetPanel({
   const visibleSearchResults = searchResults.slice(
     searchPage * SEARCH_RESULTS_PAGE_SIZE,
     searchPage * SEARCH_RESULTS_PAGE_SIZE + SEARCH_RESULTS_PAGE_SIZE,
+  );
+  const groupedHoldings = useMemo(
+    () =>
+      accountSections.map((section) => ({
+        ...section,
+        holdings: items.filter((item) => (item.accountCategory ?? "general") === section.value),
+      })),
+    [items],
+  );
+  const overseasManualValuation = calculateOverseasManualValuation(
+    overseasQuantity,
+    overseasUsdPrice,
+    overseasExchangeRate,
   );
 
   useEffect(() => {
@@ -248,6 +282,11 @@ export function InvestmentAssetPanel({
       return;
     }
 
+    setQuery("");
+    setSubmittedQuery("");
+    setServerSearchResults(null);
+    setSearchError(null);
+
     setItems((current) => {
       if (current.some((item) => item.symbol === holding.symbol)) {
         return current;
@@ -265,6 +304,38 @@ export function InvestmentAssetPanel({
         },
       ];
     });
+  };
+
+  const addOverseasManualHolding = () => {
+    const trimmedName = overseasName.trim().toUpperCase();
+
+    if (!trimmedName || overseasManualValuation <= 0) {
+      return;
+    }
+
+    const quantity = parsePositiveNumber(overseasQuantity);
+    const usdPrice = parsePositiveNumber(overseasUsdPrice);
+    const exchangeRate = parsePositiveNumber(overseasExchangeRate);
+
+    if (!quantity || !usdPrice || !exchangeRate) {
+      return;
+    }
+
+    setOverseasHoldings((current) => [
+      ...current,
+      {
+        id: `${trimmedName}-${Date.now()}`,
+        name: trimmedName,
+        quantity,
+        usdPrice,
+        exchangeRate,
+        valuationAmount: overseasManualValuation,
+      },
+    ]);
+    setOverseasName("");
+    setOverseasQuantity("");
+    setOverseasUsdPrice("");
+    setOverseasExchangeRate("");
   };
 
   const startEdit = (holding: HoldingView) => {
@@ -475,61 +546,73 @@ export function InvestmentAssetPanel({
                 아직 등록한 종목이 없어요.
               </p>
             ) : (
-              <div className="grid gap-3">
-                {items.map((holding) => (
-                  <div
-                    key={holding.id}
-                    className="grid gap-3 rounded-[12px] border border-fb-line bg-white p-3"
-                  >
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-[14px] font-bold text-fb-ink">{holding.displayName}</p>
-                        <span className="rounded-full bg-fb-trust-soft px-2 py-0.5 text-[11px] font-bold text-fb-trust-ink">
-                          {accountCategoryLabels[holding.accountCategory ?? "general"]}
+              <div className="grid gap-4">
+                {groupedHoldings
+                  .filter((section) => section.holdings.length > 0)
+                  .map((section) => (
+                    <section key={section.value} data-testid={`holdings-section-${section.value}`} className="grid gap-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="text-[12px] font-bold text-fb-ink-2">{section.title}</h3>
+                        <span className="fb-num text-[12px] font-bold text-fb-ink-3">
+                          {section.holdings.length}
                         </span>
                       </div>
-                      {editingId === holding.id ? (
-                        <div className="mt-2 flex items-center gap-2">
-                          <label className="sr-only" htmlFor={`${holding.id}-quantity`}>
-                            {holding.displayName} 보유 수량
-                          </label>
-                          <input
-                            id={`${holding.id}-quantity`}
-                            value={editingQuantity}
-                            onChange={(event) => setEditingQuantity(event.target.value)}
-                            className="h-9 w-24 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
-                            inputMode="decimal"
-                          />
-                          <span className="text-[12px] font-medium text-fb-ink-3">주</span>
-                        </div>
-                      ) : (
-                        <p className="mt-1 text-[12px] text-fb-ink-3">
-                          {holding.symbol} · {holding.quantity.toLocaleString("ko-KR")}주 · 마지막 거래일{" "}
-                          {holding.valuationDate} 기준
-                        </p>
-                      )}
-                    </div>
-                    <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
-                      <p className="fb-num text-[15px] font-bold text-fb-ink">
-                        {formatKrw(holding.valuationAmount)}
-                      </p>
-                      <div className="grid grid-cols-2 gap-1.5 sm:flex">
-                        {editingId === holding.id ? (
-                          <Button type="button" variant="secondary" size="sm" onClick={() => saveQuantity(holding.id)}>
-                            저장
-                          </Button>
-                        ) : (
-                          <Button type="button" variant="ghost" size="sm" onClick={() => startEdit(holding)}>
-                            수량 수정
-                          </Button>
-                        )}
-                        <Button type="button" variant="dangerSoft" size="sm" onClick={() => deleteHolding(holding.id)}>
-                          삭제
-                        </Button>
+                      <div className="grid gap-3">
+                        {section.holdings.map((holding) => (
+                          <div
+                            key={holding.id}
+                            className="grid gap-3 rounded-[12px] border border-fb-line bg-white p-3"
+                          >
+                            <div>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="text-[14px] font-bold text-fb-ink">{holding.displayName}</p>
+                                <span className="rounded-full bg-fb-trust-soft px-2 py-0.5 text-[11px] font-bold text-fb-trust-ink">
+                                  {accountCategoryLabels[holding.accountCategory ?? "general"]}
+                                </span>
+                                <span className="fb-num rounded-full bg-fb-card-alt px-2 py-0.5 text-[11px] font-bold text-fb-ink-3">
+                                  {holding.symbol}
+                                </span>
+                              </div>
+                              {editingId === holding.id ? (
+                                <div className="mt-2 flex items-center gap-2">
+                                  <label className="sr-only" htmlFor={`${holding.id}-quantity`}>
+                                    {holding.displayName} 보유 수량
+                                  </label>
+                                  <input
+                                    id={`${holding.id}-quantity`}
+                                    value={editingQuantity}
+                                    onChange={(event) => setEditingQuantity(event.target.value)}
+                                    className="h-9 w-24 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
+                                    inputMode="decimal"
+                                  />
+                                  <span className="text-[12px] font-medium text-fb-ink-3">주</span>
+                                </div>
+                              ) : null}
+                            </div>
+                            <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
+                              <p className="fb-num text-[15px] font-bold text-fb-ink">
+                                {formatKrw(holding.valuationAmount)}
+                              </p>
+                              <div className="grid grid-cols-2 gap-1.5 sm:flex">
+                                {editingId === holding.id ? (
+                                  <Button type="button" variant="secondary" size="sm" onClick={() => saveQuantity(holding.id)}>
+                                    저장
+                                  </Button>
+                                ) : (
+                                  <Button type="button" variant="ghost" size="sm" onClick={() => startEdit(holding)}>
+                                    수량 수정
+                                  </Button>
+                                )}
+                                <Button type="button" variant="dangerSoft" size="sm" onClick={() => deleteHolding(holding.id)}>
+                                  삭제
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  </div>
-                ))}
+                    </section>
+                  ))}
               </div>
             )}
           </div>
@@ -543,12 +626,83 @@ export function InvestmentAssetPanel({
             VOO, SPY, QQQ처럼 미국 거래소에 직접 상장된 자산만 수동으로 계산해요. TIGER·ACE 같은 국내상장 ETF는 위 종목 검색으로 추가해요.
           </p>
 
-          <div className="mt-4 grid gap-2 text-[12px] font-semibold text-fb-ink-2 sm:grid-cols-2 lg:grid-cols-5">
-            {["티커/이름", "보유 수량", "1주 가격(USD)", "적용 환율", "계산된 원화 평가액"].map((label) => (
-              <div key={label} className="rounded-[10px] border border-fb-line bg-white px-3 py-2">
-                {label}
+          <div className="mt-4 grid gap-3 rounded-[12px] border border-fb-line bg-white p-3">
+            <div className="grid gap-2 lg:grid-cols-4">
+              <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="overseas-name">
+                티커/이름
+                <input
+                  id="overseas-name"
+                  value={overseasName}
+                  onChange={(event) => setOverseasName(event.target.value)}
+                  className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
+                  placeholder="VOO"
+                />
+              </label>
+              <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="overseas-quantity">
+                보유 수량
+                <input
+                  id="overseas-quantity"
+                  value={overseasQuantity}
+                  onChange={(event) => setOverseasQuantity(event.target.value)}
+                  className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
+                  inputMode="decimal"
+                />
+              </label>
+              <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="overseas-usd-price">
+                1주 가격 USD
+                <input
+                  id="overseas-usd-price"
+                  value={overseasUsdPrice}
+                  onChange={(event) => setOverseasUsdPrice(event.target.value)}
+                  className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
+                  inputMode="decimal"
+                />
+              </label>
+              <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="overseas-exchange-rate">
+                적용 환율
+                <input
+                  id="overseas-exchange-rate"
+                  value={overseasExchangeRate}
+                  onChange={(event) => setOverseasExchangeRate(event.target.value)}
+                  className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
+                  inputMode="decimal"
+                />
+              </label>
+            </div>
+
+            <div className="grid gap-2 sm:flex sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[12px] font-bold text-fb-ink-2">계산된 원화 평가액</p>
+                <p className="fb-num mt-1 text-[18px] font-bold text-fb-ink">
+                  {formatKrw(overseasManualValuation)}
+                </p>
               </div>
-            ))}
+              <Button type="button" variant="secondary" size="sm" onClick={addOverseasManualHolding}>
+                계산 결과 추가
+              </Button>
+            </div>
+
+            {overseasHoldings.length > 0 ? (
+              <div className="grid gap-2 border-t border-fb-line pt-3">
+                {overseasHoldings.map((holding) => (
+                  <div
+                    key={holding.id}
+                    className="grid gap-1 rounded-[10px] bg-fb-card-alt px-3 py-2 sm:grid-cols-[1fr_auto] sm:items-center"
+                  >
+                    <div>
+                      <p className="text-[13px] font-bold text-fb-ink">{holding.name}</p>
+                      <p className="text-[12px] font-medium text-fb-ink-3">
+                        {formatPlainNumber(holding.quantity)}주 · ${formatPlainNumber(holding.usdPrice)} · ₩
+                        {formatPlainNumber(holding.exchangeRate)}
+                      </p>
+                    </div>
+                    <p className="fb-num text-[14px] font-bold text-fb-ink">
+                      {formatKrw(holding.valuationAmount)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </div>
 
           <p className="mt-4 rounded-[12px] bg-white px-3 py-3 text-[12px] leading-5 text-fb-ink-3">
@@ -558,4 +712,25 @@ export function InvestmentAssetPanel({
       </div>
     </Card>
   );
+}
+
+function calculateOverseasManualValuation(quantityInput: string, usdPriceInput: string, exchangeRateInput: string) {
+  const quantity = parsePositiveNumber(quantityInput);
+  const usdPrice = parsePositiveNumber(usdPriceInput);
+  const exchangeRate = parsePositiveNumber(exchangeRateInput);
+
+  if (!quantity || !usdPrice || !exchangeRate) {
+    return 0;
+  }
+
+  return Math.round(quantity * usdPrice * exchangeRate);
+}
+
+function parsePositiveNumber(value: string) {
+  const parsed = Number(value.replaceAll(",", ""));
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function formatPlainNumber(value: number) {
+  return value.toLocaleString("ko-KR", { maximumFractionDigits: 4 });
 }
