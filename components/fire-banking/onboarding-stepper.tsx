@@ -175,14 +175,14 @@ export function OnboardingStepper({
           type="button"
           onClick={back}
           aria-label="뒤로"
-          className="fbpress flex size-9 items-center justify-center rounded-full text-fb-ink hover:bg-fb-card-alt"
+          className="fbpress flex size-11 items-center justify-center rounded-full text-fb-ink hover:bg-fb-card-alt"
         >
           <Icon name="chevron-left" className="size-[22px]" />
         </button>
         <div className="fb-num text-[13px] font-semibold text-fb-ink-2">
           {idx + 1} <span className="text-fb-ink-4">/ {total + 1}</span>
         </div>
-        <span className="size-9" />
+        <span className="size-11" />
       </div>
 
       {/* Progress */}
@@ -287,7 +287,6 @@ export function OnboardingStepper({
             className="fbpress flex h-[54px] w-full items-center justify-center gap-1.5 rounded-[14px] bg-fb-ink text-[15px] font-bold tracking-[-0.008em] text-white"
           >
             결과 보기
-            <Icon name="chevron-right" className="size-[18px]" />
           </button>
         ) : (
           <div className="flex gap-2.5">

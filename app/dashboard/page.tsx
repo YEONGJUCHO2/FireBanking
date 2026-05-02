@@ -1,75 +1,162 @@
-import { BrandLockup, PageCanvas, StatusPill } from "@/components/fire-banking";
+import Link from "next/link";
+import {
+  BottomNav,
+  CashflowSummary,
+  DesktopDashboard,
+  FireHeroCard,
+  InviteCard,
+  MobileAppShell,
+  NetWorthHero,
+  ScreenTopBar,
+  StatusPill,
+} from "@/components/fire-banking";
+import { Card, SectionHeader } from "@/components/fire-banking/card";
+import { CheckinRow } from "@/components/fire-banking/checkin-row";
+import { Icon } from "@/components/fire-banking/icons";
 import { InvestmentAssetPanel } from "@/src/features/assets/components/InvestmentAssetPanel";
 import { LiabilityPanel } from "@/src/features/assets/components/LiabilityPanel";
 import { SignOutButton } from "@/src/features/auth/components/SignOutButton";
-import { R0Dashboard } from "@/src/features/dashboard/components/R0Dashboard";
 
-const dashboardSnapshot = {
-  month: "2026-05-01",
-  total_income: 7_200_000,
-  investable_net_worth: 120_000_000,
-  primary_residence_net_worth: 700_000_000,
-  other_net_worth: 20_000_000,
-  total_net_worth_for_display: 840_000_000,
-  fire_calculation_net_worth: 139_000_000,
-  fixed_expense: 2_300_000,
-  variable_expense: 1_700_000,
-  regular_investment: 2_000_000,
-  remaining_cash: 1_200_000,
-  monthly_asset_growth_capacity: 3_700_000,
-  annual_fire_expense: 48_000_000,
-  fire_target_asset: 1_200_000_000,
-  projected_fire_date: "2035-05-01",
-};
-
-const assetSnapshotSummary = {
-  mode: "current_estimate" as const,
-  snapshotMonth: "2026-05-01",
-  snapshotDate: null,
-  valuationDate: "2026-05-29",
-  displayedNetWorth: 839_000_000,
-  fireCalculationNetWorth: 139_000_000,
-  investmentAssetAmount: 140_000_000,
-  totalLiabilityAmount: 1_000_000,
-  monthlyDebtPrincipalAmount: 500_000,
+const data = {
+  totalNetWorthMan: 51_500,
+  netWorthDeltaMan: 320,
+  homeMan: 38_000,
+  investableMan: 13_500,
+  otherMan: 1_500,
+  fireTargetMan: 40_000,
+  incomeMan: 850,
+  fixedMan: 350,
+  variableMan: 220,
+  saveMan: 180,
+  monthlyAddMan: 280,
+  fireYears: 8,
+  fireMonths: 4,
 };
 
 export default function DashboardPage() {
-  return (
-    <PageCanvas>
-      <div className="mx-auto grid w-full max-w-[1180px] gap-6">
-        <header className="flex flex-col gap-4 border-b border-fb-line pb-5 md:flex-row md:items-end md:justify-between">
-          <div className="grid gap-4">
-            <BrandLockup tagline />
-            <div>
-              <div className="mb-2 flex flex-wrap items-center gap-2">
-                <StatusPill label="현재 추정치" status="info" />
-                <StatusPill label="자동평가 확장 준비" status="positive" />
-              </div>
-              <h1 className="text-[30px] font-bold leading-tight text-fb-ink md:text-[38px]">
-                FIRE 대시보드
-              </h1>
-              <p className="mt-2 max-w-[42rem] text-[14px] font-medium leading-6 text-fb-ink-3">
-                기존 R0 체크인 결과에 투자자산 자동평가와 단순 부채 모델을 붙여서,
-                FIRE 예상일의 신뢰도를 먼저 확인하는 화면이에요.
-              </p>
-            </div>
-          </div>
-          <div className="w-full md:w-[128px]">
-            <SignOutButton compact />
-          </div>
-        </header>
+  const percent = Math.max(0, Math.min(1, data.investableMan / data.fireTargetMan));
 
-        <section className="grid gap-5 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-          <div className="min-w-0">
-            <R0Dashboard snapshot={dashboardSnapshot} assetSnapshotSummary={assetSnapshotSummary} />
-          </div>
-          <div className="grid min-w-0 content-start gap-5">
-            <InvestmentAssetPanel />
-            <LiabilityPanel />
-          </div>
+  return (
+    <>
+      <div className="lg:hidden">
+        <MobileAppShell>
+          <ScreenTopBar
+            right={
+              <button
+                aria-label="설정"
+                className="fbpress flex size-11 items-center justify-center rounded-full text-fb-ink-2 hover:bg-fb-card-alt"
+              >
+                <Icon name="settings" className="size-5" />
+              </button>
+            }
+          />
+
+          <main className="flex-1 overflow-auto px-4 pb-28 pt-5">
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">
+                  2026. 04. 체크인
+                </div>
+                <div className="mt-0.5 text-[18px] font-bold tracking-[-0.012em] text-fb-ink">
+                  안녕하세요, 지윤님
+                </div>
+              </div>
+              <StatusPill
+                tone="trust"
+                icon={<span className="size-1.5 rounded-full bg-fb-trust" />}
+              >
+                이번 달 진행 중
+              </StatusPill>
+            </div>
+
+            <NetWorthHero
+              totalManWon={data.totalNetWorthMan}
+              deltaManWon={data.netWorthDeltaMan}
+              homeManWon={data.homeMan}
+              investableManWon={data.investableMan}
+              otherManWon={data.otherMan}
+              fireTargetManWon={data.fireTargetMan}
+            />
+
+            <div className="mt-4">
+              <FireHeroCard
+                percent={percent}
+                years={data.fireYears}
+                months={data.fireMonths}
+                goalManWon={data.fireTargetMan}
+                coastManWon={Math.round(data.fireTargetMan * 0.55)}
+              />
+            </div>
+
+            <section className="mt-6 space-y-3">
+              <SectionHeader
+                title="이번 달 부부 체크인"
+                subtitle="배우자 입력이 끝나면 결과가 확정돼요"
+              />
+              <Card className="px-4 py-1">
+                <CheckinRow name="지윤" role="admin" status="done" when="오늘 14:08 입력" />
+                <div className="fb-divider" />
+                <CheckinRow
+                  name="민호"
+                  role="lite"
+                  status="pending"
+                  when="초대 수락 · 입력 대기 중"
+                />
+              </Card>
+            </section>
+
+            <div className="mt-6">
+              <CashflowSummary
+                incomeMan={data.incomeMan}
+                fixedMan={data.fixedMan}
+                variableMan={data.variableMan}
+                regularInvestmentMan={data.saveMan}
+                remainingMan={data.monthlyAddMan}
+              />
+            </div>
+
+            <div className="mt-6 grid gap-4">
+              <InvestmentAssetPanel />
+              <LiabilityPanel />
+            </div>
+
+            <section className="mt-6 space-y-3">
+              <SectionHeader title="배우자 초대" />
+              <InviteCard />
+            </section>
+
+            <Link
+              href="/subscribe"
+              className="fbpress mt-4 flex items-center gap-3.5 rounded-[20px] border border-fb-line bg-white p-5"
+            >
+              <span className="flex size-11 items-center justify-center rounded-[14px] bg-fb-trust-soft text-fb-trust-ink">
+                <Icon name="refresh" className="size-[22px]" />
+              </span>
+              <span className="flex-1">
+                <span className="block text-[14px] font-bold text-fb-ink">고정비 시뮬레이터</span>
+                <span className="mt-0.5 block text-[12px] font-medium text-fb-ink-3">
+                  반복 지출이 미래 자산에 미치는 영향
+                </span>
+              </span>
+              <Icon name="chevron-right" className="size-5 text-fb-ink-3" />
+            </Link>
+
+            <div className="mt-6">
+              <SignOutButton />
+            </div>
+          </main>
+
+          <BottomNav active="home" partnerPending />
+        </MobileAppShell>
+      </div>
+
+      <div className="hidden min-h-dvh bg-fb-page px-8 py-10 lg:block">
+        <DesktopDashboard footerAction={<SignOutButton />} />
+        <section className="mx-auto mt-6 grid w-full max-w-[1280px] gap-5">
+          <InvestmentAssetPanel />
+          <LiabilityPanel />
         </section>
       </div>
-    </PageCanvas>
+    </>
   );
 }

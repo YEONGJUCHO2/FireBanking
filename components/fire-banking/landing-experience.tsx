@@ -6,7 +6,7 @@ import { MobileAppShell } from './app-shell'
 /**
  * Calm entry screen (was the marketing landing).
  * Mirrors design `Fire Banking.html` ScreenLogin: monochrome surface,
- * #0066FF accent eyebrow, two-CTA stack (Google + email), reassurance row.
+ * #0066FF accent eyebrow, two-CTA stack (Gmail + Kakao), reassurance row.
  */
 export function LandingExperience() {
   return (
@@ -45,12 +45,12 @@ export function LandingExperience() {
             size="lg"
             full
             href="/onboarding"
-            iconLeft={<GoogleGlyph />}
+            iconLeft={<GoogleMailMark />}
           >
-            Google로 계속하기
+            G-mail로 시작하기
           </Button>
-          <Button variant="secondary" size="lg" full href="/onboarding" iconLeft={<Icon name="mail" className="size-[18px]" />}>
-            이메일로 시작하기
+          <Button variant="kakao" size="lg" full href="/onboarding" iconLeft={<Icon name="kakao" className="size-[18px]" />}>
+            카카오로 계속하기
           </Button>
         </div>
 
@@ -64,28 +64,15 @@ export function LandingExperience() {
   )
 }
 
-function GoogleGlyph() {
+function GoogleMailMark() {
   return (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-      <path
-        fill="#fff"
-        d="M21.6 12.227c0-.708-.064-1.39-.18-2.045H12v3.868h5.382a4.6 4.6 0 0 1-1.995 3.018v2.51h3.227c1.886-1.736 2.986-4.295 2.986-7.351z"
-      />
-      <path
-        fill="#fff"
-        opacity="0.85"
-        d="M12 22c2.7 0 4.964-.895 6.614-2.422l-3.227-2.51c-.895.6-2.04.954-3.387.954-2.605 0-4.81-1.762-5.595-4.13H3.067v2.59A9.997 9.997 0 0 0 12 22z"
-      />
-      <path
-        fill="#fff"
-        opacity="0.7"
-        d="M6.405 13.892A6.003 6.003 0 0 1 6.09 12c0-.659.114-1.298.314-1.892V7.518H3.067A9.997 9.997 0 0 0 2 12c0 1.614.387 3.14 1.067 4.482l3.338-2.59z"
-      />
-      <path
-        fill="#fff"
-        opacity="0.55"
-        d="M12 5.978c1.468 0 2.786.504 3.823 1.495l2.866-2.866C16.96 3.045 14.695 2 12 2 8.09 2 4.717 4.245 3.067 7.518l3.338 2.59C7.19 7.74 9.395 5.978 12 5.978z"
-      />
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" className="shrink-0">
+      <path d="M4.5 6.5v11h3.2V9.9L12 13.1l4.3-3.2v7.6h3.2v-11L12 12.1 4.5 6.5Z" fill="#FFFFFF" />
+      <path d="M4.5 6.5 12 12.1l7.5-5.6v2.9L12 15 4.5 9.4V6.5Z" fill="#EA4335" />
+      <path d="M4.5 9.4v8.1h3.2v-5.7L4.5 9.4Z" fill="#34A853" />
+      <path d="M16.3 11.8v5.7h3.2V9.4l-3.2 2.4Z" fill="#4285F4" />
+      <path d="M4.5 6.5 12 12.1l2.1-1.6L6.8 5H5.7C5 5 4.5 5.6 4.5 6.5Z" fill="#FBBC04" />
+      <path d="M17.2 5 12 8.9l7.5-2.4C19.5 5.6 19 5 18.3 5h-1.1Z" fill="#C5221F" />
     </svg>
   )
 }

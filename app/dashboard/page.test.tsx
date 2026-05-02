@@ -3,14 +3,14 @@ import { describe, expect, it } from "vitest";
 import DashboardPage from "./page";
 
 describe("DashboardPage", () => {
-  it("renders the current app dashboard instead of the legacy showcase mock", () => {
+  it("renders the OD dashboard design with investment and liability extensions", () => {
     render(<DashboardPage />);
 
-    expect(screen.getByRole("heading", { name: "FIRE 대시보드" })).toBeInTheDocument();
-    expect(screen.getByText("투자자산")).toBeInTheDocument();
-    expect(screen.getByText("부채")).toBeInTheDocument();
-    expect(screen.getByText("FIRE 계산 순자산")).toBeInTheDocument();
-    expect(screen.queryByText("안녕하세요, 지윤님")).not.toBeInTheDocument();
-    expect(screen.queryByText("이번 달 결과를 같이 봐요.")).not.toBeInTheDocument();
+    expect(screen.getByText("안녕하세요, 지윤님")).toBeInTheDocument();
+    expect(screen.getAllByText("이번 달 부부 체크인").length).toBeGreaterThan(0);
+    expect(screen.getByText("이번 달 결과를 같이 봐요.")).toBeInTheDocument();
+    expect(screen.getAllByText("투자자산").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("부채").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("검색 준비중").length).toBeGreaterThan(0);
   });
 });

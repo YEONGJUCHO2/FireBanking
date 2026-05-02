@@ -167,13 +167,13 @@ export function InvitePartnerCard({
   return (
     <section className="fb-card p-5">
       <div className="flex items-start gap-4">
-        <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-fb-green-100 text-xl text-fb-green">
+        <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-fb-trust-soft text-xl text-fb-trust">
           ♡
         </div>
         <div className="grid gap-2">
-          <p className="text-sm font-bold text-fb-green">배우자 현황</p>
+          <p className="text-sm font-bold text-fb-trust">배우자 현황</p>
           <h2 className="text-xl font-bold tracking-normal text-fb-ink">함께 보면 결과가 더 또렷해져요.</h2>
-          <p className="text-sm leading-6 text-fb-muted">
+          <p className="text-sm leading-6 text-fb-ink-2">
           초대를 수락하면 배우자가 같은 FIRE 대시보드를 함께 볼 수 있습니다.
           </p>
         </div>
@@ -184,7 +184,7 @@ export function InvitePartnerCard({
         <button
           type="submit"
           disabled={pending}
-          className="fb-focus w-full rounded-button bg-fb-green px-4 py-3 text-sm font-bold text-white shadow-card hover:bg-fb-green-900 disabled:cursor-not-allowed disabled:opacity-60"
+          className="fb-focus w-full rounded-button bg-fb-trust px-4 py-3 text-sm font-bold text-white shadow-card hover:bg-fb-trust-strong disabled:cursor-not-allowed disabled:opacity-60"
         >
           {pending ? "링크 만드는 중..." : "배우자 초대 링크 만들기"}
         </button>
@@ -192,13 +192,13 @@ export function InvitePartnerCard({
 
       {inviteUrl ? (
         <div className="mt-3 grid gap-2">
-          <p className="break-all rounded-soft bg-fb-green-50 px-3 py-2 text-sm text-fb-muted">
+          <p className="break-all rounded-soft bg-fb-trust-soft px-3 py-2 text-sm text-fb-ink-2">
             {inviteUrl}
           </p>
           <button
             type="button"
             onClick={copyInviteUrl}
-            className="fb-focus rounded-button border border-fb-line bg-white px-4 py-2 text-sm font-bold text-fb-ink shadow-card hover:border-fb-green/30"
+            className="fb-focus rounded-button border border-fb-line bg-white px-4 py-2 text-sm font-bold text-fb-ink shadow-card hover:border-fb-trust/30"
           >
             {copied ? "복사했어요" : "초대 링크 복사"}
           </button>
@@ -209,12 +209,12 @@ export function InvitePartnerCard({
           >
             카카오톡으로 보내기
           </button>
-          {copyError ? <p className="text-sm text-fb-muted">{copyError}</p> : null}
-          {shareError ? <p className="text-sm text-fb-muted">{shareError}</p> : null}
+          {copyError ? <p className="text-sm text-fb-ink-2">{copyError}</p> : null}
+          {shareError ? <p className="text-sm text-fb-ink-2">{shareError}</p> : null}
         </div>
       ) : null}
 
-      {state.error ? <p className="mt-3 text-sm text-fb-danger">{state.error}</p> : null}
+      {state.error ? <p className="mt-3 text-sm text-fb-negative">{state.error}</p> : null}
     </section>
   );
 }
