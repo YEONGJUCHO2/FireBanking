@@ -37,6 +37,7 @@ vi.mock("@/src/features/assets/actions/deleteHolding", () => ({
 
 describe("InvestmentAssetPanel", () => {
   beforeEach(() => {
+    document.cookie = "fb_demo_asset_holdings=; Path=/; Max-Age=0";
     mocks.searchDomesticInstruments.mockReset();
     mocks.searchDomesticInstruments.mockImplementation(() => new Promise(() => {}));
     mocks.saveHolding.mockReset();
@@ -90,6 +91,36 @@ describe("InvestmentAssetPanel", () => {
 
     expect(screen.queryByText("₩2,125,000")).not.toBeInTheDocument();
     expect(screen.getByText("아직 등록한 종목이 없어요.")).toBeInTheDocument();
+  });
+
+  it("persists demo holdings in a cookie so navigation does not reset local entries", async () => {
+    render(<InvestmentAssetPanel holdings={[]} />);
+
+    fireEvent.change(screen.getByLabelText("종목 검색어"), { target: { value: "포스코" } });
+    fireEvent.change(screen.getByLabelText("추가 수량"), { target: { value: "2" } });
+    fireEvent.click(screen.getByRole("button", { name: "검색" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "추가" })[0]);
+
+    let cookieValue: string | undefined;
+    await waitFor(() => {
+      cookieValue = document.cookie
+        .split("; ")
+        .find((cookie) => cookie.startsWith("fb_demo_asset_holdings="))
+        ?.split("=")[1];
+      expect(cookieValue).toBeTruthy();
+    });
+
+    expect(JSON.parse(decodeURIComponent(cookieValue ?? ""))).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          symbol: "003670",
+          displayName: "포스코퓨처엠",
+          quantity: 2,
+          valuationAmount: 500_000,
+          accountCategory: "general",
+        }),
+      ]),
+    );
   });
 
   it("separates holdings by account category and keeps symbols beside category chips", () => {

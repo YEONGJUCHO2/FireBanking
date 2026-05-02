@@ -49,6 +49,7 @@ const defaultHoldings: HoldingView[] = [
 ];
 
 const SEARCH_RESULTS_PAGE_SIZE = 3;
+const DEMO_HOLDINGS_COOKIE = "fb_demo_asset_holdings";
 
 const accountCategoryOptions: Array<{ value: AccountCategory; label: string }> = [
   { value: "general", label: "일반" },
@@ -187,6 +188,12 @@ export function InvestmentAssetPanel({
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!coupleId) {
+      persistDemoHoldings(items);
+    }
+  }, [coupleId, items]);
 
   const runSearch = (nextQuery: string, options: { defer?: boolean } = {}) => {
     const normalizedQuery = nextQuery.trim();
@@ -730,4 +737,9 @@ function parsePositiveNumber(value: string) {
 
 function formatPlainNumber(value: number) {
   return value.toLocaleString("ko-KR", { maximumFractionDigits: 4 });
+}
+
+function persistDemoHoldings(holdings: HoldingView[]) {
+  const value = encodeURIComponent(JSON.stringify(holdings));
+  document.cookie = `${DEMO_HOLDINGS_COOKIE}=${value}; Path=/; Max-Age=2592000; SameSite=Lax`;
 }

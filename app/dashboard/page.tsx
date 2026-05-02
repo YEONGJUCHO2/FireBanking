@@ -122,7 +122,7 @@ export default async function DashboardPage() {
               />
             </div>
 
-            <AssetManagementLink />
+            <AssetManagementLink linkedAssetCount={data.linkedAssetCount} />
 
             <section className="mt-6 space-y-3">
               <SectionHeader title="배우자 초대" />
