@@ -12,8 +12,6 @@ type NetWorthHeroProps = {
   investableManWon: number
   /** 기타 자산 (만원) */
   otherManWon: number
-  /** FIRE 계산에서 제외하는 연금/IRP 자산 (만원) */
-  retirementManWon?: number
   /** FIRE 목표 자산 (만원) */
   fireTargetManWon: number
   className?: string
@@ -25,7 +23,6 @@ export function NetWorthHero({
   homeManWon,
   investableManWon,
   otherManWon,
-  retirementManWon = 0,
   fireTargetManWon,
   className,
 }: NetWorthHeroProps) {
@@ -57,10 +54,7 @@ export function NetWorthHero({
       <div className="grid grid-cols-2 gap-x-4 gap-y-4">
         <BreakdownItem label="거주 부동산" value={homeManWon} />
         <BreakdownItem label="투자가능" value={investableManWon} highlight badge="FIRE" />
-        <BreakdownItem
-          label={retirementManWon > 0 ? "연금/IRP 별도" : "기타 순자산"}
-          value={retirementManWon > 0 ? retirementManWon : otherManWon}
-        />
+        <BreakdownItem label="기타 순자산" value={otherManWon} />
         <BreakdownItem label="FIRE 목표" value={fireTargetManWon} />
       </div>
     </Card>

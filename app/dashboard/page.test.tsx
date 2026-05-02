@@ -74,8 +74,8 @@ describe("DashboardPage", () => {
 
     expect(screen.getByText("투자가능")).toBeInTheDocument();
     expect(screen.getAllByText("252").length).toBeGreaterThan(0);
-    expect(screen.getByText("연금/IRP 별도")).toBeInTheDocument();
-    expect(screen.getAllByText("31").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("기타 순자산").length).toBeGreaterThan(0);
+    expect(screen.queryByText("연금/IRP 별도")).not.toBeInTheDocument();
     expect(screen.getAllByText(/3개 등록 자산이 대시보드에 반영 중/).length).toBeGreaterThan(0);
   });
 });

@@ -17,7 +17,6 @@ import { getAssetManagementData } from "@/src/features/assets/lib/getAssetManage
 import { SignOutButton } from "@/src/features/auth/components/SignOutButton";
 
 type DashboardData = typeof baseData & {
-  retirementMan: number;
   linkedAssetCount: number;
 };
 
@@ -82,7 +81,6 @@ export default async function DashboardPage() {
               investableManWon={data.investableMan}
               otherManWon={data.otherMan}
               fireTargetManWon={data.fireTargetMan}
-              retirementManWon={data.retirementMan}
             />
 
             <div className="mt-4">
@@ -206,7 +204,7 @@ function deriveDashboardData({
   const registeredLiabilities = liabilities ?? [];
 
   if (registeredHoldings.length === 0 && registeredLiabilities.length === 0) {
-    return { ...baseData, retirementMan: 0, linkedAssetCount: 0 };
+    return { ...baseData, linkedAssetCount: 0 };
   }
 
   const displayedHoldingAmount = registeredHoldings.reduce(
@@ -216,7 +214,6 @@ function deriveDashboardData({
   const fireIncludedHoldingAmount = registeredHoldings
     .filter((holding) => !isRetirementAccount(holding.accountCategory))
     .reduce((total, holding) => total + holding.valuationAmount, 0);
-  const retirementAmount = displayedHoldingAmount - fireIncludedHoldingAmount;
   const totalLiabilityAmount = registeredLiabilities.reduce(
     (total, liability) => total + liability.balanceAmount,
     0,
@@ -239,7 +236,6 @@ function deriveDashboardData({
     totalNetWorthMan,
     investableMan,
     otherMan: baseData.otherMan,
-    retirementMan: Math.round(retirementAmount / 10_000),
     linkedAssetCount: registeredHoldings.length,
   };
 }
