@@ -13,8 +13,6 @@ import {
 import { Card, SectionHeader } from "@/components/fire-banking/card";
 import { CheckinRow } from "@/components/fire-banking/checkin-row";
 import { Icon } from "@/components/fire-banking/icons";
-import { InvestmentAssetPanel } from "@/src/features/assets/components/InvestmentAssetPanel";
-import { LiabilityPanel } from "@/src/features/assets/components/LiabilityPanel";
 import { SignOutButton } from "@/src/features/auth/components/SignOutButton";
 
 const data = {
@@ -115,11 +113,6 @@ export default function DashboardPage() {
               />
             </div>
 
-            <div className="mt-6 grid gap-4">
-              <InvestmentAssetPanel />
-              <LiabilityPanel />
-            </div>
-
             <section className="mt-6 space-y-3">
               <SectionHeader title="배우자 초대" />
               <InviteCard />
@@ -152,10 +145,6 @@ export default function DashboardPage() {
 
       <div className="hidden min-h-dvh bg-fb-page px-8 py-10 lg:block">
         <DesktopDashboard footerAction={<SignOutButton />} />
-        <section className="mx-auto mt-6 grid w-full max-w-[1280px] gap-5">
-          <InvestmentAssetPanel />
-          <LiabilityPanel />
-        </section>
       </div>
     </>
   );
