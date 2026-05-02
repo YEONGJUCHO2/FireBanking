@@ -38,5 +38,6 @@ export async function deleteHolding(
   }
 
   revalidatePath("/dashboard");
+  revalidatePath("/assets");
   return { success: true };
 }

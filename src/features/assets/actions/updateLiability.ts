@@ -57,5 +57,6 @@ export async function updateLiability(
   }
 
   revalidatePath("/dashboard");
+  revalidatePath("/assets");
   return { success: true };
 }

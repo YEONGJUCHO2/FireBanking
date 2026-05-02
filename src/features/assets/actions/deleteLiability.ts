@@ -38,5 +38,6 @@ export async function deleteLiability(
   }
 
   revalidatePath("/dashboard");
+  revalidatePath("/assets");
   return { success: true };
 }

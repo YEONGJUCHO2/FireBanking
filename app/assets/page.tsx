@@ -1,8 +1,11 @@
 import { AppHeader, BottomNav, MobileAppShell, PageCanvas } from "@/components/fire-banking";
 import { InvestmentAssetPanel } from "@/src/features/assets/components/InvestmentAssetPanel";
 import { LiabilityPanel } from "@/src/features/assets/components/LiabilityPanel";
+import { getAssetManagementData } from "@/src/features/assets/lib/getAssetManagementData";
 
-export default function AssetsPage() {
+export default async function AssetsPage() {
+  const assetData = await getAssetManagementData();
+
   return (
     <>
       <div className="lg:hidden">
@@ -14,8 +17,8 @@ export default function AssetsPage() {
           />
           <main className="flex-1 overflow-auto px-4 pb-28 pt-2">
             <div className="grid gap-4">
-              <InvestmentAssetPanel />
-              <LiabilityPanel />
+              <InvestmentAssetPanel coupleId={assetData.coupleId} holdings={assetData.holdings} />
+              <LiabilityPanel coupleId={assetData.coupleId} liabilities={assetData.liabilities} />
             </div>
           </main>
           <BottomNav active="home" partnerPending />
@@ -42,8 +45,8 @@ export default function AssetsPage() {
           </header>
 
           <section className="grid gap-5">
-            <InvestmentAssetPanel />
-            <LiabilityPanel />
+            <InvestmentAssetPanel coupleId={assetData.coupleId} holdings={assetData.holdings} />
+            <LiabilityPanel coupleId={assetData.coupleId} liabilities={assetData.liabilities} />
           </section>
         </div>
       </PageCanvas>

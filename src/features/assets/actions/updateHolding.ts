@@ -51,5 +51,6 @@ export async function updateHolding(
   }
 
   revalidatePath("/dashboard");
+  revalidatePath("/assets");
   return { success: true };
 }

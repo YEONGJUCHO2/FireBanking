@@ -1,16 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Button, Card, SectionHeader, StatusPill } from "@/components/fire-banking";
+import { deleteHolding as deleteHoldingAction } from "@/src/features/assets/actions/deleteHolding";
+import { saveKnownDomesticHolding } from "@/src/features/assets/actions/saveKnownDomesticHolding";
+import { updateHolding } from "@/src/features/assets/actions/updateHolding";
 import { formatKrw } from "@/src/lib/format";
 
-type HoldingView = {
+export type HoldingView = {
   id: string;
   symbol: string;
   displayName: string;
   quantity: number;
   valuationAmount: number;
   valuationDate: string;
+  accountCategory?: "general" | "pension_savings" | "irp" | "other";
 };
 
 const defaultHoldings: HoldingView[] = [
@@ -58,7 +63,15 @@ const searchableInstruments = [
   },
 ];
 
-export function InvestmentAssetPanel({ holdings = defaultHoldings }: { holdings?: HoldingView[] }) {
+export function InvestmentAssetPanel({
+  coupleId,
+  holdings = defaultHoldings,
+}: {
+  coupleId?: string | null;
+  holdings?: HoldingView[];
+}) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [items, setItems] = useState(holdings);
   const [query, setQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
@@ -84,8 +97,27 @@ export function InvestmentAssetPanel({ holdings = defaultHoldings }: { holdings?
   };
 
   const addHolding = (holding: HoldingView) => {
+    if (items.some((item) => item.symbol === holding.symbol)) {
+      return;
+    }
+
+    if (coupleId) {
+      const formData = new FormData();
+      formData.set("coupleId", coupleId);
+      formData.set("symbol", holding.symbol);
+      formData.set("quantity", String(holding.quantity));
+      formData.set("accountCategory", "general");
+      startTransition(async () => {
+        const result = await saveKnownDomesticHolding({}, formData);
+        if (result.success) {
+          router.refresh();
+        }
+      });
+      return;
+    }
+
     setItems((current) => {
-      if (current.some((item) => item.id === holding.id)) {
+      if (current.some((item) => item.symbol === holding.symbol)) {
         return current;
       }
 
@@ -118,10 +150,37 @@ export function InvestmentAssetPanel({ holdings = defaultHoldings }: { holdings?
     );
     setEditingId(null);
     setEditingQuantity("");
+
+    if (coupleId) {
+      const current = items.find((item) => item.id === holdingId);
+      const formData = new FormData();
+      formData.set("coupleId", coupleId);
+      formData.set("holdingId", holdingId);
+      formData.set("quantity", String(nextQuantity));
+      formData.set("accountCategory", current?.accountCategory ?? "general");
+      startTransition(async () => {
+        const result = await updateHolding({}, formData);
+        if (result.success) {
+          router.refresh();
+        }
+      });
+    }
   };
 
   const deleteHolding = (holdingId: string) => {
     setItems((current) => current.filter((item) => item.id !== holdingId));
+
+    if (coupleId) {
+      const formData = new FormData();
+      formData.set("coupleId", coupleId);
+      formData.set("holdingId", holdingId);
+      startTransition(async () => {
+        const result = await deleteHoldingAction({}, formData);
+        if (result.success) {
+          router.refresh();
+        }
+      });
+    }
   };
 
   return (
@@ -129,7 +188,7 @@ export function InvestmentAssetPanel({ holdings = defaultHoldings }: { holdings?
       <SectionHeader
         title="투자자산"
         subtitle="국내주식과 국내 ETF를 종목별로 자동 계산해요."
-        action={<StatusPill label="국내 상장 우선" status="info" />}
+        action={<StatusPill label={isPending ? "저장 중" : "국내 상장 우선"} status="info" />}
       />
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">

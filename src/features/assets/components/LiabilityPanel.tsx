@@ -1,16 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Button, Card, SectionHeader, StatusPill } from "@/components/fire-banking";
+import { updateLiability } from "@/src/features/assets/actions/updateLiability";
 import { formatKrw } from "@/src/lib/format";
 
-type LiabilityView = {
+export type LiabilityView = {
   id: string;
   label: string;
   purposeLabel: string;
   balanceAmount: number;
   monthlyInterestAmount: number;
   monthlyPrincipalAmount: number;
+  purpose?: "residence" | "investment" | "lifestyle_credit" | "other";
 };
 
 const defaultLiabilities: LiabilityView[] = [
@@ -21,10 +24,19 @@ const defaultLiabilities: LiabilityView[] = [
     balanceAmount: 15_000_000,
     monthlyInterestAmount: 100_000,
     monthlyPrincipalAmount: 300_000,
+    purpose: "investment",
   },
 ];
 
-export function LiabilityPanel({ liabilities = defaultLiabilities }: { liabilities?: LiabilityView[] }) {
+export function LiabilityPanel({
+  coupleId,
+  liabilities = defaultLiabilities,
+}: {
+  coupleId?: string | null;
+  liabilities?: LiabilityView[];
+}) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [items, setItems] = useState(liabilities);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState({
@@ -69,6 +81,23 @@ export function LiabilityPanel({ liabilities = defaultLiabilities }: { liabiliti
       ),
     );
     setEditingId(null);
+
+    if (coupleId) {
+      const current = items.find((item) => item.id === liabilityId);
+      const formData = new FormData();
+      formData.set("coupleId", coupleId);
+      formData.set("liabilityId", liabilityId);
+      formData.set("purpose", current?.purpose ?? "investment");
+      formData.set("balanceAmount", String(balance));
+      formData.set("monthlyInterestAmount", String(interest));
+      formData.set("monthlyPrincipalAmount", String(principal));
+      startTransition(async () => {
+        const result = await updateLiability({}, formData);
+        if (result.success) {
+          router.refresh();
+        }
+      });
+    }
   };
 
   return (
@@ -76,7 +105,7 @@ export function LiabilityPanel({ liabilities = defaultLiabilities }: { liabiliti
       <SectionHeader
         title="부채"
         subtitle="이자는 비용으로 보고, 원금상환은 빚이 줄어드는 효과로 계산해요."
-        action={<StatusPill label="단순 모델" status="info" />}
+        action={<StatusPill label={isPending ? "저장 중" : "단순 모델"} status="info" />}
       />
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">

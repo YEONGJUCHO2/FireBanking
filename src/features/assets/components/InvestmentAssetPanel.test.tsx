@@ -1,6 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { InvestmentAssetPanel } from "./InvestmentAssetPanel";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: vi.fn() }),
+}));
 
 describe("InvestmentAssetPanel", () => {
   it("shows domestic search, recommended instruments, and manual US-listed calculation", () => {
