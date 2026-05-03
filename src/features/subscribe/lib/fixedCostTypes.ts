@@ -34,4 +34,5 @@ export type FixedCostProjection = {
   simpleFixedCostTotal: number;
   futureFixedCostImpact: number;
   futureInvestmentValue: number;
+  fireMonthsSaved: number;
 };

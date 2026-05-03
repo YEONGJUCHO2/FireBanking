@@ -55,6 +55,12 @@ export const defaultFixedCostConfig: FixedCostSimulatorConfig = {
         { id: "course", name: "온라인 강의", monthlyAmount: 30_000, enabled: false },
       ],
     },
+    {
+      id: "custom",
+      name: "직접 추가",
+      prompt: "내 상황에 맞는 반복 지출을 직접 넣어보세요.",
+      items: [],
+    },
   ],
   livingExpenses: [
     { id: "food", name: "식비", monthlyAmount: 0 },

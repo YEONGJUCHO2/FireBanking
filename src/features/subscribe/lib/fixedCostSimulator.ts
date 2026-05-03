@@ -33,19 +33,20 @@ export function calculateFixedCostProjection(
   const monthlyFixedExpense = subscriptionTotal + livingTotal;
   const monthlyRemainingCash = Math.max(config.monthlyIncome - monthlyFixedExpense, 0);
   const monthlyInvestmentAmount = Math.round(monthlyRemainingCash * config.investmentRatio);
+  const futureFixedCostImpact = Math.round(
+    futureValueOfMonthlyPayment(
+      monthlyFixedExpense,
+      config.periodMonths,
+      config.annualReturnRate,
+    ),
+  );
 
   return {
     monthlyFixedExpense,
     monthlyRemainingCash,
     monthlyInvestmentAmount,
     simpleFixedCostTotal: monthlyFixedExpense * config.periodMonths,
-    futureFixedCostImpact: Math.round(
-      futureValueOfMonthlyPayment(
-        monthlyFixedExpense,
-        config.periodMonths,
-        config.annualReturnRate,
-      ),
-    ),
+    futureFixedCostImpact,
     futureInvestmentValue: Math.round(
       futureValueOfMonthlyPayment(
         monthlyInvestmentAmount,
@@ -53,5 +54,6 @@ export function calculateFixedCostProjection(
         config.annualReturnRate,
       ),
     ),
+    fireMonthsSaved: Math.max(0, Math.round(futureFixedCostImpact / 2_000_000)),
   };
 }

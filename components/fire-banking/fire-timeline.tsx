@@ -1,6 +1,7 @@
 import { cn } from '@/lib/cn'
 
 export type FireMode = 'distance' | 'date' | 'meter'
+export type FireDisplayMode = 'amount' | 'period'
 
 type FireTimelineProps = {
   /** Progress 0..1 */
@@ -16,6 +17,7 @@ type FireTimelineProps = {
   /** Momentum vs prior month, in pp */
   momentumPp?: number
   mode?: FireMode
+  displayMode?: FireDisplayMode
   className?: string
   /** FIRE goal value in 만원 (display only) */
   goalManWon?: number
@@ -25,6 +27,9 @@ type FireTimelineProps = {
 
 export function FireTimeline({
   percent,
+  years = 8,
+  months = 4,
+  displayMode = 'amount',
   goalManWon = 40000,
   className,
 }: FireTimelineProps) {
@@ -43,9 +48,13 @@ export function FireTimeline({
   return (
     <div className={cn(className)}>
       <div className="mb-3.5 flex items-baseline justify-between gap-3">
-        <div className="fb-num text-[13px] font-bold text-fb-ink">FIRE까지</div>
+        <div className="fb-num text-[13px] font-bold text-fb-ink">
+          {displayMode === 'amount' ? 'FIRE까지 남은 금액' : 'FIRE까지 남은 기간'}
+        </div>
         <div className="fb-num text-[13px] font-extrabold text-fb-trust">
-          {remainingManWon.toLocaleString('ko-KR')}만원
+          {displayMode === 'amount'
+            ? `${remainingManWon.toLocaleString('ko-KR')}만원`
+            : `${years}년 ${months}개월`}
         </div>
       </div>
 
@@ -97,6 +106,7 @@ export function FireTimelineWide({
   months = 4,
   dateLabel = '2034. 8.',
   mode = 'distance',
+  displayMode = 'amount',
   fireValueManWon = 40000,
   hereValueManWon = 13500,
   className,
@@ -106,6 +116,7 @@ export function FireTimelineWide({
   months?: number
   dateLabel?: string
   mode?: FireMode
+  displayMode?: FireDisplayMode
   fireValueManWon?: number
   hereValueManWon?: number
   className?: string
@@ -124,10 +135,12 @@ export function FireTimelineWide({
     <div className={className}>
       <div className="relative h-[92px] pt-8">
         <div className="absolute left-0 top-0 text-[11px] font-semibold uppercase tracking-[0.024em] text-fb-ink">
-          FIRE까지
+          {displayMode === 'amount' ? 'FIRE까지 남은 금액' : 'FIRE까지 남은 기간'}
         </div>
         <div className="fb-num absolute right-0 top-0 text-[11px] font-semibold uppercase tracking-[0.024em] text-fb-trust">
-          {remainingManWon.toLocaleString('ko-KR')}만원
+          {displayMode === 'amount'
+            ? `${remainingManWon.toLocaleString('ko-KR')}만원`
+            : `${years}년 ${months}개월`}
         </div>
 
         <div className="absolute left-0 top-10 h-2 overflow-hidden rounded-full bg-fb-card-mute" style={{ width: `calc(100% - ${fireTrackInset}px)` }}>
@@ -167,7 +180,11 @@ export function FireTimelineWide({
           진척 <span className="font-bold text-fb-trust">{Math.round(pct * 100)}%</span>
         </div>
         <div className="fb-num text-[16px] font-bold text-fb-ink">
-          {mode === 'date' ? (
+          {displayMode === 'amount' ? (
+            <>
+              남은 금액 <span className="text-fb-trust">{remainingManWon.toLocaleString('ko-KR')}만원</span>
+            </>
+          ) : mode === 'date' ? (
             <>
               예상 도달 <span className="text-fb-trust">{dateLabel}</span>
             </>

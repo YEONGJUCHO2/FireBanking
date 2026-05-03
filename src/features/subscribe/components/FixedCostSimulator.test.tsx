@@ -8,9 +8,25 @@ describe("FixedCostSimulator", () => {
     render(<FixedCostSimulator initialConfig={defaultFixedCostConfig} saveAction={async () => ({})} />);
 
     expect(screen.getByText("월 고정비")).toBeInTheDocument();
+    expect(screen.getByText("소비 누적 vs 투자 결과")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "유튜브 프리미엄" }));
 
     expect(screen.getByText(/₩14,900/)).toBeInTheDocument();
+  });
+
+  it("lets a user add a custom fixed cost item", () => {
+    render(<FixedCostSimulator initialConfig={defaultFixedCostConfig} saveAction={async () => ({})} />);
+
+    fireEvent.change(screen.getByLabelText("직접 추가 항목명"), {
+      target: { value: "주차 정기권" },
+    });
+    fireEvent.change(screen.getByLabelText("직접 추가 월 금액"), {
+      target: { value: "90000" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "추가" }));
+
+    expect(screen.getByRole("button", { name: "주차 정기권" })).toBeInTheDocument();
+    expect(screen.getByText(/₩90,000/)).toBeInTheDocument();
   });
 
   it("lets a user edit a card amount before saving", async () => {

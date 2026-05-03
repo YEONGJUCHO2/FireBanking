@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import DashboardPage from "./page";
 
@@ -26,7 +26,10 @@ describe("DashboardPage", () => {
     expect(screen.getByText("안녕하세요, 지윤님")).toBeInTheDocument();
     expect(screen.getAllByText("이번 달 부부 체크인").length).toBeGreaterThan(0);
     expect(screen.getByText("이번 달 결과를 같이 봐요.")).toBeInTheDocument();
-    expect(screen.getAllByText("예상 FIRE 도달까지").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("FIRE까지 남은 금액").length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: "기간" }).length).toBeGreaterThan(0);
+    fireEvent.click(screen.getAllByRole("button", { name: "기간" })[0]);
+    expect(screen.getAllByText("FIRE까지 남은 기간").length).toBeGreaterThan(0);
     expect(screen.getAllByText("목표 월 생활비").length).toBeGreaterThan(0);
     expect(screen.getAllByText("FIRE 목표자산").length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: /자산·부채 관리/ })[0]).toHaveAttribute(

@@ -8,7 +8,8 @@ describe("DashboardMobilePage", () => {
 
     expect(screen.getByText("안녕하세요, 지윤님")).toBeInTheDocument();
     expect(screen.getByText("이번 달 부부 체크인")).toBeInTheDocument();
-    expect(screen.getByText("예상 FIRE 도달까지")).toBeInTheDocument();
+    expect(screen.getAllByText("FIRE까지 남은 금액").length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "기간" })).toBeInTheDocument();
     expect(screen.getAllByText("목표 월 생활비").length).toBeGreaterThan(0);
     expect(screen.getByText("고정비 시뮬레이터")).toBeInTheDocument();
   });

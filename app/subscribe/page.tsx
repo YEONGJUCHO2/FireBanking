@@ -1,5 +1,8 @@
-import { FixedCostSimulator, MobileAppShell } from '@/components/fire-banking'
+import { MobileAppShell } from '@/components/fire-banking'
 import { Icon } from '@/components/fire-banking/icons'
+import { saveFixedCostSimulation } from '@/src/features/subscribe/actions/saveFixedCostSimulation'
+import { FixedCostSimulator } from '@/src/features/subscribe/components/FixedCostSimulator'
+import { defaultFixedCostConfig } from '@/src/features/subscribe/lib/fixedCostDefaults'
 
 export default function SubscribePage() {
   return (
@@ -24,7 +27,7 @@ export default function SubscribePage() {
       </header>
 
       <main className="flex-1 overflow-auto px-4 pb-8 pt-5">
-        <FixedCostSimulator />
+        <FixedCostSimulator initialConfig={defaultFixedCostConfig} saveAction={saveFixedCostSimulation} />
       </main>
     </MobileAppShell>
   )

@@ -1,10 +1,13 @@
+'use client'
+
 import type { ReactNode } from 'react'
 import Link from 'next/link'
+import { useState } from 'react'
 import { BrandMark } from './brand'
 import { Button } from './button'
 import { Card } from './card'
 import { CheckinRow } from './checkin-row'
-import { FireTimelineWide } from './fire-timeline'
+import { FireTimelineWide, type FireDisplayMode } from './fire-timeline'
 import { Icon } from './icons'
 import { StatusPill } from './status-pill'
 import { cn } from '@/lib/cn'
@@ -38,6 +41,8 @@ export function DesktopDashboard({
   data?: DesktopDashboardData
 }) {
   const percent = Math.max(0, Math.min(1, dashboardData.investableMan / dashboardData.fireTargetMan))
+  const [displayMode, setDisplayMode] = useState<FireDisplayMode>('amount')
+  const remainingManWon = Math.max(0, dashboardData.fireTargetMan - dashboardData.investableMan)
   return (
     <section className="mx-auto w-full max-w-[1280px] rounded-[28px] border border-fb-line bg-white">
       {/* topbar */}
@@ -104,13 +109,33 @@ export function DesktopDashboard({
           <div className="flex flex-col gap-5">
             <Card radius="hero" className="p-8">
               <div className="flex items-baseline justify-between">
-                <div className="text-[13px] font-medium text-fb-ink-3">예상 FIRE 도달까지</div>
+                <div className="text-[13px] font-medium text-fb-ink-3">
+                  {displayMode === 'amount' ? 'FIRE까지 남은 금액' : 'FIRE까지 남은 기간'}
+                </div>
                 <StatusPill tone="trust">월 {dashboardData.targetMonthlyExpenseMan}만원 기준</StatusPill>
               </div>
               <div className="fb-num mt-2 flex items-baseline gap-1.5">
                 <span className="text-[64px] font-bold leading-none tracking-[-0.030em] text-fb-ink">
-                  {dashboardData.fireYears}년 {dashboardData.fireMonths}개월
+                  {displayMode === 'amount'
+                    ? remainingManWon.toLocaleString('ko-KR')
+                    : `${dashboardData.fireYears}년 ${dashboardData.fireMonths}개월`}
                 </span>
+                {displayMode === 'amount' ? <span className="text-[22px] font-bold text-fb-ink-2">만원</span> : null}
+              </div>
+              <div className="mt-4 inline-flex rounded-full border border-fb-line bg-white p-1">
+                {(['amount', 'period'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setDisplayMode(mode)}
+                    className={cn(
+                      'h-8 rounded-full px-3 text-[12px] font-bold transition-colors',
+                      displayMode === mode ? 'bg-fb-ink text-white' : 'text-fb-ink-2 hover:bg-fb-card-alt',
+                    )}
+                  >
+                    {mode === 'amount' ? '남은 금액' : '남은 기간'}
+                  </button>
+                ))}
               </div>
               <p className="mt-3 text-[13px] font-medium text-fb-ink-3">
                 FIRE 목표자산은 목표 월 생활비 × 12 × 25배로 계산해요.
@@ -157,6 +182,7 @@ export function DesktopDashboard({
                 months={dashboardData.fireMonths}
                 fireValueManWon={dashboardData.fireTargetMan}
                 hereValueManWon={dashboardData.investableMan}
+                displayMode={displayMode}
               />
 
               <div className="mt-6 grid grid-cols-3 gap-6">

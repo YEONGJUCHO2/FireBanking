@@ -2,11 +2,10 @@ import Link from "next/link";
 import {
   BottomNav,
   CashflowSummary,
+  DashboardFireOverview,
   DesktopDashboard,
-  FireHeroCard,
   InviteCard,
   MobileAppShell,
-  NetWorthHero,
   ScreenTopBar,
   StatusPill,
 } from "@/components/fire-banking";
@@ -75,7 +74,8 @@ export default async function DashboardPage() {
               </StatusPill>
             </div>
 
-            <NetWorthHero
+            <DashboardFireOverview
+              percent={percent}
               targetMonthlyExpenseManWon={data.targetMonthlyExpenseMan}
               fireNetWorthManWon={data.investableMan}
               monthlyGrowthManWon={data.monthlyAddMan}
@@ -83,16 +83,6 @@ export default async function DashboardPage() {
               years={data.fireYears}
               months={data.fireMonths}
             />
-
-            <div className="mt-4">
-              <FireHeroCard
-                percent={percent}
-                years={data.fireYears}
-                months={data.fireMonths}
-                goalManWon={data.fireTargetMan}
-                coastManWon={Math.round(data.fireTargetMan * 0.55)}
-              />
-            </div>
 
             <section className="mt-6 space-y-3">
               <SectionHeader

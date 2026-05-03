@@ -41,9 +41,15 @@ export function FixedCostSimulator({
   const [config, setConfig] = useState(() => cloneConfig(initialConfig));
   const [shareOpen, setShareOpen] = useState(false);
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
+  const [customName, setCustomName] = useState("");
+  const [customAmount, setCustomAmount] = useState("");
   const [saveState, setSaveState] = useState<SaveFixedCostSimulationState>({});
   const [isPending, startTransition] = useTransition();
   const projection = useMemo(() => calculateFixedCostProjection(config), [config]);
+  const activeFixedCostCount = config.subscriptionCategories.reduce(
+    (total, category) => total + category.items.filter((item) => item.enabled).length,
+    0,
+  );
 
   function updateConfig(updater: (next: FixedCostSimulatorConfig) => void) {
     setConfig((current) => {
@@ -67,6 +73,34 @@ export function FixedCostSimulator({
       const result = await saveAction(config);
       setSaveState(result);
     });
+  }
+
+  function addCustomItem() {
+    const name = customName.trim();
+    const amount = Number(customAmount);
+
+    if (!name || !Number.isFinite(amount) || amount <= 0) {
+      return;
+    }
+
+    updateConfig((next) => {
+      const customCategory =
+        next.subscriptionCategories.find((category) => category.id === "custom") ??
+        next.subscriptionCategories[next.subscriptionCategories.length - 1];
+
+      if (!customCategory) {
+        return;
+      }
+
+      customCategory.items.push({
+        id: `custom-${Date.now()}`,
+        name,
+        monthlyAmount: amount,
+        enabled: true,
+      });
+    });
+    setCustomName("");
+    setCustomAmount("");
   }
 
   return (
@@ -188,6 +222,37 @@ export function FixedCostSimulator({
             </p>
           </div>
         </div>
+
+        <div className="rounded-card border border-fb-line bg-white p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-bold text-fb-ink">소비 누적 vs 투자 결과</p>
+              <p className="mt-1 text-sm text-fb-ink-2">
+                같은 고정비를 줄여 투자하면 FIRE까지 약{" "}
+                <strong className="text-fb-trust">
+                  {Math.floor(projection.fireMonthsSaved / 12)}년 {projection.fireMonthsSaved % 12}개월
+                </strong>{" "}
+                당길 수 있어요.
+              </p>
+            </div>
+            <span className="rounded-full bg-fb-trust-soft px-3 py-1 text-xs font-bold text-fb-trust">
+              {activeFixedCostCount}개 활성
+            </span>
+          </div>
+          <div className="mt-4 flex h-20 items-end gap-3">
+            <ComparisonBar
+              label="소비 누적"
+              value={projection.simpleFixedCostTotal}
+              max={Math.max(projection.simpleFixedCostTotal, projection.futureFixedCostImpact, 1)}
+            />
+            <ComparisonBar
+              label="투자 결과"
+              value={projection.futureFixedCostImpact}
+              max={Math.max(projection.simpleFixedCostTotal, projection.futureFixedCostImpact, 1)}
+              trust
+            />
+          </div>
+        </div>
       </section>
 
       <section className="grid gap-4">
@@ -277,6 +342,34 @@ export function FixedCostSimulator({
                   </div>
                 ))}
               </div>
+              {category.id === "custom" ? (
+                <div className="mt-3 grid gap-2 rounded-soft border border-dashed border-fb-line-strong bg-white p-3 sm:grid-cols-[1fr_140px_auto]">
+                  <input
+                    aria-label="직접 추가 항목명"
+                    value={customName}
+                    onChange={(event) => setCustomName(event.target.value)}
+                    placeholder="예: 주차 정기권"
+                    className="fb-input px-3 py-2 text-sm"
+                  />
+                  <input
+                    aria-label="직접 추가 월 금액"
+                    type="number"
+                    min={0}
+                    step={1000}
+                    value={customAmount}
+                    onChange={(event) => setCustomAmount(event.target.value)}
+                    placeholder="월 금액"
+                    className="fb-input px-3 py-2 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={addCustomItem}
+                    className="fb-focus rounded-button bg-fb-ink px-4 py-2 text-sm font-bold text-white"
+                  >
+                    추가
+                  </button>
+                </div>
+              ) : null}
             </div>
           );
         })}
@@ -356,6 +449,35 @@ export function FixedCostSimulator({
           </div>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function ComparisonBar({
+  label,
+  value,
+  max,
+  trust = false,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  trust?: boolean;
+}) {
+  const height = Math.max(8, Math.round((value / max) * 64));
+
+  return (
+    <div className="flex min-w-0 flex-1 flex-col items-stretch justify-end">
+      <div
+        className={trust ? "rounded-[8px] bg-fb-trust" : "rounded-[8px] bg-fb-line-strong"}
+        style={{ height }}
+      />
+      <div className="mt-2 flex items-center justify-between gap-2">
+        <span className={trust ? "text-xs font-bold text-fb-trust" : "text-xs font-bold text-fb-ink-3"}>
+          {label}
+        </span>
+        <span className="text-xs font-bold text-fb-ink">{formatCompactKrw(value)}</span>
+      </div>
     </div>
   );
 }

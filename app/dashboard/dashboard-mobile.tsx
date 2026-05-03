@@ -2,10 +2,9 @@ import Link from 'next/link'
 import {
   BottomNav,
   CashflowSummary,
-  FireHeroCard,
+  DashboardFireOverview,
   InviteCard,
   MobileAppShell,
-  NetWorthHero,
   ScreenTopBar,
   StatusPill,
 } from '@/components/fire-banking'
@@ -62,7 +61,8 @@ export function DashboardMobile() {
           </StatusPill>
         </div>
 
-        <NetWorthHero
+        <DashboardFireOverview
+          percent={percent}
           targetMonthlyExpenseManWon={data.targetMonthlyExpenseMan}
           fireNetWorthManWon={data.investableMan}
           monthlyGrowthManWon={data.monthlyAddMan}
@@ -70,16 +70,6 @@ export function DashboardMobile() {
           years={data.fireYears}
           months={data.fireMonths}
         />
-
-        <div className="mt-4">
-          <FireHeroCard
-            percent={percent}
-            years={data.fireYears}
-            months={data.fireMonths}
-            goalManWon={data.fireTargetMan}
-            coastManWon={Math.round(data.fireTargetMan * 0.55)}
-          />
-        </div>
 
         <section className="mt-6 space-y-3">
           <SectionHeader title="이번 달 부부 체크인" subtitle="배우자 입력이 끝나면 결과가 확정돼요" />
