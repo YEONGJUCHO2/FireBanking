@@ -44,9 +44,15 @@ export function LiabilityPanel({
     interestManwon: "",
     principalManwon: "",
   });
-  const totalBalance = items.reduce((sum, liability) => sum + liability.balanceAmount, 0);
-  const monthlyPayment = items.reduce(
-    (sum, liability) => sum + liability.monthlyInterestAmount + liability.monthlyPrincipalAmount,
+  const investmentLinkedLoanBalance = items
+    .filter((liability) => liability.purpose === "investment")
+    .reduce((sum, liability) => sum + liability.balanceAmount, 0);
+  const monthlyInterest = items.reduce(
+    (sum, liability) => sum + liability.monthlyInterestAmount,
+    0,
+  );
+  const monthlyPrincipal = items.reduce(
+    (sum, liability) => sum + liability.monthlyPrincipalAmount,
     0,
   );
 
@@ -103,24 +109,25 @@ export function LiabilityPanel({
   return (
     <Card className="p-5 md:p-6">
       <SectionHeader
-        title="부채"
-        subtitle="이자는 비용으로 보고, 원금상환은 빚이 줄어드는 효과로 계산해요."
-        action={<StatusPill label={isPending ? "저장 중" : "단순 모델"} status="info" />}
+        title="투자 연동 대출"
+        subtitle="투자자산을 만들기 위해 낀 대출만 FIRE 반영 투자자산에서 차감해요."
+        action={<StatusPill label={isPending ? "저장 중" : "FIRE 보정"} status="info" />}
       />
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
         <section className="rounded-[16px] border border-fb-line bg-fb-card-alt p-4">
-          <div className="grid grid-cols-2 gap-3">
-            <Summary label="총 부채" value={formatKrw(totalBalance)} />
-            <Summary label="월 상환 흐름" value={formatKrw(monthlyPayment)} />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <Summary label="차감 대상 대출" value={formatKrw(investmentLinkedLoanBalance)} />
+            <Summary label="월 이자" value={formatKrw(monthlyInterest)} />
+            <Summary label="월 원금상환" value={formatKrw(monthlyPrincipal)} />
           </div>
           <p className="mt-4 rounded-[12px] bg-white px-3 py-3 text-[12px] leading-5 text-fb-ink-3">
-            은행 앱의 상환 안내처럼 정교한 원리금 스케줄을 만들기보다, FIRE 예상일에 필요한
-            월 현금흐름과 부채 잔액만 단순하게 반영해요.
+            우리사주 대출, 주식담보대출처럼 투자자산을 사기 위해 빌린 돈은 투자자산 평가액에서
+            빼야 FIRE 금액을 과대평가하지 않아요.
           </p>
           <p className="mt-3 text-[12px] leading-5 text-fb-ink-3">
-            거주 부동산 관련 부채는 기본 FIRE 계산 순자산에서 제외하고, 투자/생활/기타 부채는
-            기본 차감해요.
+            주거/생활 부채는 이 진단 KPI에서 기본 제외하고, 생활비 조정기나 월 현금흐름에서
+            따로 다뤄요.
           </p>
         </section>
 
@@ -176,7 +183,8 @@ export function LiabilityPanel({
                       </div>
                     ) : (
                       <p className="mt-1 text-[12px] text-fb-ink-3">
-                        {liability.purposeLabel} · 이자 {formatKrw(liability.monthlyInterestAmount)} · 원금상환{" "}
+                        {liability.purpose === "investment" ? "FIRE 반영 투자자산에서 차감" : "이 진단 KPI에서는 제외"} ·
+                        이자 {formatKrw(liability.monthlyInterestAmount)} · 원금상환{" "}
                         {formatKrw(liability.monthlyPrincipalAmount)}
                       </p>
                     )}

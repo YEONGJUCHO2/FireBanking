@@ -10,11 +10,11 @@ describe("LiabilityPanel", () => {
   it("shows liability policy copy and edit affordance", () => {
     render(<LiabilityPanel />);
 
-    expect(screen.getByText("부채")).toBeInTheDocument();
-    expect(screen.getByText(/이자는 비용으로 보고/)).toBeInTheDocument();
-    expect(screen.getByText(/원금상환은 빚이 줄어드는 효과/)).toBeInTheDocument();
-    expect(screen.getByText(/은행 앱의 상환 안내/)).toBeInTheDocument();
-    expect(screen.getByText(/거주 부동산 관련/)).toBeInTheDocument();
+    expect(screen.getByText("투자 연동 대출")).toBeInTheDocument();
+    expect(screen.getByText(/투자자산을 만들기 위해 낀 대출만 FIRE 반영 투자자산에서 차감해요/)).toBeInTheDocument();
+    expect(screen.getByText("차감 대상 대출")).toBeInTheDocument();
+    expect(screen.getByText("월 이자")).toBeInTheDocument();
+    expect(screen.getByText("월 원금상환")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "부채 수정" })).toBeInTheDocument();
   });
 
@@ -34,6 +34,7 @@ describe("LiabilityPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "저장" }));
 
     expect(screen.getAllByText("₩12,000,000").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("₩330,000").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("₩80,000").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("₩250,000").length).toBeGreaterThan(0);
   });
 });
