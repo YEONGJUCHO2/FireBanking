@@ -72,6 +72,26 @@ const accountSections: Array<{ value: AccountCategory; title: string }> = [
   { value: "other", title: "기타" },
 ];
 
+function getUnitPrice(holding: HoldingView) {
+  const searchableHolding = holding as SearchableHoldingView;
+
+  if (searchableHolding.lastClosePrice && searchableHolding.lastClosePrice > 0) {
+    return searchableHolding.lastClosePrice;
+  }
+
+  if (holding.quantity > 0) {
+    return Math.round(holding.valuationAmount / holding.quantity);
+  }
+
+  return 0;
+}
+
+function getDiagnosisCategoryLabel(accountCategory: AccountCategory) {
+  return accountCategory === "pension_savings" || accountCategory === "irp"
+    ? "제한·미래 자산"
+    : "FIRE 반영";
+}
+
 const searchableInstruments: SearchableHoldingView[] = [
   {
     id: "sample-samsung",
@@ -562,16 +582,23 @@ export function InvestmentAssetPanel({
                         <h3 className="text-[12px] font-bold text-fb-ink-2">{section.title}</h3>
                       </div>
                       <div className="grid gap-3">
-                        {section.holdings.map((holding) => (
-                          <div
-                            key={holding.id}
-                            className="grid gap-3 rounded-[12px] border border-fb-line bg-white p-3"
-                          >
+                        {section.holdings.map((holding) => {
+                          const accountCategory = holding.accountCategory ?? "general";
+                          const unitPrice = getUnitPrice(holding);
+
+                          return (
+                            <div
+                              key={holding.id}
+                              className="grid gap-3 rounded-[12px] border border-fb-line bg-white p-3"
+                            >
                             <div>
                               <div className="flex flex-wrap items-center gap-2">
                                 <p className="text-[14px] font-bold text-fb-ink">{holding.displayName}</p>
                                 <span className="rounded-full bg-fb-trust-soft px-2 py-0.5 text-[11px] font-bold text-fb-trust-ink">
-                                  {accountCategoryLabels[holding.accountCategory ?? "general"]}
+                                  {accountCategoryLabels[accountCategory]}
+                                </span>
+                                <span className="rounded-full bg-fb-card-alt px-2 py-0.5 text-[11px] font-bold text-fb-ink-3">
+                                  {getDiagnosisCategoryLabel(accountCategory)}
                                 </span>
                                 <span className="fb-num rounded-full bg-fb-card-alt px-2 py-0.5 text-[11px] font-bold text-fb-ink-3">
                                   {holding.symbol}
@@ -591,11 +618,23 @@ export function InvestmentAssetPanel({
                                   />
                                   <span className="text-[12px] font-medium text-fb-ink-3">주</span>
                                 </div>
-                              ) : null}
+                              ) : (
+                                <div className="mt-3 grid grid-cols-1 gap-2 rounded-[12px] bg-fb-card-alt p-3 sm:grid-cols-3">
+                                  <p className="fb-num text-[13px] font-bold text-fb-ink">
+                                    보유 {formatPlainNumber(holding.quantity)}주
+                                  </p>
+                                  <p className="fb-num text-[13px] font-bold text-fb-ink">
+                                    기준가 {formatKrw(unitPrice)}
+                                  </p>
+                                  <p className="fb-num text-[13px] font-bold text-fb-ink">
+                                    평가액 {formatKrw(holding.valuationAmount)}
+                                  </p>
+                                </div>
+                              )}
                             </div>
                             <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
-                              <p className="fb-num text-[15px] font-bold text-fb-ink">
-                                {formatKrw(holding.valuationAmount)}
+                              <p className="text-[12px] font-medium text-fb-ink-3">
+                                {getDiagnosisCategoryLabel(accountCategory)} 기준
                               </p>
                               <div className="grid grid-cols-2 gap-1.5 sm:flex">
                                 {editingId === holding.id ? (
@@ -613,7 +652,8 @@ export function InvestmentAssetPanel({
                               </div>
                             </div>
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </section>
                   ))}

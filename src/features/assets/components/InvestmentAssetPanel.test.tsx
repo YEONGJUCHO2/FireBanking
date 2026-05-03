@@ -85,11 +85,11 @@ describe("InvestmentAssetPanel", () => {
     fireEvent.change(screen.getByLabelText("삼성전자 보유 수량"), { target: { value: "25" } });
     fireEvent.click(screen.getByRole("button", { name: "저장" }));
 
-    expect(screen.getByText("₩2,125,000")).toBeInTheDocument();
+    expect(screen.getByText("평가액 ₩2,125,000")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "삭제" }));
 
-    expect(screen.queryByText("₩2,125,000")).not.toBeInTheDocument();
+    expect(screen.queryByText("평가액 ₩2,125,000")).not.toBeInTheDocument();
     expect(screen.getByText("아직 등록한 종목이 없어요.")).toBeInTheDocument();
   });
 
@@ -165,7 +165,11 @@ describe("InvestmentAssetPanel", () => {
     expect(within(generalSection).getByText("포스코퓨처엠")).toBeInTheDocument();
     expect(within(generalSection).getByText("일반")).toBeInTheDocument();
     expect(within(generalSection).getByText("003670")).toBeInTheDocument();
-    expect(within(generalSection).queryByText("1")).not.toBeInTheDocument();
+    expect(within(generalSection).getByText("보유 1주")).toBeInTheDocument();
+    expect(within(generalSection).getByText("기준가 ₩252,000")).toBeInTheDocument();
+    expect(within(generalSection).getByText("평가액 ₩252,000")).toBeInTheDocument();
+    expect(within(pensionSection).getByText("제한·미래 자산")).toBeInTheDocument();
+    expect(within(irpSection).getByText("제한·미래 자산")).toBeInTheDocument();
     expect(within(pensionSection).getByText("TIGER 미국S&P500")).toBeInTheDocument();
     expect(within(irpSection).getByText("ACE 미국S&P500채권혼합액티브")).toBeInTheDocument();
     expect(screen.queryByText(/마지막 거래일/)).not.toBeInTheDocument();
