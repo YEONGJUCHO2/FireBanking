@@ -210,7 +210,7 @@ function deriveDashboardData({
     0,
   );
   const fireIncludedLiabilityAmount = registeredLiabilities
-    .filter((liability) => liability.purpose !== "residence")
+    .filter((liability) => liability.purpose === "investment")
     .reduce((total, liability) => total + liability.balanceAmount, 0);
 
   const totalNetWorthMan = Math.round(

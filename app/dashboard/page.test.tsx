@@ -86,4 +86,55 @@ describe("DashboardPage", () => {
     expect(screen.queryByText("연금/IRP 별도")).not.toBeInTheDocument();
     expect(screen.getAllByText(/3개 투자자산이 FIRE 금액에 반영 중/).length).toBeGreaterThan(0);
   });
+
+  it("subtracts only investment-linked loans from dashboard FIRE reflected assets", async () => {
+    mocks.getAssetManagementData.mockResolvedValue({
+      coupleId: "couple-1",
+      holdings: [
+        {
+          id: "holding-general",
+          symbol: "003670",
+          displayName: "포스코퓨처엠",
+          quantity: 1,
+          valuationAmount: 50_000_000,
+          valuationDate: "2026-04-30",
+          accountCategory: "general",
+        },
+        {
+          id: "holding-pension",
+          symbol: "360750",
+          displayName: "TIGER 미국S&P500",
+          quantity: 10,
+          valuationAmount: 10_000_000,
+          valuationDate: "2026-04-30",
+          accountCategory: "pension_savings",
+        },
+      ],
+      liabilities: [
+        {
+          id: "stock-loan",
+          label: "주식담보대출",
+          purposeLabel: "투자 관련",
+          balanceAmount: 15_000_000,
+          monthlyInterestAmount: 100_000,
+          monthlyPrincipalAmount: 300_000,
+          purpose: "investment",
+        },
+        {
+          id: "credit-loan",
+          label: "생활 신용대출",
+          purposeLabel: "생활 신용",
+          balanceAmount: 5_000_000,
+          monthlyInterestAmount: 50_000,
+          monthlyPrincipalAmount: 200_000,
+          purpose: "lifestyle_credit",
+        },
+      ],
+    });
+
+    render(await DashboardPage());
+
+    expect(screen.getAllByText("FIRE 계산 순자산").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("3,500").length).toBeGreaterThan(0);
+  });
 });
