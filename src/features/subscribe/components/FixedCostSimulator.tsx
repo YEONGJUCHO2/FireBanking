@@ -105,11 +105,11 @@ export function FixedCostSimulator({
 
   return (
     <div className="grid gap-6">
-      <section className="grid gap-4 rounded-card border border-fb-line bg-fb-card p-5 shadow-card">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
+      <section className="grid min-w-0 gap-4 rounded-card border border-fb-line bg-fb-card p-5 shadow-card">
+        <div className="flex min-w-0 flex-col gap-4">
+          <div className="min-w-0">
             <p className="text-sm font-bold text-fb-trust">고정비 시뮬레이터</p>
-            <h1 className="mt-1 text-2xl font-bold tracking-normal text-fb-ink sm:text-3xl">
+            <h1 className="mt-1 text-[24px] font-bold leading-[1.28] tracking-normal text-fb-ink">
               내 고정비가 미래 자산을 얼마나 바꾸는지 확인해요
             </h1>
           </div>
@@ -117,7 +117,7 @@ export function FixedCostSimulator({
             type="button"
             onClick={save}
             disabled={isPending}
-            className="fb-focus w-full rounded-button bg-fb-trust px-4 py-3 text-sm font-bold text-white shadow-card hover:bg-fb-trust-strong disabled:opacity-60 sm:w-auto sm:py-2"
+            className="fb-focus w-full rounded-button bg-fb-trust px-4 py-3 text-sm font-bold text-white shadow-card hover:bg-fb-trust-strong disabled:opacity-60"
           >
             {isPending ? "저장 중..." : "저장"}
           </button>
@@ -125,8 +125,8 @@ export function FixedCostSimulator({
         {saveState.error ? <p className="text-sm text-fb-negative">{saveState.error}</p> : null}
         {saveState.saved ? <p className="text-sm text-fb-positive">저장했어요.</p> : null}
 
-        <div className="grid gap-4 sm:grid-cols-4">
-          <label className="grid gap-2">
+        <div className="grid min-w-0 gap-3">
+          <label className="grid min-w-0 gap-2">
             <span className="text-sm font-medium text-fb-ink-2">월 실수령액</span>
             <input
               type="number"
@@ -138,10 +138,10 @@ export function FixedCostSimulator({
                   next.monthlyIncome = Number(event.target.value);
                 })
               }
-              className="fb-input"
+              className="fb-input min-w-0 w-full"
             />
           </label>
-          <label className="grid gap-2">
+          <label className="grid min-w-0 gap-2">
             <span className="text-sm font-medium text-fb-ink-2">시뮬레이션 기간</span>
             <input
               aria-label="시뮬레이션 기간"
@@ -157,7 +157,7 @@ export function FixedCostSimulator({
             />
             <span className="text-sm text-fb-ink-2">{Math.round(config.periodMonths / 12)}년</span>
           </label>
-          <label className="grid gap-2">
+          <label className="grid min-w-0 gap-2">
             <span className="text-sm font-medium text-fb-ink-2">투자 비율</span>
             <input
               aria-label="투자 비율"
@@ -175,7 +175,7 @@ export function FixedCostSimulator({
               {Math.round(config.investmentRatio * 100)}%
             </span>
           </label>
-          <div className="grid gap-2">
+          <div className="grid min-w-0 gap-2">
             <span className="text-sm font-medium text-fb-ink-2">예상 수익률</span>
             <div className="flex flex-wrap gap-2">
               {[0.03, 0.05, 0.07].map((rate) => (
@@ -200,7 +200,7 @@ export function FixedCostSimulator({
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-4">
+        <div className="grid min-w-0 grid-cols-2 gap-3">
           <div className="rounded-soft bg-fb-trust-soft p-3">
             <p className="text-sm text-fb-ink-2">월 고정비</p>
             <p className="text-xl font-semibold">{formatCompactKrw(projection.monthlyFixedExpense)}</p>
@@ -223,9 +223,9 @@ export function FixedCostSimulator({
           </div>
         </div>
 
-        <div className="rounded-card border border-fb-line bg-white p-4">
-          <div className="flex items-center justify-between gap-3">
-            <div>
+        <div className="min-w-0 rounded-card border border-fb-line bg-white p-4">
+          <div className="flex min-w-0 flex-col gap-2">
+            <div className="min-w-0">
               <p className="text-sm font-bold text-fb-ink">소비 누적 vs 투자 결과</p>
               <p className="mt-1 text-sm text-fb-ink-2">
                 같은 고정비를 줄여 투자하면 FIRE까지 약{" "}
@@ -235,7 +235,7 @@ export function FixedCostSimulator({
                 당길 수 있어요.
               </p>
             </div>
-            <span className="rounded-full bg-fb-trust-soft px-3 py-1 text-xs font-bold text-fb-trust">
+            <span className="self-start rounded-full bg-fb-trust-soft px-3 py-1 text-xs font-bold text-fb-trust">
               {activeFixedCostCount}개 활성
             </span>
           </div>
@@ -255,7 +255,7 @@ export function FixedCostSimulator({
         </div>
       </section>
 
-      <section className="grid gap-4">
+      <section className="grid min-w-0 gap-4">
         <div>
           <h2 className="text-2xl font-semibold">내 고정비 찾기</h2>
           <p className="mt-1 text-sm text-fb-ink-2">
@@ -269,9 +269,9 @@ export function FixedCostSimulator({
           );
 
           return (
-          <div key={category.id} className="rounded-card border border-fb-line bg-fb-card p-4 shadow-card">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                <div>
+          <div key={category.id} className="min-w-0 rounded-card border border-fb-line bg-fb-card p-4 shadow-card">
+              <div className="flex min-w-0 flex-col gap-2">
+                <div className="min-w-0">
                   <h3 className="font-semibold">{category.name}</h3>
                   <p className="text-sm text-fb-ink-2">{category.prompt}</p>
                 </div>
@@ -279,17 +279,17 @@ export function FixedCostSimulator({
                   {formatKrw(categoryTotal)}
                 </p>
               </div>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-3 grid min-w-0 gap-2">
                 {category.items.map((item) => (
                   <div
                     key={item.id}
-                    className={`grid gap-2 rounded-soft border p-3 ${
+                    className={`grid min-w-0 gap-2 rounded-soft border p-3 ${
                       item.enabled
                         ? "border-fb-trust bg-fb-trust-soft text-fb-trust"
                         : "border-fb-line bg-fb-card text-fb-ink-2"
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="flex min-w-0 items-center justify-between gap-3">
                       <button
                         type="button"
                         onClick={() =>
@@ -305,7 +305,7 @@ export function FixedCostSimulator({
                             }
                           })
                         }
-                        className="text-left text-sm font-semibold"
+                        className="min-w-0 flex-1 text-left text-sm font-semibold"
                       >
                         {item.name}
                       </button>
@@ -313,7 +313,7 @@ export function FixedCostSimulator({
                         {item.enabled ? "포함" : "제외"}
                       </span>
                     </div>
-                    <label className="grid gap-1">
+                    <label className="grid min-w-0 gap-1">
                       <span className="text-xs font-medium text-fb-ink-2">
                         {item.name} 월 금액
                       </span>
@@ -336,20 +336,20 @@ export function FixedCostSimulator({
                             }
                           })
                         }
-                        className="fb-input px-2 py-2 text-sm"
+                        className="fb-input min-w-0 w-full px-2 py-2 text-sm"
                       />
                     </label>
                   </div>
                 ))}
               </div>
               {category.id === "custom" ? (
-                <div className="mt-3 grid gap-2 rounded-soft border border-dashed border-fb-line-strong bg-white p-3 sm:grid-cols-[1fr_140px_auto]">
+                <div className="mt-3 grid min-w-0 gap-2 rounded-soft border border-dashed border-fb-line-strong bg-white p-3">
                   <input
                     aria-label="직접 추가 항목명"
                     value={customName}
                     onChange={(event) => setCustomName(event.target.value)}
                     placeholder="예: 주차 정기권"
-                    className="fb-input px-3 py-2 text-sm"
+                    className="fb-input min-w-0 w-full px-3 py-2 text-sm"
                   />
                   <input
                     aria-label="직접 추가 월 금액"
@@ -359,7 +359,7 @@ export function FixedCostSimulator({
                     value={customAmount}
                     onChange={(event) => setCustomAmount(event.target.value)}
                     placeholder="월 금액"
-                    className="fb-input px-3 py-2 text-sm"
+                    className="fb-input min-w-0 w-full px-3 py-2 text-sm"
                   />
                   <button
                     type="button"
@@ -375,11 +375,11 @@ export function FixedCostSimulator({
         })}
       </section>
 
-      <section className="rounded-card border border-fb-line bg-fb-card p-4 shadow-card">
+      <section className="min-w-0 rounded-card border border-fb-line bg-fb-card p-4 shadow-card">
         <h2 className="text-2xl font-semibold">실생활 고정지출</h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="mt-4 grid min-w-0 gap-3">
           {config.livingExpenses.map((item) => (
-            <label key={item.id} className="grid gap-2">
+            <label key={item.id} className="grid min-w-0 gap-2">
               <span className="text-sm font-medium text-fb-ink-2">{item.name}</span>
               <input
                 type="number"
@@ -394,14 +394,14 @@ export function FixedCostSimulator({
                     }
                   })
                 }
-                className="fb-input"
+                className="fb-input min-w-0 w-full"
               />
             </label>
           ))}
         </div>
       </section>
 
-      <section className="rounded-card border border-fb-line bg-fb-card p-4 shadow-card">
+      <section className="min-w-0 rounded-card border border-fb-line bg-fb-card p-4 shadow-card">
         <p className="text-sm text-fb-ink-2">
           월 {formatCompactKrw(projection.monthlyFixedExpense)}의 고정비를{" "}
           {Math.round(config.periodMonths / 12)}년 동안 그대로 두면 단순 합산{" "}
