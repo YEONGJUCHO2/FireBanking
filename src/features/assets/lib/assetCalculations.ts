@@ -4,8 +4,8 @@ import type {
   LiabilityInput,
 } from "../types";
 
-function shouldSubtractFromFireNetWorth(liability: LiabilityInput) {
-  return liability.purpose !== "residence";
+function shouldSubtractFromFireReflectedInvestmentAssets(liability: LiabilityInput) {
+  return liability.purpose === "investment";
 }
 
 export function calculateAssetSnapshotInputs(
@@ -25,7 +25,7 @@ export function calculateAssetSnapshotInputs(
     0,
   );
   const fireIncludedLiabilityAmount = input.liabilities
-    .filter(shouldSubtractFromFireNetWorth)
+    .filter(shouldSubtractFromFireReflectedInvestmentAssets)
     .reduce((total, liability) => total + liability.balanceAmount, 0);
   const monthlyDebtInterestAmount = input.liabilities.reduce(
     (total, liability) => total + liability.monthlyInterestAmount,

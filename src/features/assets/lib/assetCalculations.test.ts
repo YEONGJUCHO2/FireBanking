@@ -56,7 +56,7 @@ describe("calculateAssetSnapshotInputs", () => {
     expect(result.fireCalculationNetWorth).toBe(70_000_000);
   });
 
-  it("subtracts investment and lifestyle liabilities from FIRE net worth", () => {
+  it("subtracts only investment-linked loans from FIRE reflected investment assets", () => {
     const result = calculateAssetSnapshotInputs({
       cashAssetAmount: 20_000_000,
       domesticHoldingValuationAmount: 50_000_000,
@@ -79,12 +79,19 @@ describe("calculateAssetSnapshotInputs", () => {
           monthlyInterestAmount: 50_000,
           monthlyPrincipalAmount: 200_000,
         },
+        {
+          id: "other-loan",
+          purpose: "other",
+          balanceAmount: 7_000_000,
+          monthlyInterestAmount: 30_000,
+          monthlyPrincipalAmount: 100_000,
+        },
       ],
     });
 
-    expect(result.displayedNetWorth).toBe(50_000_000);
-    expect(result.fireCalculationNetWorth).toBe(50_000_000);
-    expect(result.monthlyDebtInterestAmount).toBe(150_000);
-    expect(result.monthlyDebtPrincipalAmount).toBe(500_000);
+    expect(result.displayedNetWorth).toBe(43_000_000);
+    expect(result.fireCalculationNetWorth).toBe(55_000_000);
+    expect(result.monthlyDebtInterestAmount).toBe(180_000);
+    expect(result.monthlyDebtPrincipalAmount).toBe(600_000);
   });
 });
