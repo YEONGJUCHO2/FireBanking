@@ -11,8 +11,8 @@ export default async function AssetsPage() {
       <div className="lg:hidden">
         <MobileAppShell>
           <AppHeader
-            title="자산·부채 관리"
-            subtitle="FIRE 예상일 계산에 들어갈 자동평가 자산과 빚 정보를 정리해요."
+            title="FIRE 자산 진단"
+            subtitle="FIRE까지 남은 금액에 들어갈 투자자산 KPI를 검증해요."
             backHref="/dashboard"
           />
           <main className="flex-1 overflow-auto px-4 pb-28 pt-2">
@@ -36,10 +36,10 @@ export default async function AssetsPage() {
                 홈으로
               </a>
               <h1 className="text-[30px] font-bold tracking-[-0.024em] text-fb-ink">
-                자산·부채 관리
+                FIRE 자산 진단
               </h1>
               <p className="mt-2 text-[14px] font-medium text-fb-ink-3">
-                대시보드는 요약만 보고, 세부 입력은 이 화면에서 다뤄요.
+                바로 쓸 수 있는 투자자산과 투자 연동 대출을 분리해서 FIRE 반영 금액을 확인해요.
               </p>
             </div>
           </header>

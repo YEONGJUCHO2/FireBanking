@@ -166,11 +166,11 @@ function AssetManagementLink({ linkedAssetCount }: { linkedAssetCount?: number }
         <Icon name="wallet" className="size-[22px]" />
       </span>
       <span className="flex-1">
-        <span className="block text-[14px] font-bold text-fb-ink">자산·부채 관리</span>
+        <span className="block text-[14px] font-bold text-fb-ink">FIRE 자산 진단</span>
         <span className="mt-0.5 block text-[12px] font-medium text-fb-ink-3">
           {linkedAssetCount
-            ? `${linkedAssetCount.toLocaleString("ko-KR")}개 등록 자산이 대시보드에 반영 중`
-            : "자동평가 자산과 빚 정보를 따로 정리해요"}
+            ? `${linkedAssetCount.toLocaleString("ko-KR")}개 투자자산이 FIRE 금액에 반영 중`
+            : "투자자산과 투자 연동 대출을 분리해요"}
         </span>
       </span>
       <Icon name="chevron-right" className="size-5 text-fb-ink-3" />

@@ -27,9 +27,10 @@ describe("AssetsPage", () => {
   it("renders investment and liability management outside the home dashboard", async () => {
     render(await AssetsPage());
 
-    expect(screen.getAllByRole("heading", { name: "자산·부채 관리" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByText("FIRE 자산 진단").length).toBeGreaterThan(0);
+    expect(screen.getByText(/투자자산 KPI를 검증해요/)).toBeInTheDocument();
     expect(screen.getAllByText("투자자산").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("부채").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("투자 연동 대출").length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: "홈으로" })).toHaveAttribute("href", "/dashboard");
   });
 });
