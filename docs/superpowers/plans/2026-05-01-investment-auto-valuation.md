@@ -1,5 +1,7 @@
 # Investment Auto Valuation Implementation Plan
 
+> Document status: historical implementation plan. Current product scope and priorities live in `fire_couple_app_prd_v2.md`. Keep this file only for valuation implementation history.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build the first release of investment auto valuation: domestic listed holdings are valued from last trading-day close, liabilities are reflected, daily prices feed current estimates, and KST month-end snapshots are fixed for dashboard history.

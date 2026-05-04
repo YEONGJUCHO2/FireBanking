@@ -2,7 +2,7 @@ import { Card } from './card'
 import { Icon } from './icons'
 
 export function InviteCard({
-  spouseName = '민호',
+  spouseName = '배우자',
   inviteUrl = 'firebanking.app/invite/3a91…',
   daysLeft = 7,
 }: {

@@ -120,7 +120,7 @@ describe("acceptInvite", () => {
     const result = await acceptInvite({}, createFormData("token-1"));
 
     expect(result).toEqual({
-      error: "이미 배우자 계정이 연결되어 있습니다. 관리자에게 새 초대를 요청해주세요.",
+      error: "이미 배우자 계정이 연결되어 있습니다. 리드 파트너에게 새 초대를 요청해주세요.",
     });
   });
 });

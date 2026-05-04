@@ -1,0 +1,261 @@
+{
+  "schema_version": "1.0",
+  "kind": "codex_json_handoff",
+  "trigger_keyword": "인수인계",
+  "created_at": "2026-05-03T11:44:50.742Z",
+  "created_by": "Codex handoff hook",
+  "workspace": {
+    "absolute_path": "/Users/macmini-cho/Documents/Project/FireBanking",
+    "cwd_at_creation": "/Users/macmini-cho/Documents/Project/FireBanking",
+    "project_name": "fire-banking",
+    "branch": "codex/investment-auto-valuation",
+    "current_commit": "ba5012b",
+    "host": "macmini-choui-Macmini.local",
+    "platform": "darwin 25.4.0"
+  },
+  "storage": {
+    "directory": "docs/handoffs",
+    "file": "docs/handoffs/2026-05-03-204450-firebanking-closed-beta-implementation-handoff.json",
+    "cumulative_index": "docs/handoffs/index.json",
+    "mode": "Each handoff is stored as an individual JSON file and registered in the cumulative index."
+  },
+  "purpose": "Continue FireBanking closed-beta implementation from the canonical PRD",
+  "user_notes": [
+    "Decision: handoffs now live in docs/handoffs and accumulate in docs/handoffs/index.json.",
+    "Next: use fire_couple_app_prd_v2.md section 30 as the implementation checklist.",
+    "Do not create more scattered strategy documents; update existing canonical docs only when needed."
+  ],
+  "canonical_context": {
+    "rule": "Read these first. If docs conflict, prefer explicit canonical product/project docs over old plans.",
+    "read_first": [
+      "fire_couple_app_prd_v2.md",
+      "README.md",
+      "docs/designer-handoff.md"
+    ],
+    "doc_candidates": [
+      "README.md",
+      "docs/designer-handoff.md",
+      "docs/research/2026-05-kiwoom-domestic-valuation-spike.md",
+      "docs/superpowers/plans/2026-04-25-fire-banking-r0-admin-solo.md",
+      "docs/superpowers/plans/2026-05-01-investment-auto-valuation.md",
+      "docs/superpowers/plans/2026-05-03-fire-asset-diagnosis.md",
+      "docs/superpowers/specs/2026-04-25-fire-banking-mvp-design.md",
+      "docs/superpowers/specs/2026-05-01-investment-auto-valuation-design.md",
+      "docs/superpowers/specs/2026-05-03-fire-asset-diagnosis-design.md",
+      "docs/superpowers/specs/2026-05-03-fire-living-expense-adjuster-design.md",
+      "fire_couple_app_prd_v2.md"
+    ]
+  },
+  "git_state": {
+    "is_git_repo": true,
+    "status_short": [
+      {
+        "raw": "M .gitignore",
+        "status": "M",
+        "path": "gitignore"
+      },
+      {
+        "raw": " M README.md",
+        "status": "M",
+        "path": "README.md"
+      },
+      {
+        "raw": " M app/dashboard/dashboard-mobile.tsx",
+        "status": "M",
+        "path": "app/dashboard/dashboard-mobile.tsx"
+      },
+      {
+        "raw": " M app/dashboard/mobile/page.test.tsx",
+        "status": "M",
+        "path": "app/dashboard/mobile/page.test.tsx"
+      },
+      {
+        "raw": " M app/dashboard/page.test.tsx",
+        "status": "M",
+        "path": "app/dashboard/page.test.tsx"
+      },
+      {
+        "raw": " M app/dashboard/page.tsx",
+        "status": "M",
+        "path": "app/dashboard/page.tsx"
+      },
+      {
+        "raw": " M app/showcase/page.tsx",
+        "status": "M",
+        "path": "app/showcase/page.tsx"
+      },
+      {
+        "raw": " M app/subscribe/page.tsx",
+        "status": "M",
+        "path": "app/subscribe/page.tsx"
+      },
+      {
+        "raw": " M docs/designer-handoff.md",
+        "status": "M",
+        "path": "docs/designer-handoff.md"
+      },
+      {
+        "raw": " M docs/superpowers/plans/2026-04-25-fire-banking-r0-admin-solo.md",
+        "status": "M",
+        "path": "docs/superpowers/plans/2026-04-25-fire-banking-r0-admin-solo.md"
+      },
+      {
+        "raw": " M docs/superpowers/plans/2026-05-01-investment-auto-valuation.md",
+        "status": "M",
+        "path": "docs/superpowers/plans/2026-05-01-investment-auto-valuation.md"
+      },
+      {
+        "raw": " M docs/superpowers/plans/2026-05-03-fire-asset-diagnosis.md",
+        "status": "M",
+        "path": "docs/superpowers/plans/2026-05-03-fire-asset-diagnosis.md"
+      },
+      {
+        "raw": " M docs/superpowers/specs/2026-04-25-fire-banking-mvp-design.md",
+        "status": "M",
+        "path": "docs/superpowers/specs/2026-04-25-fire-banking-mvp-design.md"
+      },
+      {
+        "raw": " M docs/superpowers/specs/2026-05-01-investment-auto-valuation-design.md",
+        "status": "M",
+        "path": "docs/superpowers/specs/2026-05-01-investment-auto-valuation-design.md"
+      },
+      {
+        "raw": " M docs/superpowers/specs/2026-05-03-fire-asset-diagnosis-design.md",
+        "status": "M",
+        "path": "docs/superpowers/specs/2026-05-03-fire-asset-diagnosis-design.md"
+      },
+      {
+        "raw": " M docs/superpowers/specs/2026-05-03-fire-living-expense-adjuster-design.md",
+        "status": "M",
+        "path": "docs/superpowers/specs/2026-05-03-fire-living-expense-adjuster-design.md"
+      },
+      {
+        "raw": " M fire_couple_app_prd_v2.md",
+        "status": "M",
+        "path": "fire_couple_app_prd_v2.md"
+      },
+      {
+        "raw": " M src/features/assets/components/InvestmentAssetPanel.test.tsx",
+        "status": "M",
+        "path": "src/features/assets/components/InvestmentAssetPanel.test.tsx"
+      },
+      {
+        "raw": " M src/features/assets/components/InvestmentAssetPanel.tsx",
+        "status": "M",
+        "path": "src/features/assets/components/InvestmentAssetPanel.tsx"
+      },
+      {
+        "raw": " M src/features/dashboard/lib/dashboardRoleUi.test.ts",
+        "status": "M",
+        "path": "src/features/dashboard/lib/dashboardRoleUi.test.ts"
+      },
+      {
+        "raw": " M src/features/dashboard/lib/dashboardRoleUi.ts",
+        "status": "M",
+        "path": "src/features/dashboard/lib/dashboardRoleUi.ts"
+      },
+      {
+        "raw": " M src/features/subscribe/actions/saveFixedCostSimulation.ts",
+        "status": "M",
+        "path": "src/features/subscribe/actions/saveFixedCostSimulation.ts"
+      },
+      {
+        "raw": " M src/features/subscribe/components/FixedCostSimulator.test.tsx",
+        "status": "M",
+        "path": "src/features/subscribe/components/FixedCostSimulator.test.tsx"
+      },
+      {
+        "raw": " M src/features/subscribe/components/FixedCostSimulator.tsx",
+        "status": "M",
+        "path": "src/features/subscribe/components/FixedCostSimulator.tsx"
+      },
+      {
+        "raw": " M src/features/subscribe/lib/fixedCostDefaults.ts",
+        "status": "M",
+        "path": "src/features/subscribe/lib/fixedCostDefaults.ts"
+      },
+      {
+        "raw": " M src/features/subscribe/lib/fixedCostSimulator.test.ts",
+        "status": "M",
+        "path": "src/features/subscribe/lib/fixedCostSimulator.test.ts"
+      },
+      {
+        "raw": " M src/features/subscribe/lib/fixedCostSimulator.ts",
+        "status": "M",
+        "path": "src/features/subscribe/lib/fixedCostSimulator.ts"
+      },
+      {
+        "raw": " M src/features/subscribe/lib/fixedCostTypes.ts",
+        "status": "M",
+        "path": "src/features/subscribe/lib/fixedCostTypes.ts"
+      },
+      {
+        "raw": "?? docs/superpowers/plans/2026-05-03-fire-living-expense-adjuster-refactor.md",
+        "status": "??",
+        "path": "docs/superpowers/plans/2026-05-03-fire-living-expense-adjuster-refactor.md"
+      },
+      {
+        "raw": "?? src/features/dashboard/lib/getDashboardCashflowSnapshot.ts",
+        "status": "??",
+        "path": "src/features/dashboard/lib/getDashboardCashflowSnapshot.ts"
+      },
+      {
+        "raw": "?? src/features/subscribe/actions/applyFireLivingExpenseRecommendation.test.ts",
+        "status": "??",
+        "path": "src/features/subscribe/actions/applyFireLivingExpenseRecommendation.test.ts"
+      },
+      {
+        "raw": "?? src/features/subscribe/actions/applyFireLivingExpenseRecommendation.ts",
+        "status": "??",
+        "path": "src/features/subscribe/actions/applyFireLivingExpenseRecommendation.ts"
+      },
+      {
+        "raw": "?? src/features/subscribe/actions/saveFixedCostSimulation.test.ts",
+        "status": "??",
+        "path": "src/features/subscribe/actions/saveFixedCostSimulation.test.ts"
+      },
+      {
+        "raw": "?? src/features/subscribe/lib/fixedCostConfigSchema.ts",
+        "status": "??",
+        "path": "src/features/subscribe/lib/fixedCostConfigSchema.ts"
+      }
+    ],
+    "recent_commits": [
+      "ba5012b fix: subtract only investment loans on dashboard",
+      "1f0ab5b refactor: rename assets area to fire diagnosis",
+      "f123746 feat: frame liabilities as investment linked loans",
+      "9af1e7e feat: show fire asset holding quantities",
+      "061a3b1 refactor: count only investment loans in fire assets"
+    ]
+  },
+  "package": {
+    "name": "fire-banking",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+      "dev": "next dev",
+      "build": "next build",
+      "start": "next start",
+      "lint": "eslint .",
+      "test": "vitest run",
+      "test:watch": "vitest",
+      "test:e2e": "playwright test"
+    }
+  },
+  "next_session_checklist": [
+    "Read this JSON first.",
+    "Read the canonical files listed in canonical_context.read_first.",
+    "Run git status before editing.",
+    "Do not revert dirty worktree changes you did not make.",
+    "Continue from the highest-priority unfinished task.",
+    "Run targeted verification before claiming completion."
+  ],
+  "recommended_verification_commands": [
+    "git status --short --untracked-files=all",
+    "git diff --check",
+    "npm test",
+    "npm run lint",
+    "npm run build"
+  ],
+  "handoff_prompt_for_new_session": "이 JSON 파일(/Users/macmini-cho/Documents/Project/FireBanking/docs/handoffs/2026-05-03-204450-firebanking-closed-beta-implementation-handoff.json)을 먼저 읽고, canonical_context.read_first에 있는 문서를 기준으로 이어서 작업해줘. 이전 인수인계 이력은 /Users/macmini-cho/Documents/Project/FireBanking/docs/handoffs/index.json에서 확인해. git status를 먼저 확인하고, 내가 만들지 않은 기존 변경은 되돌리지 마. 새 전략 문서를 만들기보다 필요한 경우 기존 기준 문서를 갱신해."
+}

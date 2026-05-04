@@ -1,12 +1,104 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import type { SaveFixedCostSimulationState } from "@/src/features/subscribe/actions/saveFixedCostSimulation";
+import { fixedCostSimulationConfigSchema } from "@/src/features/subscribe/lib/fixedCostConfigSchema";
 import { calculateFixedCostProjection } from "@/src/features/subscribe/lib/fixedCostSimulator";
 import type { FixedCostSimulatorConfig } from "@/src/features/subscribe/lib/fixedCostTypes";
 import { formatKrw } from "@/src/lib/format";
 
 type SaveAction = (config: FixedCostSimulatorConfig) => Promise<SaveFixedCostSimulationState>;
+type ApplyAction = (
+  config: FixedCostSimulatorConfig,
+) => Promise<{ applied?: boolean; error?: string }>;
+const LOCAL_CONFIG_KEY = "fire-living-expense-adjuster-config";
+type MoneyUnit = "won" | "thousand" | "man";
+type CategoryDraft = { name: string; amount: string; unit: MoneyUnit };
+
+const moneyUnitOptions: Array<{ value: MoneyUnit; label: string; multiplier: number }> = [
+  { value: "won", label: "원", multiplier: 1 },
+  { value: "thousand", label: "천원", multiplier: 1_000 },
+  { value: "man", label: "만원", multiplier: 10_000 },
+];
+
+function getMoneyUnitMultiplier(unit: MoneyUnit) {
+  return moneyUnitOptions.find((option) => option.value === unit)?.multiplier ?? 1;
+}
+
+function addThousandsSeparators(value: string) {
+  const [integerPart, decimalPart] = value.replace(/,/g, "").split(".");
+  const normalizedInteger = integerPart.replace(/[^\d-]/g, "");
+  const formattedInteger = normalizedInteger.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  if (decimalPart == null) {
+    return formattedInteger;
+  }
+
+  return `${formattedInteger}.${decimalPart.replace(/[^\d]/g, "")}`;
+}
+
+function formatAmountInput(valueInWon: number, unit: MoneyUnit) {
+  const displayValue = valueInWon / getMoneyUnitMultiplier(unit);
+  const roundedDisplay =
+    Number.isInteger(displayValue) ? String(displayValue) : displayValue.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+  return addThousandsSeparators(roundedDisplay);
+}
+
+function parseAmountInput(value: string, unit: MoneyUnit) {
+  const numberValue = Number(value.replace(/,/g, ""));
+  if (!Number.isFinite(numberValue) || numberValue < 0) {
+    return 0;
+  }
+
+  return Math.round(numberValue * getMoneyUnitMultiplier(unit));
+}
+
+function formatDraftAmount(value: string) {
+  return addThousandsSeparators(value);
+}
+
+function AmountInput({
+  amountLabel,
+  unitLabel,
+  value,
+  unit,
+  onValueChange,
+  onUnitChange,
+  className = "",
+}: {
+  amountLabel: string;
+  unitLabel: string;
+  value: string;
+  unit: MoneyUnit;
+  onValueChange: (value: string) => void;
+  onUnitChange: (unit: MoneyUnit) => void;
+  className?: string;
+}) {
+  return (
+    <div className={`grid min-w-0 grid-cols-[minmax(0,1fr)_92px] ${className}`}>
+      <input
+        aria-label={amountLabel}
+        inputMode="decimal"
+        value={value}
+        onChange={(event) => onValueChange(event.target.value)}
+        placeholder="월 금액"
+        className="fb-input min-w-0 w-full rounded-r-none border-r-0 px-3 py-2 text-sm"
+      />
+      <select
+        aria-label={unitLabel}
+        value={unit}
+        onChange={(event) => onUnitChange(event.target.value as MoneyUnit)}
+        className="fb-input min-w-0 w-full rounded-l-none px-2 py-2 text-sm font-bold"
+      >
+        {moneyUnitOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
 
 function formatCompactKrw(value: number) {
   if (value >= 100_000_000) {
@@ -34,17 +126,48 @@ function cloneConfig(config: FixedCostSimulatorConfig): FixedCostSimulatorConfig
 export function FixedCostSimulator({
   initialConfig,
   saveAction,
+  applyAction,
 }: {
   initialConfig: FixedCostSimulatorConfig;
   saveAction: SaveAction;
+  applyAction: ApplyAction;
 }) {
-  const [config, setConfig] = useState(() => cloneConfig(initialConfig));
+  const [config, setConfig] = useState(() => {
+    if (typeof window === "undefined") {
+      return cloneConfig(initialConfig);
+    }
+
+    const savedConfig = window.localStorage.getItem(LOCAL_CONFIG_KEY);
+    if (!savedConfig) {
+      return cloneConfig(initialConfig);
+    }
+
+    try {
+      const parsed = fixedCostSimulationConfigSchema.safeParse(JSON.parse(savedConfig));
+      return parsed.success ? cloneConfig(parsed.data) : cloneConfig(initialConfig);
+    } catch {
+      window.localStorage.removeItem(LOCAL_CONFIG_KEY);
+      return cloneConfig(initialConfig);
+    }
+  });
   const [shareOpen, setShareOpen] = useState(false);
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
+  const [amountUnits, setAmountUnits] = useState<Record<string, MoneyUnit>>({});
+  const [customAmountUnit, setCustomAmountUnit] = useState<MoneyUnit>("won");
   const [customName, setCustomName] = useState("");
   const [customAmount, setCustomAmount] = useState("");
+  const [categoryDrafts, setCategoryDrafts] = useState<Record<string, CategoryDraft>>({});
+  const [openAddCategoryId, setOpenAddCategoryId] = useState<string | null>(null);
+  const [openCategoryIds, setOpenCategoryIds] = useState<Set<string>>(() => new Set());
+  const [fixedCostsOpen, setFixedCostsOpen] = useState(false);
+  const [variableExpensesOpen, setVariableExpensesOpen] = useState(false);
+  const [noteEditingItemKey, setNoteEditingItemKey] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<SaveFixedCostSimulationState>({});
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [applyState, setApplyState] = useState<{ applied?: boolean; error?: string }>({});
+  const itemIdSequence = useRef(0);
   const [isPending, startTransition] = useTransition();
+  const [isApplyPending, startApplyTransition] = useTransition();
   const projection = useMemo(() => calculateFixedCostProjection(config), [config]);
   const activeFixedCostCount = config.subscriptionCategories.reduce(
     (total, category) => total + category.items.filter((item) => item.enabled).length,
@@ -59,6 +182,32 @@ export function FixedCostSimulator({
     });
   }
 
+  function getAmountUnit(key: string) {
+    return amountUnits[key] ?? "won";
+  }
+
+  function setAmountUnit(key: string, unit: MoneyUnit) {
+    setAmountUnits((current) => ({ ...current, [key]: unit }));
+  }
+
+  function toggleCategory(categoryId: string) {
+    setOpenCategoryIds((current) => {
+      const next = new Set(current);
+      if (next.has(categoryId)) {
+        next.delete(categoryId);
+      } else {
+        next.add(categoryId);
+      }
+      return next;
+    });
+    setOpenAddCategoryId((current) => (current === categoryId ? null : current));
+  }
+
+  function createItemId(prefix: string) {
+    itemIdSequence.current += 1;
+    return `${prefix}-${itemIdSequence.current}`;
+  }
+
   async function copyCurrentUrl() {
     try {
       await navigator.clipboard.writeText(window.location.href);
@@ -71,17 +220,39 @@ export function FixedCostSimulator({
   function save() {
     startTransition(async () => {
       const result = await saveAction(config);
+      if (result.error === "로그인이 필요합니다.") {
+        window.localStorage.setItem(LOCAL_CONFIG_KEY, JSON.stringify(config));
+        setSaveState({ saved: true });
+        setSaveMessage("이 브라우저에 저장했어요.");
+        return;
+      }
+
+      if (result.saved) {
+        window.localStorage.setItem(LOCAL_CONFIG_KEY, JSON.stringify(config));
+        setSaveMessage("저장했어요.");
+      } else {
+        setSaveMessage(null);
+      }
       setSaveState(result);
+    });
+  }
+
+  function applyRecommendation() {
+    startApplyTransition(async () => {
+      const result = await applyAction(config);
+      setApplyState(result);
     });
   }
 
   function addCustomItem() {
     const name = customName.trim();
-    const amount = Number(customAmount);
+    const amount = parseAmountInput(customAmount, customAmountUnit);
 
     if (!name || !Number.isFinite(amount) || amount <= 0) {
       return;
     }
+
+    const itemId = createItemId("custom");
 
     updateConfig((next) => {
       const customCategory =
@@ -93,14 +264,49 @@ export function FixedCostSimulator({
       }
 
       customCategory.items.push({
-        id: `custom-${Date.now()}`,
+        id: itemId,
         name,
         monthlyAmount: amount,
         enabled: true,
       });
     });
+    setAmountUnit(`custom:${itemId}`, customAmountUnit);
     setCustomName("");
     setCustomAmount("");
+  }
+
+  function addCategoryItem(categoryId: string) {
+    const draft = categoryDrafts[categoryId] ?? { name: "", amount: "", unit: "won" };
+    const name = draft.name.trim();
+    const amount = parseAmountInput(draft.amount, draft.unit);
+
+    if (!name || !Number.isFinite(amount) || amount <= 0) {
+      return;
+    }
+
+    const itemId = createItemId(categoryId);
+
+    updateConfig((next) => {
+      const targetCategory = next.subscriptionCategories.find((category) => category.id === categoryId);
+      targetCategory?.items.push({
+        id: itemId,
+        name,
+        monthlyAmount: amount,
+        enabled: true,
+      });
+    });
+    setAmountUnit(`${categoryId}:${itemId}`, draft.unit);
+    setCategoryDrafts((current) => ({ ...current, [categoryId]: { name: "", amount: "", unit: "won" } }));
+    setOpenAddCategoryId(null);
+  }
+
+  function deleteCategoryItem(categoryId: string, itemId: string) {
+    updateConfig((next) => {
+      const targetCategory = next.subscriptionCategories.find((category) => category.id === categoryId);
+      if (targetCategory) {
+        targetCategory.items = targetCategory.items.filter((item) => item.id !== itemId);
+      }
+    });
   }
 
   return (
@@ -108,306 +314,447 @@ export function FixedCostSimulator({
       <section className="grid min-w-0 gap-4 rounded-card border border-fb-line bg-fb-card p-5 shadow-card">
         <div className="flex min-w-0 flex-col gap-4">
           <div className="min-w-0">
-            <p className="text-sm font-bold text-fb-trust">고정비 시뮬레이터</p>
+            <p className="text-sm font-bold text-fb-trust">FIRE 생활비 조정기</p>
             <h1 className="mt-1 text-[24px] font-bold leading-[1.28] tracking-normal text-fb-ink">
-              내 고정비가 미래 자산을 얼마나 바꾸는지 확인해요
+              목표 월 생활비를 현실적인 생활 수준으로 조정해요
             </h1>
           </div>
-          <button
-            type="button"
-            onClick={save}
-            disabled={isPending}
-            className="fb-focus w-full rounded-button bg-fb-trust px-4 py-3 text-sm font-bold text-white shadow-card hover:bg-fb-trust-strong disabled:opacity-60"
-          >
-            {isPending ? "저장 중..." : "저장"}
-          </button>
-        </div>
-        {saveState.error ? <p className="text-sm text-fb-negative">{saveState.error}</p> : null}
-        {saveState.saved ? <p className="text-sm text-fb-positive">저장했어요.</p> : null}
-
-        <div className="grid min-w-0 gap-3">
-          <label className="grid min-w-0 gap-2">
-            <span className="text-sm font-medium text-fb-ink-2">월 실수령액</span>
-            <input
-              type="number"
-              min={0}
-              step={10_000}
-              value={config.monthlyIncome}
-              onChange={(event) =>
-                updateConfig((next) => {
-                  next.monthlyIncome = Number(event.target.value);
-                })
-              }
-              className="fb-input min-w-0 w-full"
-            />
-          </label>
-          <label className="grid min-w-0 gap-2">
-            <span className="text-sm font-medium text-fb-ink-2">시뮬레이션 기간</span>
-            <input
-              aria-label="시뮬레이션 기간"
-              type="range"
-              min={1}
-              max={360}
-              value={config.periodMonths}
-              onChange={(event) =>
-                updateConfig((next) => {
-                  next.periodMonths = Number(event.target.value);
-                })
-              }
-            />
-            <span className="text-sm text-fb-ink-2">{Math.round(config.periodMonths / 12)}년</span>
-          </label>
-          <label className="grid min-w-0 gap-2">
-            <span className="text-sm font-medium text-fb-ink-2">투자 비율</span>
-            <input
-              aria-label="투자 비율"
-              type="range"
-              min={0}
-              max={100}
-              value={Math.round(config.investmentRatio * 100)}
-              onChange={(event) =>
-                updateConfig((next) => {
-                  next.investmentRatio = Number(event.target.value) / 100;
-                })
-              }
-            />
-            <span className="text-sm text-fb-ink-2">
-              {Math.round(config.investmentRatio * 100)}%
-            </span>
-          </label>
-          <div className="grid min-w-0 gap-2">
-            <span className="text-sm font-medium text-fb-ink-2">예상 수익률</span>
-            <div className="flex flex-wrap gap-2">
-              {[0.03, 0.05, 0.07].map((rate) => (
-                <button
-                  key={rate}
-                  type="button"
-                  onClick={() =>
-                    updateConfig((next) => {
-                      next.annualReturnRate = rate;
-                    })
-                  }
-                  className={`fb-focus rounded-button border px-3 py-2 text-sm font-bold ${
-                    config.annualReturnRate === rate
-                      ? "border-fb-trust bg-fb-trust-soft text-fb-trust"
-                      : "border-fb-line text-fb-ink-2"
-                  }`}
-                >
-                  연 {Math.round(rate * 100)}%
-                </button>
-              ))}
-            </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={save}
+              disabled={isPending}
+              className="fb-focus rounded-button border border-fb-line bg-white px-4 py-3 text-sm font-bold text-fb-ink shadow-card disabled:opacity-60"
+            >
+              {isPending ? "저장 중..." : "저장"}
+            </button>
+            <button
+              type="button"
+              onClick={applyRecommendation}
+              disabled={isApplyPending}
+              className="fb-focus rounded-button bg-fb-trust px-4 py-3 text-sm font-bold text-white shadow-card hover:bg-fb-trust-strong disabled:opacity-60"
+            >
+              {isApplyPending ? "적용 중..." : "추천값 적용"}
+            </button>
           </div>
         </div>
+        {saveState.error ? <p className="text-sm text-fb-negative">{saveState.error}</p> : null}
+        {saveState.saved && saveMessage ? (
+          <p className="text-sm text-fb-positive">{saveMessage}</p>
+        ) : null}
+        {applyState.error ? <p className="text-sm text-fb-negative">{applyState.error}</p> : null}
+        {applyState.applied ? (
+          <p className="text-sm text-fb-positive">대시보드에 적용했어요.</p>
+        ) : null}
 
         <div className="grid min-w-0 grid-cols-2 gap-3">
           <div className="rounded-soft bg-fb-trust-soft p-3">
             <p className="text-sm text-fb-ink-2">월 고정비</p>
-            <p className="text-xl font-semibold">{formatCompactKrw(projection.monthlyFixedExpense)}</p>
-          </div>
-          <div className="rounded-soft bg-fb-trust-soft p-3">
-            <p className="text-sm text-fb-ink-2">매월 남는 돈</p>
-            <p className="text-xl font-semibold">{formatCompactKrw(projection.monthlyRemainingCash)}</p>
-          </div>
-          <div className="rounded-soft bg-fb-trust-soft p-3">
-            <p className="text-sm text-fb-ink-2">고정비 영향</p>
             <p className="text-xl font-semibold">
-              +{formatCompactKrw(projection.futureFixedCostImpact)}
+              {formatCompactKrw(projection.monthlyRecurringFixedExpense)}
             </p>
           </div>
           <div className="rounded-soft bg-fb-trust-soft p-3">
-            <p className="text-sm text-fb-ink-2">투자 예상액</p>
+            <p className="text-sm text-fb-ink-2">월 변동비</p>
             <p className="text-xl font-semibold">
-              {formatCompactKrw(projection.futureInvestmentValue)}
+              {formatCompactKrw(projection.monthlyVariableExpense)}
+            </p>
+          </div>
+          <div className="rounded-soft bg-fb-trust-soft p-3">
+            <p className="text-sm text-fb-ink-2">버퍼</p>
+            <p className="text-xl font-semibold">{formatCompactKrw(projection.monthlyBufferExpense)}</p>
+          </div>
+          <div className="rounded-soft bg-fb-trust-soft p-3">
+            <p className="text-sm text-fb-ink-2">계산된 월 생활비</p>
+            <p className="text-xl font-semibold">
+              {formatCompactKrw(projection.recommendedTargetMonthlyExpense)}
             </p>
           </div>
         </div>
 
         <div className="min-w-0 rounded-card border border-fb-line bg-white p-4">
-          <div className="flex min-w-0 flex-col gap-2">
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-fb-ink">소비 누적 vs 투자 결과</p>
-              <p className="mt-1 text-sm text-fb-ink-2">
-                같은 고정비를 줄여 투자하면 FIRE까지 약{" "}
-                <strong className="text-fb-trust">
-                  {Math.floor(projection.fireMonthsSaved / 12)}년 {projection.fireMonthsSaved % 12}개월
-                </strong>{" "}
-                당길 수 있어요.
-              </p>
-            </div>
-            <span className="self-start rounded-full bg-fb-trust-soft px-3 py-1 text-xs font-bold text-fb-trust">
-              {activeFixedCostCount}개 활성
-            </span>
-          </div>
-          <div className="mt-4 flex h-20 items-end gap-3">
-            <ComparisonBar
-              label="소비 누적"
-              value={projection.simpleFixedCostTotal}
-              max={Math.max(projection.simpleFixedCostTotal, projection.futureFixedCostImpact, 1)}
-            />
-            <ComparisonBar
-              label="투자 결과"
-              value={projection.futureFixedCostImpact}
-              max={Math.max(projection.simpleFixedCostTotal, projection.futureFixedCostImpact, 1)}
-              trust
-            />
+          <div>
+            <p className="text-sm font-bold text-fb-ink">활성 고정비 {activeFixedCostCount}개</p>
+            <p className="mt-1 text-sm text-fb-ink-2">
+              대시보드 수익률은 연 5% 기준으로 고정하고, 이 화면에서는 생활비 구성만 조정합니다.
+            </p>
           </div>
         </div>
-      </section>
-
-      <section className="grid min-w-0 gap-4">
-        <div>
-          <h2 className="text-2xl font-semibold">내 고정비 찾기</h2>
-          <p className="mt-1 text-sm text-fb-ink-2">
-            해당하는 항목을 켜면 미래 자산 영향이 바로 바뀝니다.
-          </p>
-        </div>
-        {config.subscriptionCategories.map((category) => {
-          const categoryTotal = category.items.reduce(
-            (total, item) => total + (item.enabled ? item.monthlyAmount : 0),
-            0,
-          );
-
-          return (
-          <div key={category.id} className="min-w-0 rounded-card border border-fb-line bg-fb-card p-4 shadow-card">
-              <div className="flex min-w-0 flex-col gap-2">
-                <div className="min-w-0">
-                  <h3 className="font-semibold">{category.name}</h3>
-                  <p className="text-sm text-fb-ink-2">{category.prompt}</p>
-                </div>
-                <p className="text-sm font-semibold text-fb-trust">
-                  {formatKrw(categoryTotal)}
-                </p>
-              </div>
-              <div className="mt-3 grid min-w-0 gap-2">
-                {category.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`grid min-w-0 gap-2 rounded-soft border p-3 ${
-                      item.enabled
-                        ? "border-fb-trust bg-fb-trust-soft text-fb-trust"
-                        : "border-fb-line bg-fb-card text-fb-ink-2"
-                    }`}
-                  >
-                    <div className="flex min-w-0 items-center justify-between gap-3">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateConfig((next) => {
-                            const targetCategory = next.subscriptionCategories.find(
-                              (candidate) => candidate.id === category.id,
-                            );
-                            const targetItem = targetCategory?.items.find(
-                              (candidate) => candidate.id === item.id,
-                            );
-                            if (targetItem) {
-                              targetItem.enabled = !targetItem.enabled;
-                            }
-                          })
-                        }
-                        className="min-w-0 flex-1 text-left text-sm font-semibold"
-                      >
-                        {item.name}
-                      </button>
-                      <span className="text-xs font-medium text-fb-ink-2">
-                        {item.enabled ? "포함" : "제외"}
-                      </span>
-                    </div>
-                    <label className="grid min-w-0 gap-1">
-                      <span className="text-xs font-medium text-fb-ink-2">
-                        {item.name} 월 금액
-                      </span>
-                      <input
-                        aria-label={`${item.name} 월 금액`}
-                        type="number"
-                        min={0}
-                        step={1000}
-                        value={item.monthlyAmount}
-                        onChange={(event) =>
-                          updateConfig((next) => {
-                            const targetCategory = next.subscriptionCategories.find(
-                              (candidate) => candidate.id === category.id,
-                            );
-                            const targetItem = targetCategory?.items.find(
-                              (candidate) => candidate.id === item.id,
-                            );
-                            if (targetItem) {
-                              targetItem.monthlyAmount = Number(event.target.value);
-                            }
-                          })
-                        }
-                        className="fb-input min-w-0 w-full px-2 py-2 text-sm"
-                      />
-                    </label>
-                  </div>
-                ))}
-              </div>
-              {category.id === "custom" ? (
-                <div className="mt-3 grid min-w-0 gap-2 rounded-soft border border-dashed border-fb-line-strong bg-white p-3">
-                  <input
-                    aria-label="직접 추가 항목명"
-                    value={customName}
-                    onChange={(event) => setCustomName(event.target.value)}
-                    placeholder="예: 주차 정기권"
-                    className="fb-input min-w-0 w-full px-3 py-2 text-sm"
-                  />
-                  <input
-                    aria-label="직접 추가 월 금액"
-                    type="number"
-                    min={0}
-                    step={1000}
-                    value={customAmount}
-                    onChange={(event) => setCustomAmount(event.target.value)}
-                    placeholder="월 금액"
-                    className="fb-input min-w-0 w-full px-3 py-2 text-sm"
-                  />
-                  <button
-                    type="button"
-                    onClick={addCustomItem}
-                    className="fb-focus rounded-button bg-fb-ink px-4 py-2 text-sm font-bold text-white"
-                  >
-                    추가
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          );
-        })}
       </section>
 
       <section className="min-w-0 rounded-card border border-fb-line bg-fb-card p-4 shadow-card">
-        <h2 className="text-2xl font-semibold">실생활 고정지출</h2>
-        <div className="mt-4 grid min-w-0 gap-3">
-          {config.livingExpenses.map((item) => (
-            <label key={item.id} className="grid min-w-0 gap-2">
-              <span className="text-sm font-medium text-fb-ink-2">{item.name}</span>
-              <input
-                type="number"
-                min={0}
-                step={10_000}
-                value={item.monthlyAmount}
-                onChange={(event) =>
-                  updateConfig((next) => {
-                    const target = next.livingExpenses.find((candidate) => candidate.id === item.id);
-                    if (target) {
-                      target.monthlyAmount = Number(event.target.value);
+        <button
+          type="button"
+          aria-expanded={fixedCostsOpen}
+          onClick={() => setFixedCostsOpen((current) => !current)}
+          className="fb-focus flex w-full min-w-0 items-center justify-between gap-3 text-left"
+        >
+          <span className="min-w-0">
+            <span className="block text-2xl font-semibold text-fb-ink">고정비</span>
+            <span className="mt-1 block text-sm font-semibold text-fb-trust">
+              {formatKrw(projection.monthlyFixedExpense)}
+            </span>
+          </span>
+          <span className="shrink-0 text-xs font-bold text-fb-ink-3">
+            {fixedCostsOpen ? "접기" : "펼치기"}
+          </span>
+        </button>
+        {fixedCostsOpen ? (
+          <div className="mt-4 grid min-w-0 gap-4">
+            <p className="text-sm text-fb-ink-2">
+              반복 지출을 켜거나 금액을 바꾸면 추천 생활비가 바로 바뀝니다.
+            </p>
+            {config.subscriptionCategories.map((category) => {
+              const categoryTotal = category.items.reduce(
+                (total, item) => total + (item.enabled ? item.monthlyAmount : 0),
+                0,
+              );
+              const categoryDraft = categoryDrafts[category.id] ?? {
+                name: "",
+                amount: "",
+                unit: "won",
+              };
+              const categoryOpen = openCategoryIds.has(category.id);
+
+              return (
+                <div
+                  key={category.id}
+                  className="min-w-0 rounded-card border border-fb-line bg-fb-card p-4 shadow-card"
+                >
+                  <button
+                    type="button"
+                    aria-expanded={categoryOpen}
+                    onClick={() => toggleCategory(category.id)}
+                    className="fb-focus flex w-full min-w-0 items-center justify-between gap-3 text-left"
+                  >
+                    <span className="min-w-0">
+                      <span className="block font-semibold text-fb-ink">{category.name}</span>
+                      <span className="mt-1 block text-sm font-semibold text-fb-trust">
+                        {formatKrw(categoryTotal)}
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-xs font-bold text-fb-ink-3">
+                      {categoryOpen ? "접기" : "펼치기"}
+                    </span>
+                  </button>
+                  {categoryOpen ? (
+                    <>
+                      <p className="mt-3 text-sm text-fb-ink-2">{category.prompt}</p>
+                      <div className="mt-3 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setOpenAddCategoryId((current) =>
+                              current === category.id ? null : category.id,
+                            )
+                          }
+                          className="fb-focus rounded-button border border-fb-line bg-white px-3 py-2 text-xs font-bold text-fb-ink"
+                        >
+                          {category.name} 추가
+                        </button>
+                      </div>
+                      {openAddCategoryId === category.id ? (
+                        <div className="mt-3 grid min-w-0 gap-2 rounded-soft border border-dashed border-fb-line-strong bg-white p-3">
+                          <input
+                            aria-label={`${category.name} 새 항목명`}
+                            value={categoryDraft.name}
+                            onChange={(event) =>
+                              setCategoryDrafts((current) => ({
+                                ...current,
+                                [category.id]: {
+                                  amount: current[category.id]?.amount ?? "",
+                                  unit: current[category.id]?.unit ?? "won",
+                                  name: event.target.value,
+                                },
+                              }))
+                            }
+                            placeholder="항목명"
+                            className="fb-input min-w-0 w-full px-3 py-2 text-sm"
+                          />
+                          <AmountInput
+                            amountLabel={`${category.name} 새 월 금액`}
+                            unitLabel={`${category.name} 새 금액 단위`}
+                            value={categoryDraft.amount}
+                            unit={categoryDraft.unit}
+                            onValueChange={(value) =>
+                              setCategoryDrafts((current) => ({
+                                ...current,
+                                [category.id]: {
+                                  amount: formatDraftAmount(value),
+                                  unit: current[category.id]?.unit ?? "won",
+                                  name: current[category.id]?.name ?? "",
+                                },
+                              }))
+                            }
+                            onUnitChange={(unit) =>
+                              setCategoryDrafts((current) => ({
+                                ...current,
+                                [category.id]: {
+                                  amount: current[category.id]?.amount ?? "",
+                                  name: current[category.id]?.name ?? "",
+                                  unit,
+                                },
+                              }))
+                            }
+                          />
+                          <button
+                            type="button"
+                            onClick={() => addCategoryItem(category.id)}
+                            className="fb-focus rounded-button bg-fb-ink px-4 py-2 text-sm font-bold text-white"
+                          >
+                            {category.name} 항목 저장
+                          </button>
+                        </div>
+                      ) : null}
+                      <div className="mt-3 grid min-w-0 gap-2">
+                        {category.items.map((item) => {
+                          const itemKey = `${category.id}:${item.id}`;
+                          const noteOpen = noteEditingItemKey === itemKey || Boolean(item.note);
+                          const itemAmountUnit = getAmountUnit(itemKey);
+
+                          return (
+                            <div
+                              key={item.id}
+                              className={`grid min-w-0 gap-2 rounded-soft border p-3 ${
+                                item.enabled
+                                  ? "border-fb-trust bg-fb-trust-soft text-fb-trust"
+                                  : "border-fb-line bg-fb-card text-fb-ink-2"
+                              }`}
+                            >
+                              <div className="flex min-w-0 items-center justify-between gap-3">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    updateConfig((next) => {
+                                      const targetCategory = next.subscriptionCategories.find(
+                                        (candidate) => candidate.id === category.id,
+                                      );
+                                      const targetItem = targetCategory?.items.find(
+                                        (candidate) => candidate.id === item.id,
+                                      );
+                                      if (targetItem) {
+                                        targetItem.enabled = !targetItem.enabled;
+                                      }
+                                    })
+                                  }
+                                  className="min-w-0 flex-1 text-left text-sm font-semibold"
+                                >
+                                  {item.name}
+                                </button>
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    aria-label={`${item.name} 삭제`}
+                                    onClick={() => deleteCategoryItem(category.id, item.id)}
+                                    className="fb-focus rounded-full border border-fb-line bg-white px-2 py-1 text-xs font-bold text-fb-ink-2"
+                                  >
+                                    삭제
+                                  </button>
+                                  <button
+                                    type="button"
+                                    aria-label={`${item.name} 메모 편집`}
+                                    onClick={() =>
+                                      setNoteEditingItemKey((current) =>
+                                        current === itemKey ? null : itemKey,
+                                      )
+                                    }
+                                    className="fb-focus flex size-7 items-center justify-center rounded-full border border-fb-line bg-white text-sm font-bold text-fb-ink-2"
+                                  >
+                                    ✎
+                                  </button>
+                                </div>
+                              </div>
+                              <AmountInput
+                                amountLabel={`${item.name} 월 금액`}
+                                unitLabel={`${item.name} 금액 단위`}
+                                value={formatAmountInput(item.monthlyAmount, itemAmountUnit)}
+                                unit={itemAmountUnit}
+                                onValueChange={(value) =>
+                                  updateConfig((next) => {
+                                    const targetCategory = next.subscriptionCategories.find(
+                                      (candidate) => candidate.id === category.id,
+                                    );
+                                    const targetItem = targetCategory?.items.find(
+                                      (candidate) => candidate.id === item.id,
+                                    );
+                                    if (targetItem) {
+                                      targetItem.monthlyAmount = parseAmountInput(
+                                        value,
+                                        itemAmountUnit,
+                                      );
+                                    }
+                                  })
+                                }
+                                onUnitChange={(unit) => setAmountUnit(itemKey, unit)}
+                                className="gap-0"
+                              />
+                              {noteOpen ? (
+                                <label className="grid min-w-0 gap-1">
+                                  <span className="text-xs font-medium text-fb-ink-2">메모</span>
+                                  <textarea
+                                    aria-label={`${item.name} 메모`}
+                                    value={item.note ?? ""}
+                                    onChange={(event) =>
+                                      updateConfig((next) => {
+                                        const targetCategory = next.subscriptionCategories.find(
+                                          (candidate) => candidate.id === category.id,
+                                        );
+                                        const targetItem = targetCategory?.items.find(
+                                          (candidate) => candidate.id === item.id,
+                                        );
+                                        if (targetItem) {
+                                          targetItem.note = event.target.value;
+                                        }
+                                      })
+                                    }
+                                    placeholder="메모"
+                                    className="fb-input min-h-20 min-w-0 w-full resize-none px-2 py-2 text-sm"
+                                  />
+                                </label>
+                              ) : null}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {category.id === "custom" ? (
+                        <div className="mt-3 grid min-w-0 gap-2 rounded-soft border border-dashed border-fb-line-strong bg-white p-3">
+                          <input
+                            aria-label="직접 추가 항목명"
+                            value={customName}
+                            onChange={(event) => setCustomName(event.target.value)}
+                            placeholder="예: 주차 정기권"
+                            className="fb-input min-w-0 w-full px-3 py-2 text-sm"
+                          />
+                          <AmountInput
+                            amountLabel="직접 추가 월 금액"
+                            unitLabel="직접 추가 금액 단위"
+                            value={customAmount}
+                            unit={customAmountUnit}
+                            onValueChange={(value) => setCustomAmount(formatDraftAmount(value))}
+                            onUnitChange={setCustomAmountUnit}
+                          />
+                          <button
+                            type="button"
+                            onClick={addCustomItem}
+                            className="fb-focus rounded-button bg-fb-ink px-4 py-2 text-sm font-bold text-white"
+                          >
+                            추가
+                          </button>
+                        </div>
+                      ) : null}
+                    </>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
+      </section>
+
+      <section className="min-w-0 rounded-card border border-fb-line bg-fb-card p-4 shadow-card">
+        <button
+          type="button"
+          aria-expanded={variableExpensesOpen}
+          onClick={() => setVariableExpensesOpen((current) => !current)}
+          className="fb-focus flex w-full min-w-0 items-center justify-between gap-3 text-left"
+        >
+          <span className="min-w-0">
+            <span className="block text-2xl font-semibold text-fb-ink">변동비</span>
+            <span className="mt-1 block text-sm font-semibold text-fb-trust">
+              {formatKrw(projection.monthlyVariableExpense)}
+            </span>
+          </span>
+          <span className="shrink-0 text-xs font-bold text-fb-ink-3">
+            {variableExpensesOpen ? "접기" : "펼치기"}
+          </span>
+        </button>
+        {variableExpensesOpen ? (
+          <div className="mt-4 grid min-w-0 gap-3">
+            {config.livingExpenses.map((item) => {
+              const itemKey = `living:${item.id}`;
+              const itemAmountUnit = getAmountUnit(itemKey);
+
+              return (
+                <div key={item.id} className="grid min-w-0 gap-2">
+                  <p className="text-sm font-medium text-fb-ink-2">{item.name}</p>
+                  <AmountInput
+                    amountLabel={`${item.name} 월 금액`}
+                    unitLabel={`${item.name} 금액 단위`}
+                    value={formatAmountInput(item.monthlyAmount, itemAmountUnit)}
+                    unit={itemAmountUnit}
+                    onValueChange={(value) =>
+                      updateConfig((next) => {
+                        const target = next.livingExpenses.find(
+                          (candidate) => candidate.id === item.id,
+                        );
+                        if (target) {
+                          target.monthlyAmount = parseAmountInput(value, itemAmountUnit);
+                        }
+                      })
                     }
+                    onUnitChange={(unit) => setAmountUnit(itemKey, unit)}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
+      </section>
+
+      <section className="min-w-0 rounded-card border border-fb-line bg-fb-card p-4 shadow-card">
+        <h2 className="text-2xl font-semibold">버퍼</h2>
+        <div className="mt-4 grid min-w-0 gap-3">
+          <div className="grid min-w-0 gap-2">
+            <p className="text-sm font-medium text-fb-ink-2">버퍼 금액</p>
+            <AmountInput
+              amountLabel="버퍼 금액"
+              unitLabel="버퍼 금액 단위"
+              value={formatAmountInput(config.bufferMonthlyAmount, getAmountUnit("buffer"))}
+              unit={getAmountUnit("buffer")}
+              onValueChange={(value) =>
+                updateConfig((next) => {
+                  next.bufferMonthlyAmount = parseAmountInput(value, getAmountUnit("buffer"));
+                })
+              }
+              onUnitChange={(unit) => setAmountUnit("buffer", unit)}
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {[0, 5, 10, 15].map((percent) => (
+              <button
+                key={percent}
+                type="button"
+                onClick={() =>
+                  updateConfig((next) => {
+                    const base = next.subscriptionCategories.reduce(
+                      (categoryTotal, category) =>
+                        categoryTotal +
+                        category.items.reduce(
+                          (itemTotal, item) =>
+                            itemTotal + (item.enabled ? item.monthlyAmount : 0),
+                          0,
+                        ),
+                      0,
+                    ) + next.livingExpenses.reduce(
+                      (total, item) => total + Math.max(item.monthlyAmount, 0),
+                      0,
+                    );
+                    next.bufferMonthlyAmount = Math.round(base * (percent / 100));
                   })
                 }
-                className="fb-input min-w-0 w-full"
-              />
-            </label>
-          ))}
+                className="fb-focus rounded-button border border-fb-line bg-white px-3 py-2 text-sm font-bold text-fb-ink"
+              >
+                {percent}%
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
       <section className="min-w-0 rounded-card border border-fb-line bg-fb-card p-4 shadow-card">
         <p className="text-sm text-fb-ink-2">
-          월 {formatCompactKrw(projection.monthlyFixedExpense)}의 고정비를{" "}
-          {Math.round(config.periodMonths / 12)}년 동안 그대로 두면 단순 합산{" "}
-          {formatCompactKrw(projection.simpleFixedCostTotal)}이고, 같은 돈을 연{" "}
-          {Math.round(config.annualReturnRate * 100)}%로 굴렸다면{" "}
-          {formatCompactKrw(projection.futureFixedCostImpact)} 차이가 생깁니다.
+          계산된 월 생활비는 고정비, 변동비, 버퍼를 더한 값입니다. 적용 전까지 대시보드
+          기준값은 바뀌지 않습니다.
         </p>
         <button
           type="button"
@@ -430,12 +777,10 @@ export function FixedCostSimulator({
             <div className="mt-4 rounded-soft bg-fb-trust p-4 text-white">
               <p className="text-sm text-white/75">매달 조용히 사라지는 돈</p>
               <p className="mt-2 text-3xl font-bold">
-                {formatCompactKrw(projection.monthlyFixedExpense)}
+                {formatCompactKrw(projection.recommendedTargetMonthlyExpense)}
               </p>
               <p className="mt-4 text-sm">
-                {Math.round(config.periodMonths / 12)}년 후 +{formatCompactKrw(
-                  projection.futureFixedCostImpact,
-                )} 차이
+                고정비, 변동비, 버퍼를 합친 계산된 월 생활비입니다.
               </p>
             </div>
             <button
@@ -449,35 +794,6 @@ export function FixedCostSimulator({
           </div>
         </div>
       ) : null}
-    </div>
-  );
-}
-
-function ComparisonBar({
-  label,
-  value,
-  max,
-  trust = false,
-}: {
-  label: string;
-  value: number;
-  max: number;
-  trust?: boolean;
-}) {
-  const height = Math.max(8, Math.round((value / max) * 64));
-
-  return (
-    <div className="flex min-w-0 flex-1 flex-col items-stretch justify-end">
-      <div
-        className={trust ? "rounded-[8px] bg-fb-trust" : "rounded-[8px] bg-fb-line-strong"}
-        style={{ height }}
-      />
-      <div className="mt-2 flex items-center justify-between gap-2">
-        <span className={trust ? "text-xs font-bold text-fb-trust" : "text-xs font-bold text-fb-ink-3"}>
-          {label}
-        </span>
-        <span className="text-xs font-bold text-fb-ink">{formatCompactKrw(value)}</span>
-      </div>
     </div>
   );
 }

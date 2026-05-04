@@ -31,6 +31,10 @@ describe("AssetsPage", () => {
     expect(screen.getByText(/투자자산 KPI를 검증해요/)).toBeInTheDocument();
     expect(screen.getAllByText("투자자산").length).toBeGreaterThan(0);
     expect(screen.getAllByText("투자 연동 대출").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("아직 등록한 종목이 없어요.").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("등록한 부채가 없어요.").length).toBeGreaterThan(0);
+    expect(screen.queryByText("삼성전자")).not.toBeInTheDocument();
+    expect(screen.queryByText("부채 수정")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "홈으로" })).toHaveAttribute("href", "/dashboard");
   });
 });

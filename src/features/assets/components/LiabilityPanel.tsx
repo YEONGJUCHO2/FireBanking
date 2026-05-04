@@ -16,21 +16,9 @@ export type LiabilityView = {
   purpose?: "residence" | "investment" | "lifestyle_credit" | "other";
 };
 
-const defaultLiabilities: LiabilityView[] = [
-  {
-    id: "sample-investment-loan",
-    label: "투자 관련 대출",
-    purposeLabel: "투자 관련",
-    balanceAmount: 15_000_000,
-    monthlyInterestAmount: 100_000,
-    monthlyPrincipalAmount: 300_000,
-    purpose: "investment",
-  },
-];
-
 export function LiabilityPanel({
   coupleId,
-  liabilities = defaultLiabilities,
+  liabilities = [],
 }: {
   coupleId?: string | null;
   liabilities?: LiabilityView[];

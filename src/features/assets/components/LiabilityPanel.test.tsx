@@ -8,7 +8,21 @@ vi.mock("next/navigation", () => ({
 
 describe("LiabilityPanel", () => {
   it("shows liability policy copy and edit affordance", () => {
-    render(<LiabilityPanel />);
+    render(
+      <LiabilityPanel
+        liabilities={[
+          {
+            id: "investment-loan",
+            label: "투자 관련 대출",
+            purposeLabel: "투자 관련",
+            balanceAmount: 15_000_000,
+            monthlyInterestAmount: 100_000,
+            monthlyPrincipalAmount: 300_000,
+            purpose: "investment",
+          },
+        ]}
+      />,
+    );
 
     expect(screen.getByText("투자 연동 대출")).toBeInTheDocument();
     expect(screen.getByText(/투자자산을 만들기 위해 낀 대출만 FIRE 반영 투자자산에서 차감해요/)).toBeInTheDocument();
@@ -24,8 +38,29 @@ describe("LiabilityPanel", () => {
     expect(screen.getByText("등록한 부채가 없어요.")).toBeInTheDocument();
   });
 
-  it("lets a user edit liability balance and monthly repayment flow in the alpha panel", () => {
+  it("does not show a demo liability when no real liabilities are provided", () => {
     render(<LiabilityPanel />);
+
+    expect(screen.getByText("등록한 부채가 없어요.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "부채 수정" })).not.toBeInTheDocument();
+  });
+
+  it("lets a user edit liability balance and monthly repayment flow in the alpha panel", () => {
+    render(
+      <LiabilityPanel
+        liabilities={[
+          {
+            id: "investment-loan",
+            label: "투자 관련 대출",
+            purposeLabel: "투자 관련",
+            balanceAmount: 15_000_000,
+            monthlyInterestAmount: 100_000,
+            monthlyPrincipalAmount: 300_000,
+            purpose: "investment",
+          },
+        ]}
+      />,
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "부채 수정" }));
     fireEvent.change(screen.getByLabelText("투자 관련 대출 잔액"), { target: { value: "1200" } });

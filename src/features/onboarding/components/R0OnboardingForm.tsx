@@ -31,24 +31,10 @@ const fields = [
     true,
   ],
   [
-    "monthlyFixedExpense",
-    "가구 월 고정비 총액",
-    "230",
-    "만원 단위입니다. 주거비, 보험, 통신, 구독처럼 반복되는 비용입니다.",
-    true,
-  ],
-  [
-    "monthlyVariableExpense",
-    "평소 한 달 예상 변동비",
-    "170",
-    "만원 단위입니다. 지난달 실제 지출이 아니라 보통 한 달에 쓸 금액입니다.",
-    true,
-  ],
-  [
-    "monthlyRegularInvestment",
-    "월 정기저축/투자",
-    "200",
-    "만원 단위입니다. 매달 투자가능 자산으로 쌓이는 저축과 투자입니다.",
+    "monthlyTotalExpense",
+    "가구 월 총지출",
+    "400",
+    "만원 단위입니다. 고정비와 변동비를 나누지 않고 첫 FIRE 거리감을 보는 총액입니다.",
     true,
   ],
 ] as const;

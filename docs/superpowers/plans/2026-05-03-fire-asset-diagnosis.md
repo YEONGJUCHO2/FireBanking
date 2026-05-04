@@ -1,5 +1,7 @@
 # FIRE Asset Diagnosis Implementation Plan
 
+> Document status: historical implementation plan. Current product scope and priorities live in `fire_couple_app_prd_v2.md`. Keep this file only for asset diagnosis implementation history.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Reframe `/assets` from a generic asset/liability manager into a FIRE asset diagnosis surface where FIRE reflected investment assets equal immediately usable investment assets minus investment-linked loans.

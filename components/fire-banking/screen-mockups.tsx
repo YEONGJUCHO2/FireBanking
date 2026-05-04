@@ -190,14 +190,13 @@ function MockBottomNav({ active }: { active: string }) {
   const items = [
     { label: '홈', icon: 'home' as const },
     { label: '기록', icon: 'calendar' as const },
-    { label: '분석', icon: 'chart' as const },
-    { label: '설계', icon: 'mountain' as const },
-    { label: '더보기', icon: 'plus' as const },
+    { label: '함께', icon: 'users' as const },
+    { label: '설정', icon: 'plus' as const },
   ]
 
   return (
     <nav className="mt-auto border-t border-fb-line bg-fb-card/95 px-1 py-2">
-      <div className="grid grid-cols-5">
+      <div className="grid grid-cols-4">
         {items.map((item) => (
           <span key={item.label} className={item.label === active ? 'flex flex-col items-center gap-1 text-[9px] font-bold text-fb-trust' : 'flex flex-col items-center gap-1 text-[9px] font-bold text-fb-ink-2'}>
             <Icon name={item.icon} className="size-4" />
@@ -252,7 +251,7 @@ export function LiteScreenPreview() {
       <MockStatusBar />
       <div className="mt-3"><MockBackButton /></div>
       <header className="mt-2">
-        <h1 className="text-[16px] font-black tracking-normal text-fb-ink">나의 기본 정보 (Lite)</h1>
+        <h1 className="text-[16px] font-black tracking-normal text-fb-ink">나의 기본 정보</h1>
         <p className="mt-3 text-[12px] font-medium leading-5 text-fb-ink-2">정확하지 않아도 괜찮아요.<br />지금은 첫 거리감을 보는 단계예요.</p>
       </header>
       <p className="mt-5 text-right text-[10px] font-bold text-fb-ink-2">단위: 만원</p>

@@ -37,17 +37,6 @@ type OverseasManualHolding = {
   valuationAmount: number;
 };
 
-const defaultHoldings: HoldingView[] = [
-  {
-    id: "sample-samsung",
-    symbol: "005930",
-    displayName: "삼성전자",
-    quantity: 18,
-    valuationAmount: 1_530_000,
-    valuationDate: "2026-05-29",
-  },
-];
-
 const SEARCH_RESULTS_PAGE_SIZE = 3;
 const DEMO_HOLDINGS_COOKIE = "fb_demo_asset_holdings";
 
@@ -87,9 +76,11 @@ function getUnitPrice(holding: HoldingView) {
 }
 
 function getDiagnosisCategoryLabel(accountCategory: AccountCategory) {
-  return accountCategory === "pension_savings" || accountCategory === "irp"
-    ? "제한·미래 자산"
-    : "FIRE 반영";
+  return isRestrictedAccount(accountCategory) ? "제한·미래 자산" : "FIRE 반영";
+}
+
+function isRestrictedAccount(accountCategory: AccountCategory) {
+  return accountCategory === "pension_savings" || accountCategory === "irp";
 }
 
 const searchableInstruments: SearchableHoldingView[] = [
@@ -142,7 +133,7 @@ const searchableInstruments: SearchableHoldingView[] = [
 
 export function InvestmentAssetPanel({
   coupleId,
-  holdings = defaultHoldings,
+  holdings = [],
 }: {
   coupleId?: string | null;
   holdings?: HoldingView[];
@@ -161,6 +152,7 @@ export function InvestmentAssetPanel({
   const [addAccountCategory, setAddAccountCategory] = useState<AccountCategory>("general");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingQuantity, setEditingQuantity] = useState("");
+  const [expandedSections, setExpandedSections] = useState<Partial<Record<AccountCategory, boolean>>>({});
   const [overseasName, setOverseasName] = useState("");
   const [overseasQuantity, setOverseasQuantity] = useState("");
   const [overseasUsdPrice, setOverseasUsdPrice] = useState("");
@@ -200,6 +192,124 @@ export function InvestmentAssetPanel({
     overseasUsdPrice,
     overseasExchangeRate,
   );
+
+  const toggleSection = (accountCategory: AccountCategory) => {
+    setExpandedSections((current) => ({
+      ...current,
+      [accountCategory]: !current[accountCategory],
+    }));
+  };
+
+  const renderAccountSection = (section: (typeof groupedHoldings)[number]) => {
+    const isExpanded = Boolean(expandedSections[section.value]);
+    const sectionValuationAmount = section.holdings.reduce(
+      (total, holding) => total + holding.valuationAmount,
+      0,
+    );
+    const sectionContentId = `holdings-section-${section.value}-content`;
+
+    return (
+      <section
+        key={section.value}
+        data-testid={`holdings-section-${section.value}`}
+        className="grid gap-2"
+      >
+        <button
+          type="button"
+          className="fbpress flex min-h-12 items-center justify-between gap-3 rounded-[12px] border border-fb-line bg-white px-3 py-2 text-left hover:bg-fb-card-alt"
+          aria-expanded={isExpanded}
+          aria-controls={sectionContentId}
+          onClick={() => toggleSection(section.value)}
+        >
+          <span className="min-w-0">
+            <span className="block text-[12px] font-bold text-fb-ink-2">{section.title}</span>
+            <span className="fb-num mt-0.5 block text-[13px] font-bold text-fb-ink">
+              총 평가 {formatKrw(sectionValuationAmount)}
+            </span>
+          </span>
+          <span className="text-[12px] font-bold text-fb-ink-3">
+            {isExpanded ? "접기" : "펼치기"}
+          </span>
+        </button>
+        {isExpanded ? (
+          <div id={sectionContentId} className="grid gap-3">
+            {section.holdings.map((holding) => {
+              const accountCategory = holding.accountCategory ?? "general";
+              const unitPrice = getUnitPrice(holding);
+
+              return (
+                <div
+                  key={holding.id}
+                  className="grid gap-3 rounded-[12px] border border-fb-line bg-white p-3"
+                >
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-[14px] font-bold text-fb-ink">{holding.displayName}</p>
+                      <span className="rounded-full bg-fb-trust-soft px-2 py-0.5 text-[11px] font-bold text-fb-trust-ink">
+                        {accountCategoryLabels[accountCategory]}
+                      </span>
+                      <span className="rounded-full bg-fb-card-alt px-2 py-0.5 text-[11px] font-bold text-fb-ink-3">
+                        {getDiagnosisCategoryLabel(accountCategory)}
+                      </span>
+                      <span className="fb-num rounded-full bg-fb-card-alt px-2 py-0.5 text-[11px] font-bold text-fb-ink-3">
+                        {holding.symbol}
+                      </span>
+                    </div>
+                    {editingId === holding.id ? (
+                      <div className="mt-2 flex items-center gap-2">
+                        <label className="sr-only" htmlFor={`${holding.id}-quantity`}>
+                          {holding.displayName} 보유 수량
+                        </label>
+                        <input
+                          id={`${holding.id}-quantity`}
+                          value={editingQuantity}
+                          onChange={(event) => setEditingQuantity(event.target.value)}
+                          className="h-9 w-24 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
+                          inputMode="decimal"
+                        />
+                        <span className="text-[12px] font-medium text-fb-ink-3">주</span>
+                      </div>
+                    ) : (
+                      <div className="mt-3 grid grid-cols-1 gap-2 rounded-[12px] bg-fb-card-alt p-3 sm:grid-cols-3">
+                        <p className="fb-num text-[13px] font-bold text-fb-ink">
+                          보유 {formatPlainNumber(holding.quantity)}주
+                        </p>
+                        <p className="fb-num text-[13px] font-bold text-fb-ink">
+                          기준가 {formatKrw(unitPrice)}
+                        </p>
+                        <p className="fb-num text-[13px] font-bold text-fb-ink">
+                          평가액 {formatKrw(holding.valuationAmount)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
+                    <p className="text-[12px] font-medium text-fb-ink-3">
+                      {getDiagnosisCategoryLabel(accountCategory)} 기준
+                    </p>
+                    <div className="grid grid-cols-2 gap-1.5 sm:flex">
+                      {editingId === holding.id ? (
+                        <Button type="button" variant="secondary" size="sm" onClick={() => saveQuantity(holding.id)}>
+                          저장
+                        </Button>
+                      ) : (
+                        <Button type="button" variant="ghost" size="sm" onClick={() => startEdit(holding)}>
+                          수량 수정
+                        </Button>
+                      )}
+                      <Button type="button" variant="dangerSoft" size="sm" onClick={() => deleteHolding(holding.id)}>
+                        삭제
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
+      </section>
+    );
+  };
 
   useEffect(() => {
     return () => {
@@ -313,6 +423,7 @@ export function InvestmentAssetPanel({
     setSubmittedQuery("");
     setServerSearchResults(null);
     setSearchError(null);
+    setExpandedSections((current) => ({ ...current, [addAccountCategory]: true }));
 
     setItems((current) => {
       if (current.some((item) => item.symbol === holding.symbol)) {
@@ -568,191 +679,137 @@ export function InvestmentAssetPanel({
           ) : null}
 
           <div data-testid="holdings-section" className="mt-5 border-t border-fb-line pt-4">
-            {items.length === 0 ? (
-              <p className="rounded-[12px] bg-fb-card-alt px-3 py-3 text-[13px] font-medium text-fb-ink-3">
-                아직 등록한 종목이 없어요.
-              </p>
-            ) : (
-              <div className="grid gap-4">
+            <div className="grid gap-4">
+              <div data-testid="fire-reflected-holdings-group" className="grid gap-2">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[12px] font-bold text-fb-ink">FIRE 반영 계좌</p>
+                  <p className="text-[11px] font-semibold text-fb-trust-ink">FIRE 순자산에 포함</p>
+                </div>
+                {items.length === 0 ? (
+                  <p className="rounded-[12px] bg-fb-card-alt px-3 py-3 text-[13px] font-medium text-fb-ink-3">
+                    아직 등록한 종목이 없어요.
+                  </p>
+                ) : null}
                 {groupedHoldings
-                  .filter((section) => section.holdings.length > 0)
-                  .map((section) => (
-                    <section key={section.value} data-testid={`holdings-section-${section.value}`} className="grid gap-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <h3 className="text-[12px] font-bold text-fb-ink-2">{section.title}</h3>
-                      </div>
-                      <div className="grid gap-3">
-                        {section.holdings.map((holding) => {
-                          const accountCategory = holding.accountCategory ?? "general";
-                          const unitPrice = getUnitPrice(holding);
+                  .filter((section) => section.holdings.length > 0 && !isRestrictedAccount(section.value))
+                  .map(renderAccountSection)}
 
-                          return (
-                            <div
-                              key={holding.id}
-                              className="grid gap-3 rounded-[12px] border border-fb-line bg-white p-3"
-                            >
-                            <div>
-                              <div className="flex flex-wrap items-center gap-2">
-                                <p className="text-[14px] font-bold text-fb-ink">{holding.displayName}</p>
-                                <span className="rounded-full bg-fb-trust-soft px-2 py-0.5 text-[11px] font-bold text-fb-trust-ink">
-                                  {accountCategoryLabels[accountCategory]}
-                                </span>
-                                <span className="rounded-full bg-fb-card-alt px-2 py-0.5 text-[11px] font-bold text-fb-ink-3">
-                                  {getDiagnosisCategoryLabel(accountCategory)}
-                                </span>
-                                <span className="fb-num rounded-full bg-fb-card-alt px-2 py-0.5 text-[11px] font-bold text-fb-ink-3">
-                                  {holding.symbol}
-                                </span>
-                              </div>
-                              {editingId === holding.id ? (
-                                <div className="mt-2 flex items-center gap-2">
-                                  <label className="sr-only" htmlFor={`${holding.id}-quantity`}>
-                                    {holding.displayName} 보유 수량
-                                  </label>
-                                  <input
-                                    id={`${holding.id}-quantity`}
-                                    value={editingQuantity}
-                                    onChange={(event) => setEditingQuantity(event.target.value)}
-                                    className="h-9 w-24 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
-                                    inputMode="decimal"
-                                  />
-                                  <span className="text-[12px] font-medium text-fb-ink-3">주</span>
-                                </div>
-                              ) : (
-                                <div className="mt-3 grid grid-cols-1 gap-2 rounded-[12px] bg-fb-card-alt p-3 sm:grid-cols-3">
-                                  <p className="fb-num text-[13px] font-bold text-fb-ink">
-                                    보유 {formatPlainNumber(holding.quantity)}주
-                                  </p>
-                                  <p className="fb-num text-[13px] font-bold text-fb-ink">
-                                    기준가 {formatKrw(unitPrice)}
-                                  </p>
-                                  <p className="fb-num text-[13px] font-bold text-fb-ink">
-                                    평가액 {formatKrw(holding.valuationAmount)}
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                            <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
-                              <p className="text-[12px] font-medium text-fb-ink-3">
-                                {getDiagnosisCategoryLabel(accountCategory)} 기준
-                              </p>
-                              <div className="grid grid-cols-2 gap-1.5 sm:flex">
-                                {editingId === holding.id ? (
-                                  <Button type="button" variant="secondary" size="sm" onClick={() => saveQuantity(holding.id)}>
-                                    저장
-                                  </Button>
-                                ) : (
-                                  <Button type="button" variant="ghost" size="sm" onClick={() => startEdit(holding)}>
-                                    수량 수정
-                                  </Button>
-                                )}
-                                <Button type="button" variant="dangerSoft" size="sm" onClick={() => deleteHolding(holding.id)}>
-                                  삭제
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                          );
-                        })}
+                <details className="rounded-[14px] border border-fb-line bg-fb-card-alt p-3">
+                  <summary className="cursor-pointer text-[13px] font-bold text-fb-ink">
+                    해외거래소 직접 보유
+                  </summary>
+                  <p className="mt-2 text-[12px] leading-5 text-fb-ink-3">
+                    VOO, SPY, QQQ처럼 미국 거래소에 직접 상장된 자산만 수동으로 계산해요. TIGER·ACE 같은 국내상장 ETF는 위 종목 검색으로 추가해요.
+                  </p>
+                  <p className="mt-2 rounded-[10px] bg-white px-3 py-2 text-[12px] leading-5 text-fb-ink-3">
+                    키움 API 연결은 확인했지만 해외주식 자동검색 TR은 아직 확인되지 않았어요.
+                    확인 전까지는 수량, 달러 가격, 환율로 직접 반영해요.
+                  </p>
+
+                  <div className="mt-4 grid gap-3 rounded-[12px] border border-fb-line bg-white p-3">
+                    <div className="grid gap-2 lg:grid-cols-4">
+                      <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="overseas-name">
+                        티커/이름
+                        <input
+                          id="overseas-name"
+                          value={overseasName}
+                          onChange={(event) => setOverseasName(event.target.value)}
+                          className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
+                          placeholder="VOO"
+                        />
+                      </label>
+                      <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="overseas-quantity">
+                        보유 수량
+                        <input
+                          id="overseas-quantity"
+                          value={overseasQuantity}
+                          onChange={(event) => setOverseasQuantity(event.target.value)}
+                          className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
+                          inputMode="decimal"
+                        />
+                      </label>
+                      <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="overseas-usd-price">
+                        1주 가격 USD
+                        <input
+                          id="overseas-usd-price"
+                          value={overseasUsdPrice}
+                          onChange={(event) => setOverseasUsdPrice(event.target.value)}
+                          className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
+                          inputMode="decimal"
+                        />
+                      </label>
+                      <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="overseas-exchange-rate">
+                        적용 환율
+                        <input
+                          id="overseas-exchange-rate"
+                          value={overseasExchangeRate}
+                          onChange={(event) => setOverseasExchangeRate(event.target.value)}
+                          className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
+                          inputMode="decimal"
+                        />
+                      </label>
+                    </div>
+
+                    <div className="grid gap-2 sm:flex sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-[12px] font-bold text-fb-ink-2">계산된 원화 평가액</p>
+                        <p className="fb-num mt-1 text-[18px] font-bold text-fb-ink">
+                          {formatKrw(overseasManualValuation)}
+                        </p>
                       </div>
-                    </section>
-                  ))}
+                      <Button type="button" variant="secondary" size="sm" onClick={addOverseasManualHolding}>
+                        계산 결과 추가
+                      </Button>
+                    </div>
+
+                    {overseasHoldings.length > 0 ? (
+                      <div className="grid gap-2 border-t border-fb-line pt-3">
+                        {overseasHoldings.map((holding) => (
+                          <div
+                            key={holding.id}
+                            className="grid gap-1 rounded-[10px] bg-fb-card-alt px-3 py-2 sm:grid-cols-[1fr_auto] sm:items-center"
+                          >
+                            <div>
+                              <p className="text-[13px] font-bold text-fb-ink">{holding.name}</p>
+                              <p className="text-[12px] font-medium text-fb-ink-3">
+                                {formatPlainNumber(holding.quantity)}주 · ${formatPlainNumber(holding.usdPrice)} · ₩
+                                {formatPlainNumber(holding.exchangeRate)}
+                              </p>
+                            </div>
+                            <p className="fb-num text-[14px] font-bold text-fb-ink">
+                              {formatKrw(holding.valuationAmount)}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <p className="mt-4 rounded-[12px] bg-white px-3 py-3 text-[12px] leading-5 text-fb-ink-3">
+                    해외거래소 직접 보유는 바로 처분할 수 있는 투자자산으로 FIRE 순자산에 반영해요.
+                  </p>
+                </details>
               </div>
-            )}
+
+              {groupedHoldings.some(
+                (section) => section.holdings.length > 0 && isRestrictedAccount(section.value),
+              ) ? (
+                <div
+                  data-testid="restricted-holdings-group"
+                  className="grid gap-2 rounded-[14px] border border-fb-line bg-fb-card-alt p-3"
+                >
+                  <div className="grid gap-1 sm:flex sm:items-center sm:justify-between">
+                    <p className="text-[12px] font-bold text-fb-ink">제한·미래 자산</p>
+                    <p className="text-[11px] font-semibold text-fb-ink-3">FIRE 순자산에서는 제외</p>
+                  </div>
+                  {groupedHoldings
+                    .filter((section) => section.holdings.length > 0 && isRestrictedAccount(section.value))
+                    .map(renderAccountSection)}
+                </div>
+              ) : null}
+            </div>
           </div>
         </section>
-
-        <details className="rounded-[16px] border border-fb-line bg-fb-card-alt p-4">
-          <summary className="cursor-pointer text-[13px] font-bold text-fb-ink">
-            해외거래소 직접 보유
-          </summary>
-          <p className="mt-2 text-[12px] leading-5 text-fb-ink-3">
-            VOO, SPY, QQQ처럼 미국 거래소에 직접 상장된 자산만 수동으로 계산해요. TIGER·ACE 같은 국내상장 ETF는 위 종목 검색으로 추가해요.
-          </p>
-
-          <div className="mt-4 grid gap-3 rounded-[12px] border border-fb-line bg-white p-3">
-            <div className="grid gap-2 lg:grid-cols-4">
-              <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="overseas-name">
-                티커/이름
-                <input
-                  id="overseas-name"
-                  value={overseasName}
-                  onChange={(event) => setOverseasName(event.target.value)}
-                  className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
-                  placeholder="VOO"
-                />
-              </label>
-              <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="overseas-quantity">
-                보유 수량
-                <input
-                  id="overseas-quantity"
-                  value={overseasQuantity}
-                  onChange={(event) => setOverseasQuantity(event.target.value)}
-                  className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
-                  inputMode="decimal"
-                />
-              </label>
-              <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="overseas-usd-price">
-                1주 가격 USD
-                <input
-                  id="overseas-usd-price"
-                  value={overseasUsdPrice}
-                  onChange={(event) => setOverseasUsdPrice(event.target.value)}
-                  className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
-                  inputMode="decimal"
-                />
-              </label>
-              <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="overseas-exchange-rate">
-                적용 환율
-                <input
-                  id="overseas-exchange-rate"
-                  value={overseasExchangeRate}
-                  onChange={(event) => setOverseasExchangeRate(event.target.value)}
-                  className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
-                  inputMode="decimal"
-                />
-              </label>
-            </div>
-
-            <div className="grid gap-2 sm:flex sm:items-center sm:justify-between">
-              <div>
-                <p className="text-[12px] font-bold text-fb-ink-2">계산된 원화 평가액</p>
-                <p className="fb-num mt-1 text-[18px] font-bold text-fb-ink">
-                  {formatKrw(overseasManualValuation)}
-                </p>
-              </div>
-              <Button type="button" variant="secondary" size="sm" onClick={addOverseasManualHolding}>
-                계산 결과 추가
-              </Button>
-            </div>
-
-            {overseasHoldings.length > 0 ? (
-              <div className="grid gap-2 border-t border-fb-line pt-3">
-                {overseasHoldings.map((holding) => (
-                  <div
-                    key={holding.id}
-                    className="grid gap-1 rounded-[10px] bg-fb-card-alt px-3 py-2 sm:grid-cols-[1fr_auto] sm:items-center"
-                  >
-                    <div>
-                      <p className="text-[13px] font-bold text-fb-ink">{holding.name}</p>
-                      <p className="text-[12px] font-medium text-fb-ink-3">
-                        {formatPlainNumber(holding.quantity)}주 · ${formatPlainNumber(holding.usdPrice)} · ₩
-                        {formatPlainNumber(holding.exchangeRate)}
-                      </p>
-                    </div>
-                    <p className="fb-num text-[14px] font-bold text-fb-ink">
-                      {formatKrw(holding.valuationAmount)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-          </div>
-
-          <p className="mt-4 rounded-[12px] bg-white px-3 py-3 text-[12px] leading-5 text-fb-ink-3">
-            연금저축/IRP는 표시 순자산에는 포함하고 기본 FIRE 계산에서는 제외해요.
-          </p>
-        </details>
       </div>
     </Card>
   );

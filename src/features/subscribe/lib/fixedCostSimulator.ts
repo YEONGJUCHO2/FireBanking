@@ -17,22 +17,34 @@ function futureValueOfMonthlyPayment(monthlyPayment: number, months: number, ann
 export function calculateFixedCostProjection(
   config: FixedCostSimulatorConfig,
 ): FixedCostProjection {
-  const subscriptionTotal = config.subscriptionCategories.reduce(
+  const monthlyRecurringFixedExpense = config.subscriptionCategories.reduce(
     (categoryTotal, category) =>
       categoryTotal +
       category.items.reduce(
         (itemTotal, item) => itemTotal + (item.enabled ? item.monthlyAmount : 0),
         0,
-      ),
+    ),
     0,
   );
-  const livingTotal = config.livingExpenses.reduce(
+  const monthlyVariableExpense = config.livingExpenses.reduce(
     (total, item) => total + Math.max(item.monthlyAmount, 0),
     0,
   );
-  const monthlyFixedExpense = subscriptionTotal + livingTotal;
-  const monthlyRemainingCash = Math.max(config.monthlyIncome - monthlyFixedExpense, 0);
-  const monthlyInvestmentAmount = Math.round(monthlyRemainingCash * config.investmentRatio);
+  const monthlyBufferExpense = Math.max(config.bufferMonthlyAmount ?? 0, 0);
+  const recommendedTargetMonthlyExpense =
+    monthlyRecurringFixedExpense + monthlyVariableExpense + monthlyBufferExpense;
+  const monthlyFixedExpense = recommendedTargetMonthlyExpense;
+  const fireTargetAsset = recommendedTargetMonthlyExpense * 12 * 25;
+  const remainingAmount = Math.max(
+    fireTargetAsset - (config.dashboardBaseline?.fireNetWorth ?? 0),
+    0,
+  );
+  const baselineTargetMonthlyExpense = config.dashboardBaseline?.targetMonthlyExpense ?? 0;
+  const baselineFireTargetAsset = baselineTargetMonthlyExpense * 12 * 25;
+  const baselineRemainingAmount = Math.max(
+    baselineFireTargetAsset - (config.dashboardBaseline?.fireNetWorth ?? 0),
+    0,
+  );
   const futureFixedCostImpact = Math.round(
     futureValueOfMonthlyPayment(
       monthlyFixedExpense,
@@ -42,18 +54,18 @@ export function calculateFixedCostProjection(
   );
 
   return {
+    monthlyRecurringFixedExpense,
+    monthlyVariableExpense,
+    monthlyBufferExpense,
+    recommendedTargetMonthlyExpense,
+    fireTargetAsset,
+    remainingAmount,
+    targetMonthlyExpenseDelta: recommendedTargetMonthlyExpense - baselineTargetMonthlyExpense,
+    fireTargetAssetDelta: fireTargetAsset - baselineFireTargetAsset,
+    remainingAmountDelta: remainingAmount - baselineRemainingAmount,
+    monthlyAssetGrowthCapacityDelta: 0 - (config.dashboardBaseline?.monthlyAssetGrowthCapacity ?? 0),
     monthlyFixedExpense,
-    monthlyRemainingCash,
-    monthlyInvestmentAmount,
     simpleFixedCostTotal: monthlyFixedExpense * config.periodMonths,
     futureFixedCostImpact,
-    futureInvestmentValue: Math.round(
-      futureValueOfMonthlyPayment(
-        monthlyInvestmentAmount,
-        config.periodMonths,
-        config.annualReturnRate,
-      ),
-    ),
-    fireMonthsSaved: Math.max(0, Math.round(futureFixedCostImpact / 2_000_000)),
   };
 }

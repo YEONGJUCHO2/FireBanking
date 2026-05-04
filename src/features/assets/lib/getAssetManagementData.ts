@@ -170,7 +170,7 @@ function normalizeDemoHolding(value: unknown): HoldingView | null {
     displayName: String(row.displayName),
     quantity,
     valuationAmount: Math.round(valuationAmount),
-    valuationDate: String(row.valuationDate ?? "데모 저장"),
+    valuationDate: String(row.valuationDate ?? "수동 저장"),
     accountCategory: normalizeDemoAccountCategory(row.accountCategory),
   };
 }

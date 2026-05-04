@@ -7,9 +7,7 @@ describe("r0OnboardingSchema", () => {
       targetMonthlyExpense: "300",
       monthlyNetIncome: "720",
       investableNetWorth: "12000",
-      monthlyFixedExpense: "230",
-      monthlyVariableExpense: "170",
-      monthlyRegularInvestment: "200",
+      monthlyTotalExpense: "400",
     });
 
     expect(result.targetMonthlyExpense).toBe(3_000_000);
@@ -22,9 +20,7 @@ describe("r0OnboardingSchema", () => {
       targetMonthlyExpense: "300",
       monthlyNetIncome: "720",
       investableNetWorth: "12,000",
-      monthlyFixedExpense: "230",
-      monthlyVariableExpense: "170",
-      monthlyRegularInvestment: "200",
+      monthlyTotalExpense: "400",
     });
 
     expect(result.investableNetWorth).toBe(120_000_000);
@@ -35,9 +31,7 @@ describe("r0OnboardingSchema", () => {
       targetMonthlyExpense: "300",
       monthlyNetIncome: "720",
       investableNetWorth: "12000",
-      monthlyFixedExpense: "230",
-      monthlyVariableExpense: "170",
-      monthlyRegularInvestment: "200",
+      monthlyTotalExpense: "400",
     });
 
     expect(result.investableNetWorth).toBe(120_000_000);
@@ -48,9 +42,7 @@ describe("r0OnboardingSchema", () => {
       targetMonthlyExpense: "300",
       monthlyNetIncome: "",
       investableNetWorth: "12000",
-      monthlyFixedExpense: "230",
-      monthlyVariableExpense: "170",
-      monthlyRegularInvestment: "200",
+      monthlyTotalExpense: "400",
     });
 
     expect(result.success).toBe(false);
@@ -61,9 +53,7 @@ describe("r0OnboardingSchema", () => {
       targetMonthlyExpense: "300",
       monthlyNetIncome: "-1",
       investableNetWorth: "12000",
-      monthlyFixedExpense: "230",
-      monthlyVariableExpense: "170",
-      monthlyRegularInvestment: "200",
+      monthlyTotalExpense: "400",
     });
 
     expect(result.success).toBe(false);

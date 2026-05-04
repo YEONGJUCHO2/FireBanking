@@ -2,13 +2,8 @@ import { BottomNav, MobileAppShell } from '@/components/fire-banking'
 import { SignOutButton } from '@/src/features/auth/components/SignOutButton'
 
 const rows: Array<{ label: string; value: string }> = [
-  { label: '프로필', value: '지윤' },
-  { label: '알림', value: '매월 1일 09:00' },
+  { label: '로그인 상태', value: '연결됨' },
   { label: '화폐 단위', value: '원 (만원 표시)' },
-  { label: 'FIRE 목표', value: '4억' },
-  { label: '데이터 내보내기', value: 'CSV' },
-  { label: '개인정보·보안', value: '' },
-  { label: '도움말', value: '' },
 ]
 
 export default function SettingsPage() {
@@ -31,7 +26,7 @@ export default function SettingsPage() {
                 }
               >
                 <span className="text-[14px] font-medium text-fb-ink">{row.label}</span>
-                <span className="text-[13px] text-fb-ink-3">{row.value} ›</span>
+                <span className="text-[13px] text-fb-ink-3">{row.value}</span>
               </div>
             ))}
           </div>

@@ -1,11 +1,18 @@
 import { MobileAppShell } from '@/components/fire-banking'
 import { OnboardingStepper } from '@/components/fire-banking/onboarding-stepper'
+import { getOnboardingAccessState } from '@/src/features/onboarding/lib/onboardingAccessState'
+import { redirect } from 'next/navigation'
 
-export default function OnboardingPage() {
+export default async function OnboardingPage() {
+  const access = await getOnboardingAccessState()
+
+  if (!access.canStartOnboarding) {
+    redirect('/dashboard')
+  }
+
   return (
     <MobileAppShell className="h-[min(calc(100dvh-2.5rem),820px)]">
       <OnboardingStepper
-        initial={{ goalExpense: 300, income: 850, fixed: 350, variable: 220, save: 180, investable: 12000 }}
         doneHref="/dashboard"
         backOutHref="/"
       />

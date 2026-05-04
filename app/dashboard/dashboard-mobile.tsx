@@ -12,6 +12,7 @@ import { Card, SectionHeader } from '@/components/fire-banking/card'
 import { CheckinRow } from '@/components/fire-banking/checkin-row'
 import { Icon } from '@/components/fire-banking/icons'
 import { SignOutButton } from '@/src/features/auth/components/SignOutButton'
+import { formatCheckinMonthLabel } from '@/src/lib/checkinDate'
 
 const data = {
   totalNetWorthMan: 51_500,
@@ -50,10 +51,10 @@ export function DashboardMobile() {
         <div className="mb-3 flex items-center justify-between">
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">
-              2026. 04. 체크인
+              {formatCheckinMonthLabel()}
             </div>
             <div className="mt-0.5 text-[18px] font-bold tracking-[-0.012em] text-fb-ink">
-              안녕하세요, 지윤님
+              안녕하세요
             </div>
           </div>
           <StatusPill tone="trust" icon={<span className="size-1.5 rounded-full bg-fb-trust" />}>
@@ -74,9 +75,9 @@ export function DashboardMobile() {
         <section className="mt-6 space-y-3">
           <SectionHeader title="이번 달 부부 체크인" subtitle="배우자 입력이 끝나면 결과가 확정돼요" />
           <Card className="px-4 py-1">
-            <CheckinRow name="지윤" role="admin" status="done" when="오늘 14:08 입력" />
+            <CheckinRow name="나" role="admin" status="done" when="오늘 14:08 입력" />
             <div className="fb-divider" />
-            <CheckinRow name="민호" role="lite" status="pending" when="초대 수락 · 입력 대기 중" />
+            <CheckinRow name="배우자" role="lite" status="pending" when="초대 수락 · 입력 대기 중" />
           </Card>
         </section>
 
@@ -103,9 +104,9 @@ export function DashboardMobile() {
             <Icon name="refresh" className="size-[22px]" />
           </span>
           <span className="flex-1">
-            <span className="block text-[14px] font-bold text-fb-ink">고정비 시뮬레이터</span>
+            <span className="block text-[14px] font-bold text-fb-ink">FIRE 생활비 조정기</span>
             <span className="mt-0.5 block text-[12px] font-medium text-fb-ink-3">
-              반복 지출이 미래 자산에 미치는 영향
+              고정비·변동비·버퍼로 목표 생활비 조정
             </span>
           </span>
           <Icon name="chevron-right" className="size-5 text-fb-ink-3" />

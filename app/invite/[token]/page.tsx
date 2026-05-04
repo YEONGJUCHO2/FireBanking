@@ -29,15 +29,15 @@ export default async function InvitePage({
           {/* couple symbol */}
           <div className="relative mb-6 h-14 w-24">
             <div className="absolute left-0 top-0 flex size-14 items-center justify-center rounded-full border-[3px] border-fb-page bg-fb-ink text-[22px] font-bold tracking-[-0.020em] text-white">
-              지
+              나
             </div>
             <div className="absolute left-10 top-0 flex size-14 items-center justify-center rounded-full border-[3px] border-fb-page bg-fb-trust-soft text-[22px] font-bold tracking-[-0.020em] text-fb-trust-ink">
-              민
+              +
             </div>
           </div>
 
           <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.10em] text-fb-trust">
-            지윤님이 보낸 초대
+            초대가 도착했어요
           </p>
           <h1 className="text-[28px] font-bold leading-[1.28] tracking-[-0.024em] text-fb-ink">
             부부 워크스페이스에<br />
@@ -51,8 +51,8 @@ export default async function InvitePage({
 
         <Card tone="alt" className="mt-7 p-4">
           <div className="flex flex-col gap-3">
-            <ReassureRow text="지윤님의 입력 내역은 보이지 않아요." />
-            <ReassureRow text="민호님 숫자도 합산 결과로만 표시돼요." />
+            <ReassureRow text="초대한 계정의 입력 내역은 보이지 않아요." />
+            <ReassureRow text="내 숫자도 합산 결과로만 표시돼요." />
             <ReassureRow text="언제든 워크스페이스에서 나갈 수 있어요." />
           </div>
         </Card>

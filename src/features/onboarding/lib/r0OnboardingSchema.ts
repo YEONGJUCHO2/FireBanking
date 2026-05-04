@@ -28,9 +28,7 @@ export const r0OnboardingSchema = z.object({
   targetMonthlyExpense: requiredManwonInput,
   monthlyNetIncome: requiredManwonInput,
   investableNetWorth: requiredManwonInput,
-  monthlyFixedExpense: requiredManwonInput,
-  monthlyVariableExpense: requiredManwonInput,
-  monthlyRegularInvestment: requiredManwonInput,
+  monthlyTotalExpense: requiredManwonInput,
 });
 
 export type R0OnboardingInput = z.infer<typeof r0OnboardingSchema>;

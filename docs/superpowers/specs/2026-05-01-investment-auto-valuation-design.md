@@ -1,5 +1,7 @@
 # 투자자산 자동평가 설계
 
+> 문서 상태: historical implementation note. 현재 제품 범위와 우선순위는 `fire_couple_app_prd_v2.md`가 단일 출처다. 이 문서는 투자자산 자동평가 구현 맥락을 보존하기 위해 남긴다.
+
 - 작성일: 2026-05-01
 - 기준 PRD: `/Users/macmini-cho/Downloads/FIRE-커플-앱-투자자산-자동평가-확장-PRD.md`
 - 브랜치: `codex/investment-auto-valuation`

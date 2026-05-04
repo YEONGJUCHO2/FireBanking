@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "kind": "codex_json_handoff_index",
+  "description": "Cumulative index of JSON handoffs created by the global 인수인계 hook.",
+  "handoffs": [
+    {
+      "created_at": "2026-05-04T02:17:01.963Z",
+      "title": "fire-banking handoff",
+      "path": "docs/handoffs/2026-05-04-111701-fire-banking-handoff.json",
+      "purpose": "Resume FireBanking documentation and design-refactor handoff work",
+      "branch": "codex/investment-auto-valuation",
+      "current_commit": "ba5012b",
+      "notes_count": 3,
+      "dirty_status_summary": {
+        "M": 61,
+        "??": 22
+      },
+      "prompt": "이 JSON 파일(/Users/macmini-cho/Documents/Project/FireBanking/docs/handoffs/2026-05-04-111701-fire-banking-handoff.json)을 먼저 읽고, canonical_context.read_first에 있는 문서를 기준으로 이어서 작업해줘. 이전 인수인계 이력은 /Users/macmini-cho/Documents/Project/FireBanking/docs/handoffs/index.json에서 확인해. git status를 먼저 확인하고, 내가 만들지 않은 기존 변경은 되돌리지 마. 새 전략 문서를 만들기보다 필요한 경우 기존 기준 문서를 갱신해."
+    },
+    {
+      "created_at": "2026-05-03T11:44:50.742Z",
+      "title": "FireBanking closed beta implementation handoff",
+      "path": "docs/handoffs/2026-05-03-204450-firebanking-closed-beta-implementation-handoff.json",
+      "purpose": "Continue FireBanking closed-beta implementation from the canonical PRD",
+      "branch": "codex/investment-auto-valuation",
+      "current_commit": "ba5012b",
+      "notes_count": 3,
+      "dirty_status_summary": {
+        "M": 28,
+        "??": 6
+      },
+      "prompt": "이 JSON 파일(/Users/macmini-cho/Documents/Project/FireBanking/docs/handoffs/2026-05-03-204450-firebanking-closed-beta-implementation-handoff.json)을 먼저 읽고, canonical_context.read_first에 있는 문서를 기준으로 이어서 작업해줘. 이전 인수인계 이력은 /Users/macmini-cho/Documents/Project/FireBanking/docs/handoffs/index.json에서 확인해. git status를 먼저 확인하고, 내가 만들지 않은 기존 변경은 되돌리지 마. 새 전략 문서를 만들기보다 필요한 경우 기존 기준 문서를 갱신해."
+    }
+  ],
+  "updated_at": "2026-05-04T02:17:01.976Z"
+}

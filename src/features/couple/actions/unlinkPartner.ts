@@ -10,7 +10,7 @@ export type UnlinkPartnerState = {
 
 const unlinkPartnerErrors: Record<string, string> = {
   login_required: "로그인이 필요합니다.",
-  not_admin: "관리자 계정만 배우자 연동을 해제할 수 있습니다.",
+  not_admin: "리드 파트너 계정만 배우자 연동을 해제할 수 있습니다.",
   no_partner: "연결된 배우자 계정을 찾지 못했습니다.",
 };
 

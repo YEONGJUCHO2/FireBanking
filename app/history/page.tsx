@@ -1,13 +1,4 @@
 import { BottomNav, MobileAppShell } from '@/components/fire-banking'
-import { cn } from '@/lib/cn'
-
-const months = [
-  { m: '2026. 04', net: '5억 1,500', delta: '+220', mood: '편안' },
-  { m: '2026. 03', net: '5억 1,280', delta: '+180', mood: '편안' },
-  { m: '2026. 02', net: '5억 1,100', delta: '-40', mood: '걱정' },
-  { m: '2026. 01', net: '5억 1,140', delta: '+310', mood: '기쁨' },
-  { m: '2025. 12', net: '5억 0,830', delta: '+90', mood: '편안' },
-]
 
 export default function HistoryPage() {
   return (
@@ -22,32 +13,14 @@ export default function HistoryPage() {
           </p>
         </header>
 
-        <div className="space-y-2.5 px-4 pt-3">
-          {months.map((mo) => {
-            const isPos = mo.delta.startsWith('+')
-            return (
-              <div
-                key={mo.m}
-                className="flex items-center justify-between rounded-[14px] border border-fb-line bg-white px-4 py-4"
-              >
-                <div>
-                  <div className="text-[11px] font-semibold tracking-[0.06em] text-fb-ink-3">{mo.m}</div>
-                  <div className="fb-num mt-1 text-[18px] font-bold tracking-[-0.012em] text-fb-ink">
-                    {mo.net}만원
-                  </div>
-                  <div className="mt-0.5 text-[12px] text-fb-ink-3">분위기 · {mo.mood}</div>
-                </div>
-                <div
-                  className={cn(
-                    'fb-num text-[14px] font-bold',
-                    isPos ? 'text-fb-positive' : 'text-fb-negative',
-                  )}
-                >
-                  {mo.delta}만
-                </div>
-              </div>
-            )
-          })}
+        <div className="px-4 pt-5">
+          <div className="rounded-[16px] border border-fb-line bg-white px-5 py-8 text-center">
+            <p className="text-[15px] font-bold text-fb-ink">아직 저장된 월별 기록이 없어요.</p>
+            <p className="mt-2 text-[13px] leading-[1.5] text-fb-ink-3">
+              온보딩 완료나 이번 달 값 수정으로 저장된 현금흐름 스냅샷만 이곳에 쌓입니다.
+              자산 가격 스냅샷은 월말 자동 작업으로 별도 저장돼요.
+            </p>
+          </div>
         </div>
       </main>
       <BottomNav active="history" />

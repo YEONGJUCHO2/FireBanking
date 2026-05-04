@@ -11,6 +11,7 @@ import { FireTimelineWide, type FireDisplayMode } from './fire-timeline'
 import { Icon } from './icons'
 import { StatusPill } from './status-pill'
 import { cn } from '@/lib/cn'
+import { formatCheckinMonthLabel, formatWorkspaceMonthLabel } from '@/src/lib/checkinDate'
 
 const data = {
   totalNetWorthMan: 51_500,
@@ -36,9 +37,11 @@ const navItems = ['대시보드', '체크인', '시뮬레이터', '히스토리'
 export function DesktopDashboard({
   footerAction,
   data: dashboardData = data,
+  partnerPending = true,
 }: {
   footerAction?: ReactNode
   data?: DesktopDashboardData
+  partnerPending?: boolean
 }) {
   const percent = Math.max(0, Math.min(1, dashboardData.investableMan / dashboardData.fireTargetMan))
   const [displayMode, setDisplayMode] = useState<FireDisplayMode>('amount')
@@ -70,9 +73,11 @@ export function DesktopDashboard({
           </nav>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[12px] font-medium text-fb-ink-3">2026. 04. 체크인 진행 중</span>
+          <span className="text-[12px] font-medium text-fb-ink-3">
+            {formatCheckinMonthLabel()} 진행 중
+          </span>
           <span className="flex size-8 items-center justify-center rounded-full bg-fb-ink text-[12px] font-bold text-white">
-            지
+            나
           </span>
           {footerAction}
         </div>
@@ -83,7 +88,7 @@ export function DesktopDashboard({
         <div className="mb-6 flex items-baseline justify-between">
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">
-              2026 APRIL · 우리 가족 워크스페이스
+              {formatWorkspaceMonthLabel()}
             </div>
             <h1 className="mt-1.5 text-[28px] font-bold tracking-[-0.024em] text-fb-ink">
               이번 달 결과를 같이 봐요.
@@ -195,18 +200,20 @@ export function DesktopDashboard({
 
           {/* RIGHT */}
           <div className="flex flex-col gap-5">
-            <Card radius="hero" className="p-6">
-              <div className="mb-3 h-[2px] w-6 rounded-[2px] bg-fb-ink" />
-              <h3 className="text-[17px] font-bold text-fb-ink">이번 달 부부 체크인</h3>
-              <div className="mt-3">
-                <CheckinRow name="지윤" role="admin" status="done" when="오늘 14:08 입력" />
-                <div className="fb-divider" />
-                <CheckinRow name="민호" role="lite" status="pending" when="초대 수락 · 입력 대기 중" />
-              </div>
-              <div className="mt-3 rounded-[12px] bg-fb-cautionary-soft p-3 text-[12px] font-medium leading-[1.5] text-fb-cautionary-ink">
-                배우자 체크인이 완료되면 이번 달 결과가 확정돼요.
-              </div>
-            </Card>
+            {partnerPending ? (
+              <Card radius="hero" className="p-6">
+                <div className="mb-3 h-[2px] w-6 rounded-[2px] bg-fb-ink" />
+                <h3 className="text-[17px] font-bold text-fb-ink">이번 달 부부 체크인</h3>
+                <div className="mt-3">
+                  <CheckinRow name="나" role="admin" status="done" when="오늘 14:08 입력" />
+                  <div className="fb-divider" />
+                  <CheckinRow name="배우자" role="lite" status="pending" when="초대 수락 · 입력 대기 중" />
+                </div>
+                <div className="mt-3 rounded-[12px] bg-fb-cautionary-soft p-3 text-[12px] font-medium leading-[1.5] text-fb-cautionary-ink">
+                  배우자 체크인이 완료되면 이번 달 결과가 확정돼요.
+                </div>
+              </Card>
+            ) : null}
 
             <Card radius="hero" className="p-6">
               <div className="mb-3 h-[2px] w-6 rounded-[2px] bg-fb-ink" />

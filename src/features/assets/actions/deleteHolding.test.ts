@@ -70,7 +70,7 @@ describe("deleteHolding", () => {
 
     const result = await deleteHolding({}, form());
 
-    expect(result).toEqual({ error: "관리자 계정만 자산과 부채를 수정할 수 있습니다." });
+    expect(result).toEqual({ error: "리드 파트너 계정만 자산과 부채를 수정할 수 있습니다." });
     expect(refs.deleteBuilder.delete).not.toHaveBeenCalled();
   });
 });

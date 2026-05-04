@@ -48,15 +48,38 @@ describe("InvestmentAssetPanel", () => {
   });
 
   it("shows domestic search and de-emphasizes direct US-listed manual calculation", () => {
-    render(<InvestmentAssetPanel />);
+    render(
+      <InvestmentAssetPanel
+        holdings={[
+          {
+            id: "existing-samsung",
+            symbol: "005930",
+            displayName: "삼성전자",
+            quantity: 18,
+            valuationAmount: 1_530_000,
+            valuationDate: "2026-05-29",
+            accountCategory: "general",
+          },
+        ]}
+      />,
+    );
 
     expect(screen.getByText("투자자산")).toBeInTheDocument();
     expect(screen.getByText("종목 검색")).toBeInTheDocument();
     expect(screen.queryByText("VOO")).not.toBeInTheDocument();
     expect(screen.getByText("해외거래소 직접 보유")).toBeInTheDocument();
     expect(screen.getByText(/VOO, SPY, QQQ처럼 미국 거래소에 직접 상장된 자산만 수동으로 계산해요/)).toBeInTheDocument();
+    expect(screen.getByText(/키움 API 연결은 확인했지만 해외주식 자동검색 TR은 아직 확인되지 않았어요/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /일반 계좌/ }));
     expect(screen.getByRole("button", { name: "수량 수정" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "삭제" })).toBeInTheDocument();
+  });
+
+  it("does not show a demo holding when no real holdings are provided", () => {
+    render(<InvestmentAssetPanel />);
+
+    expect(screen.getByText("아직 등록한 종목이 없어요.")).toBeInTheDocument();
+    expect(screen.queryByText("삼성전자")).not.toBeInTheDocument();
   });
 
   it("shows an empty holding state", () => {
@@ -123,7 +146,7 @@ describe("InvestmentAssetPanel", () => {
     );
   });
 
-  it("separates holdings by account category and keeps symbols beside category chips", () => {
+  it("collapses account sections by default and shows only total valuation until opened", () => {
     render(
       <InvestmentAssetPanel
         holdings={[
@@ -161,13 +184,34 @@ describe("InvestmentAssetPanel", () => {
     const generalSection = screen.getByTestId("holdings-section-general");
     const pensionSection = screen.getByTestId("holdings-section-pension_savings");
     const irpSection = screen.getByTestId("holdings-section-irp");
+    const fireReflectedGroup = screen.getByTestId("fire-reflected-holdings-group");
+    const restrictedGroup = screen.getByTestId("restricted-holdings-group");
 
+    expect(within(fireReflectedGroup).getByText("FIRE 반영 계좌")).toBeInTheDocument();
+    expect(within(fireReflectedGroup).getByTestId("holdings-section-general")).toBeInTheDocument();
+    expect(within(fireReflectedGroup).getByText("해외거래소 직접 보유")).toBeInTheDocument();
+    expect(within(restrictedGroup).getByText("제한·미래 자산")).toBeInTheDocument();
+    expect(within(restrictedGroup).getByText(/FIRE 순자산에서는 제외/)).toBeInTheDocument();
+    expect(within(restrictedGroup).queryByText("해외거래소 직접 보유")).not.toBeInTheDocument();
+    expect(within(restrictedGroup).getByTestId("holdings-section-pension_savings")).toBeInTheDocument();
+    expect(within(restrictedGroup).getByTestId("holdings-section-irp")).toBeInTheDocument();
+    expect(within(generalSection).getByText("총 평가 ₩252,000")).toBeInTheDocument();
+    expect(within(pensionSection).getByText("총 평가 ₩261,600")).toBeInTheDocument();
+    expect(within(irpSection).getByText("총 평가 ₩50,000")).toBeInTheDocument();
+    expect(within(generalSection).queryByText("포스코퓨처엠")).not.toBeInTheDocument();
+    expect(within(pensionSection).queryByText("TIGER 미국S&P500")).not.toBeInTheDocument();
+    expect(within(irpSection).queryByText("ACE 미국S&P500채권혼합액티브")).not.toBeInTheDocument();
+
+    fireEvent.click(within(generalSection).getByRole("button", { name: /일반 계좌/ }));
     expect(within(generalSection).getByText("포스코퓨처엠")).toBeInTheDocument();
     expect(within(generalSection).getByText("일반")).toBeInTheDocument();
     expect(within(generalSection).getByText("003670")).toBeInTheDocument();
     expect(within(generalSection).getByText("보유 1주")).toBeInTheDocument();
     expect(within(generalSection).getByText("기준가 ₩252,000")).toBeInTheDocument();
     expect(within(generalSection).getByText("평가액 ₩252,000")).toBeInTheDocument();
+
+    fireEvent.click(within(pensionSection).getByRole("button", { name: /연금저축/ }));
+    fireEvent.click(within(irpSection).getByRole("button", { name: /IRP/ }));
     expect(within(pensionSection).getByText("제한·미래 자산")).toBeInTheDocument();
     expect(within(irpSection).getByText("제한·미래 자산")).toBeInTheDocument();
     expect(within(pensionSection).getByText("TIGER 미국S&P500")).toBeInTheDocument();

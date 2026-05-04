@@ -1,10 +1,10 @@
 import type { FixedCostSimulatorConfig } from "./fixedCostTypes";
 
 export const defaultFixedCostConfig: FixedCostSimulatorConfig = {
-  monthlyIncome: 4_000_000,
   periodMonths: 120,
   annualReturnRate: 0.05,
   investmentRatio: 0,
+  bufferMonthlyAmount: 0,
   subscriptionCategories: [
     {
       id: "digital",
@@ -64,8 +64,11 @@ export const defaultFixedCostConfig: FixedCostSimulatorConfig = {
   ],
   livingExpenses: [
     { id: "food", name: "식비", monthlyAmount: 0 },
+    { id: "dining", name: "외식/카페", monthlyAmount: 0 },
     { id: "transport", name: "교통비", monthlyAmount: 0 },
-    { id: "housing", name: "주거비", monthlyAmount: 0 },
-    { id: "culture", name: "여가/문화", monthlyAmount: 0 },
+    { id: "medical", name: "병원/약", monthlyAmount: 0 },
+    { id: "shopping", name: "쇼핑/생활용품", monthlyAmount: 0 },
+    { id: "culture", name: "여행/취미", monthlyAmount: 0 },
+    { id: "misc", name: "기타", monthlyAmount: 0 },
   ],
 };

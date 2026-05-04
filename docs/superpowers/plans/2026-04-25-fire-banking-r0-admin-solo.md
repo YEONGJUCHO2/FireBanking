@@ -1,5 +1,7 @@
 # Fire Banking R0 Internal Alpha + Invite Intent Implementation Plan
 
+> Document status: historical implementation plan. Current product scope and priorities live in `fire_couple_app_prd_v2.md`. Keep this file only for R0 implementation history.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build R0 Internal Alpha: a Next.js app where one lead partner can sign in with Google, enter Korean-context FIRE inputs, see a basic projection, persist a monthly snapshot, and generate/copy a spouse invite link as an intent signal. R0 is not the first external MVP; R0+R1 is the first meaningful couple-ritual validation unit.

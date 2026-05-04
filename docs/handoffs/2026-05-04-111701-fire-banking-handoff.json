@@ -1,0 +1,506 @@
+{
+  "schema_version": "1.0",
+  "kind": "codex_json_handoff",
+  "trigger_keyword": "인수인계",
+  "created_at": "2026-05-04T02:17:01.963Z",
+  "created_by": "Codex handoff hook",
+  "workspace": {
+    "absolute_path": "/Users/macmini-cho/Documents/Project/FireBanking",
+    "cwd_at_creation": "/Users/macmini-cho/Documents/Project/FireBanking",
+    "project_name": "fire-banking",
+    "branch": "codex/investment-auto-valuation",
+    "current_commit": "ba5012b",
+    "host": "macmini-choui-Macmini.local",
+    "platform": "darwin 25.4.0"
+  },
+  "storage": {
+    "directory": "docs/handoffs",
+    "file": "docs/handoffs/2026-05-04-111701-fire-banking-handoff.json",
+    "cumulative_index": "docs/handoffs/index.json",
+    "mode": "Each handoff is stored as an individual JSON file and registered in the cumulative index."
+  },
+  "purpose": "Resume FireBanking documentation and design-refactor handoff work",
+  "user_notes": [
+    "Decision: docs/designer-handoff.md is now a system/screen/component handoff only; visual tone, mood, colors, typography direction, and copy tone are intentionally out of scope.",
+    "Requirement: dashboard must include the FIRE goal graph with title, remaining amount, progress bar, 0/25/50/100 ticks, and the existing animated fire GIF at the 100% end from components/fire-banking/fire-timeline.tsx.",
+    "Doc cleanup: README now explains current development state and memory.md is marked as archived historical context, not current project status."
+  ],
+  "canonical_context": {
+    "rule": "Read these first. If docs conflict, prefer explicit canonical product/project docs over old plans.",
+    "read_first": [
+      "fire_couple_app_prd_v2.md",
+      "README.md",
+      "docs/designer-handoff.md"
+    ],
+    "doc_candidates": [
+      "README.md",
+      "docs/designer-handoff.md",
+      "docs/research/2026-05-kiwoom-domestic-valuation-spike.md",
+      "docs/superpowers/plans/2026-04-25-fire-banking-r0-admin-solo.md",
+      "docs/superpowers/plans/2026-05-01-investment-auto-valuation.md",
+      "docs/superpowers/plans/2026-05-03-fire-asset-diagnosis.md",
+      "docs/superpowers/specs/2026-04-25-fire-banking-mvp-design.md",
+      "docs/superpowers/specs/2026-05-01-investment-auto-valuation-design.md",
+      "docs/superpowers/specs/2026-05-03-fire-asset-diagnosis-design.md",
+      "docs/superpowers/specs/2026-05-03-fire-living-expense-adjuster-design.md",
+      "fire_couple_app_prd_v2.md"
+    ]
+  },
+  "git_state": {
+    "is_git_repo": true,
+    "status_short": [
+      {
+        "raw": "M .gitignore",
+        "status": "M",
+        "path": "gitignore"
+      },
+      {
+        "raw": " M README.md",
+        "status": "M",
+        "path": "README.md"
+      },
+      {
+        "raw": " M app/assets/page.test.tsx",
+        "status": "M",
+        "path": "app/assets/page.test.tsx"
+      },
+      {
+        "raw": " M app/dashboard/dashboard-mobile.tsx",
+        "status": "M",
+        "path": "app/dashboard/dashboard-mobile.tsx"
+      },
+      {
+        "raw": " M app/dashboard/mobile/page.test.tsx",
+        "status": "M",
+        "path": "app/dashboard/mobile/page.test.tsx"
+      },
+      {
+        "raw": " M app/dashboard/page.test.tsx",
+        "status": "M",
+        "path": "app/dashboard/page.test.tsx"
+      },
+      {
+        "raw": " M app/dashboard/page.tsx",
+        "status": "M",
+        "path": "app/dashboard/page.tsx"
+      },
+      {
+        "raw": " M app/design-system/page.tsx",
+        "status": "M",
+        "path": "app/design-system/page.tsx"
+      },
+      {
+        "raw": " M app/history/page.tsx",
+        "status": "M",
+        "path": "app/history/page.tsx"
+      },
+      {
+        "raw": " M app/insights/page.tsx",
+        "status": "M",
+        "path": "app/insights/page.tsx"
+      },
+      {
+        "raw": " M app/invite/[token]/page.tsx",
+        "status": "M",
+        "path": "app/invite/[token]/page.tsx"
+      },
+      {
+        "raw": " M app/onboarding/page.tsx",
+        "status": "M",
+        "path": "app/onboarding/page.tsx"
+      },
+      {
+        "raw": " M app/settings/page.tsx",
+        "status": "M",
+        "path": "app/settings/page.tsx"
+      },
+      {
+        "raw": " M app/showcase/page.tsx",
+        "status": "M",
+        "path": "app/showcase/page.tsx"
+      },
+      {
+        "raw": " M app/subscribe/page.tsx",
+        "status": "M",
+        "path": "app/subscribe/page.tsx"
+      },
+      {
+        "raw": " M app/together/page.tsx",
+        "status": "M",
+        "path": "app/together/page.tsx"
+      },
+      {
+        "raw": " M components/fire-banking/bottom-nav.tsx",
+        "status": "M",
+        "path": "components/fire-banking/bottom-nav.tsx"
+      },
+      {
+        "raw": " M components/fire-banking/desktop-dashboard.tsx",
+        "status": "M",
+        "path": "components/fire-banking/desktop-dashboard.tsx"
+      },
+      {
+        "raw": " M components/fire-banking/invite-card.tsx",
+        "status": "M",
+        "path": "components/fire-banking/invite-card.tsx"
+      },
+      {
+        "raw": " M components/fire-banking/lite-onboarding.tsx",
+        "status": "M",
+        "path": "components/fire-banking/lite-onboarding.tsx"
+      },
+      {
+        "raw": " M components/fire-banking/onboarding-stepper.test.tsx",
+        "status": "M",
+        "path": "components/fire-banking/onboarding-stepper.test.tsx"
+      },
+      {
+        "raw": " M components/fire-banking/onboarding-stepper.tsx",
+        "status": "M",
+        "path": "components/fire-banking/onboarding-stepper.tsx"
+      },
+      {
+        "raw": " M components/fire-banking/screen-mockups.tsx",
+        "status": "M",
+        "path": "components/fire-banking/screen-mockups.tsx"
+      },
+      {
+        "raw": " M docs/designer-handoff.md",
+        "status": "M",
+        "path": "docs/designer-handoff.md"
+      },
+      {
+        "raw": " M docs/superpowers/plans/2026-04-25-fire-banking-r0-admin-solo.md",
+        "status": "M",
+        "path": "docs/superpowers/plans/2026-04-25-fire-banking-r0-admin-solo.md"
+      },
+      {
+        "raw": " M docs/superpowers/plans/2026-05-01-investment-auto-valuation.md",
+        "status": "M",
+        "path": "docs/superpowers/plans/2026-05-01-investment-auto-valuation.md"
+      },
+      {
+        "raw": " M docs/superpowers/plans/2026-05-03-fire-asset-diagnosis.md",
+        "status": "M",
+        "path": "docs/superpowers/plans/2026-05-03-fire-asset-diagnosis.md"
+      },
+      {
+        "raw": " M docs/superpowers/specs/2026-04-25-fire-banking-mvp-design.md",
+        "status": "M",
+        "path": "docs/superpowers/specs/2026-04-25-fire-banking-mvp-design.md"
+      },
+      {
+        "raw": " M docs/superpowers/specs/2026-05-01-investment-auto-valuation-design.md",
+        "status": "M",
+        "path": "docs/superpowers/specs/2026-05-01-investment-auto-valuation-design.md"
+      },
+      {
+        "raw": " M docs/superpowers/specs/2026-05-03-fire-asset-diagnosis-design.md",
+        "status": "M",
+        "path": "docs/superpowers/specs/2026-05-03-fire-asset-diagnosis-design.md"
+      },
+      {
+        "raw": " M docs/superpowers/specs/2026-05-03-fire-living-expense-adjuster-design.md",
+        "status": "M",
+        "path": "docs/superpowers/specs/2026-05-03-fire-living-expense-adjuster-design.md"
+      },
+      {
+        "raw": " M fire_couple_app_prd_v2.md",
+        "status": "M",
+        "path": "fire_couple_app_prd_v2.md"
+      },
+      {
+        "raw": " M src/features/assets/actions/assetActionHelpers.ts",
+        "status": "M",
+        "path": "src/features/assets/actions/assetActionHelpers.ts"
+      },
+      {
+        "raw": " M src/features/assets/actions/deleteHolding.test.ts",
+        "status": "M",
+        "path": "src/features/assets/actions/deleteHolding.test.ts"
+      },
+      {
+        "raw": " M src/features/assets/actions/deleteLiability.test.ts",
+        "status": "M",
+        "path": "src/features/assets/actions/deleteLiability.test.ts"
+      },
+      {
+        "raw": " M src/features/assets/actions/updateHolding.test.ts",
+        "status": "M",
+        "path": "src/features/assets/actions/updateHolding.test.ts"
+      },
+      {
+        "raw": " M src/features/assets/actions/updateLiability.test.ts",
+        "status": "M",
+        "path": "src/features/assets/actions/updateLiability.test.ts"
+      },
+      {
+        "raw": " M src/features/assets/components/InvestmentAssetPanel.test.tsx",
+        "status": "M",
+        "path": "src/features/assets/components/InvestmentAssetPanel.test.tsx"
+      },
+      {
+        "raw": " M src/features/assets/components/InvestmentAssetPanel.tsx",
+        "status": "M",
+        "path": "src/features/assets/components/InvestmentAssetPanel.tsx"
+      },
+      {
+        "raw": " M src/features/assets/components/LiabilityPanel.test.tsx",
+        "status": "M",
+        "path": "src/features/assets/components/LiabilityPanel.test.tsx"
+      },
+      {
+        "raw": " M src/features/assets/components/LiabilityPanel.tsx",
+        "status": "M",
+        "path": "src/features/assets/components/LiabilityPanel.tsx"
+      },
+      {
+        "raw": " M src/features/assets/lib/getAssetManagementData.ts",
+        "status": "M",
+        "path": "src/features/assets/lib/getAssetManagementData.ts"
+      },
+      {
+        "raw": " M src/features/couple/actions/acceptInvite.test.ts",
+        "status": "M",
+        "path": "src/features/couple/actions/acceptInvite.test.ts"
+      },
+      {
+        "raw": " M src/features/couple/actions/acceptInvite.ts",
+        "status": "M",
+        "path": "src/features/couple/actions/acceptInvite.ts"
+      },
+      {
+        "raw": " M src/features/couple/actions/unlinkPartner.test.ts",
+        "status": "M",
+        "path": "src/features/couple/actions/unlinkPartner.test.ts"
+      },
+      {
+        "raw": " M src/features/couple/actions/unlinkPartner.ts",
+        "status": "M",
+        "path": "src/features/couple/actions/unlinkPartner.ts"
+      },
+      {
+        "raw": " M src/features/dashboard/lib/dashboardRoleUi.test.ts",
+        "status": "M",
+        "path": "src/features/dashboard/lib/dashboardRoleUi.test.ts"
+      },
+      {
+        "raw": " M src/features/dashboard/lib/dashboardRoleUi.ts",
+        "status": "M",
+        "path": "src/features/dashboard/lib/dashboardRoleUi.ts"
+      },
+      {
+        "raw": " M src/features/onboarding/actions/saveR0Snapshot.test.ts",
+        "status": "M",
+        "path": "src/features/onboarding/actions/saveR0Snapshot.test.ts"
+      },
+      {
+        "raw": " M src/features/onboarding/actions/saveR0Snapshot.ts",
+        "status": "M",
+        "path": "src/features/onboarding/actions/saveR0Snapshot.ts"
+      },
+      {
+        "raw": " M src/features/onboarding/components/R0OnboardingForm.test.tsx",
+        "status": "M",
+        "path": "src/features/onboarding/components/R0OnboardingForm.test.tsx"
+      },
+      {
+        "raw": " M src/features/onboarding/components/R0OnboardingForm.tsx",
+        "status": "M",
+        "path": "src/features/onboarding/components/R0OnboardingForm.tsx"
+      },
+      {
+        "raw": " M src/features/onboarding/lib/r0OnboardingSchema.test.ts",
+        "status": "M",
+        "path": "src/features/onboarding/lib/r0OnboardingSchema.test.ts"
+      },
+      {
+        "raw": " M src/features/onboarding/lib/r0OnboardingSchema.ts",
+        "status": "M",
+        "path": "src/features/onboarding/lib/r0OnboardingSchema.ts"
+      },
+      {
+        "raw": " M src/features/subscribe/actions/saveFixedCostSimulation.ts",
+        "status": "M",
+        "path": "src/features/subscribe/actions/saveFixedCostSimulation.ts"
+      },
+      {
+        "raw": " M src/features/subscribe/components/FixedCostSimulator.test.tsx",
+        "status": "M",
+        "path": "src/features/subscribe/components/FixedCostSimulator.test.tsx"
+      },
+      {
+        "raw": " M src/features/subscribe/components/FixedCostSimulator.tsx",
+        "status": "M",
+        "path": "src/features/subscribe/components/FixedCostSimulator.tsx"
+      },
+      {
+        "raw": " M src/features/subscribe/lib/fixedCostDefaults.ts",
+        "status": "M",
+        "path": "src/features/subscribe/lib/fixedCostDefaults.ts"
+      },
+      {
+        "raw": " M src/features/subscribe/lib/fixedCostSimulator.test.ts",
+        "status": "M",
+        "path": "src/features/subscribe/lib/fixedCostSimulator.test.ts"
+      },
+      {
+        "raw": " M src/features/subscribe/lib/fixedCostSimulator.ts",
+        "status": "M",
+        "path": "src/features/subscribe/lib/fixedCostSimulator.ts"
+      },
+      {
+        "raw": " M src/features/subscribe/lib/fixedCostTypes.ts",
+        "status": "M",
+        "path": "src/features/subscribe/lib/fixedCostTypes.ts"
+      },
+      {
+        "raw": "?? app/history/page.test.tsx",
+        "status": "??",
+        "path": "app/history/page.test.tsx"
+      },
+      {
+        "raw": "?? app/insights/page.test.tsx",
+        "status": "??",
+        "path": "app/insights/page.test.tsx"
+      },
+      {
+        "raw": "?? app/invite/[token]/page.test.tsx",
+        "status": "??",
+        "path": "app/invite/[token]/page.test.tsx"
+      },
+      {
+        "raw": "?? app/settings/page.test.tsx",
+        "status": "??",
+        "path": "app/settings/page.test.tsx"
+      },
+      {
+        "raw": "?? app/subscribe/page.test.tsx",
+        "status": "??",
+        "path": "app/subscribe/page.test.tsx"
+      },
+      {
+        "raw": "?? app/together/page.test.tsx",
+        "status": "??",
+        "path": "app/together/page.test.tsx"
+      },
+      {
+        "raw": "?? components/fire-banking/lite-onboarding.test.tsx",
+        "status": "??",
+        "path": "components/fire-banking/lite-onboarding.test.tsx"
+      },
+      {
+        "raw": "?? docs/handoffs/2026-05-03-204450-firebanking-closed-beta-implementation-handoff.json",
+        "status": "??",
+        "path": "docs/handoffs/2026-05-03-204450-firebanking-closed-beta-implementation-handoff.json"
+      },
+      {
+        "raw": "?? docs/handoffs/index.json",
+        "status": "??",
+        "path": "docs/handoffs/index.json"
+      },
+      {
+        "raw": "?? docs/superpowers/plans/2026-05-03-fire-living-expense-adjuster-refactor.md",
+        "status": "??",
+        "path": "docs/superpowers/plans/2026-05-03-fire-living-expense-adjuster-refactor.md"
+      },
+      {
+        "raw": "?? src/features/dashboard/lib/getDashboardCashflowSnapshot.ts",
+        "status": "??",
+        "path": "src/features/dashboard/lib/getDashboardCashflowSnapshot.ts"
+      },
+      {
+        "raw": "?? src/features/dashboard/lib/getDashboardPartnerState.test.ts",
+        "status": "??",
+        "path": "src/features/dashboard/lib/getDashboardPartnerState.test.ts"
+      },
+      {
+        "raw": "?? src/features/dashboard/lib/getDashboardPartnerState.ts",
+        "status": "??",
+        "path": "src/features/dashboard/lib/getDashboardPartnerState.ts"
+      },
+      {
+        "raw": "?? src/features/fire/lib/suggestFireMonthlyExpense.test.ts",
+        "status": "??",
+        "path": "src/features/fire/lib/suggestFireMonthlyExpense.test.ts"
+      },
+      {
+        "raw": "?? src/features/fire/lib/suggestFireMonthlyExpense.ts",
+        "status": "??",
+        "path": "src/features/fire/lib/suggestFireMonthlyExpense.ts"
+      },
+      {
+        "raw": "?? src/features/onboarding/lib/onboardingAccessState.test.ts",
+        "status": "??",
+        "path": "src/features/onboarding/lib/onboardingAccessState.test.ts"
+      },
+      {
+        "raw": "?? src/features/onboarding/lib/onboardingAccessState.ts",
+        "status": "??",
+        "path": "src/features/onboarding/lib/onboardingAccessState.ts"
+      },
+      {
+        "raw": "?? src/features/subscribe/actions/applyFireLivingExpenseRecommendation.test.ts",
+        "status": "??",
+        "path": "src/features/subscribe/actions/applyFireLivingExpenseRecommendation.test.ts"
+      },
+      {
+        "raw": "?? src/features/subscribe/actions/applyFireLivingExpenseRecommendation.ts",
+        "status": "??",
+        "path": "src/features/subscribe/actions/applyFireLivingExpenseRecommendation.ts"
+      },
+      {
+        "raw": "?? src/features/subscribe/actions/saveFixedCostSimulation.test.ts",
+        "status": "??",
+        "path": "src/features/subscribe/actions/saveFixedCostSimulation.test.ts"
+      },
+      {
+        "raw": "?? src/features/subscribe/lib/fixedCostConfigSchema.ts",
+        "status": "??",
+        "path": "src/features/subscribe/lib/fixedCostConfigSchema.ts"
+      },
+      {
+        "raw": "?? src/lib/checkinDate.ts",
+        "status": "??",
+        "path": "src/lib/checkinDate.ts"
+      }
+    ],
+    "recent_commits": [
+      "ba5012b fix: subtract only investment loans on dashboard",
+      "1f0ab5b refactor: rename assets area to fire diagnosis",
+      "f123746 feat: frame liabilities as investment linked loans",
+      "9af1e7e feat: show fire asset holding quantities",
+      "061a3b1 refactor: count only investment loans in fire assets"
+    ]
+  },
+  "package": {
+    "name": "fire-banking",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+      "dev": "next dev",
+      "build": "next build",
+      "start": "next start",
+      "lint": "eslint .",
+      "test": "vitest run",
+      "test:watch": "vitest",
+      "test:e2e": "playwright test"
+    }
+  },
+  "next_session_checklist": [
+    "Read this JSON first.",
+    "Read the canonical files listed in canonical_context.read_first.",
+    "Run git status before editing.",
+    "Do not revert dirty worktree changes you did not make.",
+    "Continue from the highest-priority unfinished task.",
+    "Run targeted verification before claiming completion."
+  ],
+  "recommended_verification_commands": [
+    "git status --short --untracked-files=all",
+    "git diff --check",
+    "npm test",
+    "npm run lint",
+    "npm run build"
+  ],
+  "handoff_prompt_for_new_session": "이 JSON 파일(/Users/macmini-cho/Documents/Project/FireBanking/docs/handoffs/2026-05-04-111701-fire-banking-handoff.json)을 먼저 읽고, canonical_context.read_first에 있는 문서를 기준으로 이어서 작업해줘. 이전 인수인계 이력은 /Users/macmini-cho/Documents/Project/FireBanking/docs/handoffs/index.json에서 확인해. git status를 먼저 확인하고, 내가 만들지 않은 기존 변경은 되돌리지 마. 새 전략 문서를 만들기보다 필요한 경우 기존 기준 문서를 갱신해."
+}
