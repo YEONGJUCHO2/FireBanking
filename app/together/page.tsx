@@ -1,12 +1,17 @@
 import { BottomNav, MobileAppShell } from '@/components/fire-banking'
 import { cn } from '@/lib/cn'
+import { AdminPartnerCard } from '@/src/features/dashboard/components/AdminPartnerCard'
+import { getDashboardPartnerState } from '@/src/features/dashboard/lib/getDashboardPartnerState'
 import { formatNextCheckinDate } from '@/src/lib/checkinDate'
 
-export default function TogetherPage() {
+export default async function TogetherPage() {
+  const partnerState = await getDashboardPartnerState()
   const adminDone = true
-  const liteDone = false
+  const liteDone = partnerState.state === 'complete'
   const myName = '나'
   const partnerName = '배우자'
+  const hasWorkspace = partnerState.state !== 'no_workspace'
+  const partnerPending = partnerState.state === 'needs_invite' || partnerState.state === 'waiting_for_input'
 
   return (
     <MobileAppShell>
@@ -42,9 +47,22 @@ export default function TogetherPage() {
               알림은 두 분 모두에게 갑니다.
             </p>
           </div>
+
+          {hasWorkspace ? (
+            <section className="mt-6 space-y-3">
+              <h2 className="text-[15px] font-bold tracking-[-0.010em] text-fb-ink">
+                {partnerState.state === 'needs_invite' ? '배우자 초대' : '배우자 연결'}
+              </h2>
+              <AdminPartnerCard
+                coupleId={partnerState.coupleId}
+                connectedPartnerCount={partnerState.connectedPartnerCount}
+                latestInviteUrl={partnerState.latestInviteUrl}
+              />
+            </section>
+          ) : null}
         </section>
       </main>
-      <BottomNav active="together" />
+      <BottomNav active="together" partnerPending={partnerPending} />
     </MobileAppShell>
   )
 }

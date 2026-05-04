@@ -92,6 +92,16 @@ describe("DashboardPage", () => {
     expect(screen.queryByText("초대 수락 · 입력 대기 중")).not.toBeInTheDocument();
   });
 
+  it("shows the spouse invite workflow in the desktop dashboard when a partner is pending", async () => {
+    render(await DashboardPage());
+
+    const desktopDashboard = document.querySelector(".lg\\:block");
+
+    expect(desktopDashboard).toHaveTextContent("배우자 초대");
+    expect(desktopDashboard).toHaveTextContent("배우자에게 공유할 준비");
+    expect(desktopDashboard).toHaveTextContent("/invite/token-1");
+  });
+
   it("links registered assets to dashboard net worth while excluding pension and IRP from FIRE assets", async () => {
     mocks.getAssetManagementData.mockResolvedValue({
       coupleId: "couple-1",

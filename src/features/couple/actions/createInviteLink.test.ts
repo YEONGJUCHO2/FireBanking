@@ -101,6 +101,7 @@ describe("createInviteLink", () => {
       token: "token-1",
     });
     expect(mocks.revalidatePath).toHaveBeenCalledWith("/dashboard");
+    expect(mocks.revalidatePath).toHaveBeenCalledWith("/together");
     expect(result).toEqual({ inviteUrl: "/invite/token-1" });
   });
 

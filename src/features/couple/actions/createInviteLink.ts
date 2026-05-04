@@ -54,6 +54,7 @@ export async function createInviteLink(
   }
 
   revalidatePath("/dashboard");
+  revalidatePath("/together");
 
   return { inviteUrl: `/invite/${token}` };
 }

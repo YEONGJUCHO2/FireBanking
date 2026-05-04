@@ -161,6 +161,16 @@ export default async function DashboardPage() {
         <div className="mx-auto mt-6 w-full max-w-[1280px]">
           <FireLivingExpenseAdjusterLink />
           <AssetManagementLink linkedAssetCount={data.linkedAssetCount} />
+          {pendingPartnerState ? (
+            <section className="mt-4 space-y-3">
+              <SectionHeader title="배우자 초대" />
+              <AdminPartnerCard
+                coupleId={pendingPartnerState.coupleId}
+                connectedPartnerCount={pendingPartnerState.connectedPartnerCount}
+                latestInviteUrl={pendingPartnerState.latestInviteUrl}
+              />
+            </section>
+          ) : null}
         </div>
       </div>
     </>
