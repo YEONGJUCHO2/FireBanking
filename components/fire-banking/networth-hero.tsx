@@ -1,61 +1,83 @@
+'use client'
+
 import { Card } from './card'
 import { cn } from '@/lib/cn'
+import type { FireDisplayMode } from './fire-timeline'
 
 type NetWorthHeroProps = {
-  /** 표시 순자산 (만원) */
-  totalManWon: number
-  /** 전월 대비 Δ (만원, signed) */
-  deltaManWon?: number
-  /** 거주 부동산 (만원) */
-  homeManWon: number
-  /** 투자가능 — FIRE 계산 (만원) */
-  investableManWon: number
-  /** 기타 자산 (만원) */
-  otherManWon: number
-  /** FIRE 목표 자산 (만원) */
+  /** 목표 월 생활비 (만원) */
+  targetMonthlyExpenseManWon: number
+  /** FIRE 계산 순자산 (만원) */
+  fireNetWorthManWon: number
+  /** 월 자산 증가 여력 (만원) */
+  monthlyGrowthManWon: number
+  /** FIRE 목표 자산 (만원): 목표 월 생활비 × 12 × 25 */
   fireTargetManWon: number
+  years?: number
+  months?: number
+  displayMode?: FireDisplayMode
+  onDisplayModeChange?: (mode: FireDisplayMode) => void
   className?: string
 }
 
 export function NetWorthHero({
-  totalManWon,
-  deltaManWon,
-  homeManWon,
-  investableManWon,
-  otherManWon,
+  targetMonthlyExpenseManWon,
+  fireNetWorthManWon,
+  monthlyGrowthManWon,
   fireTargetManWon,
+  years,
+  months,
+  displayMode = 'amount',
+  onDisplayModeChange,
   className,
 }: NetWorthHeroProps) {
+  const hasDistance = years != null && months != null
+  const remainingManWon = Math.max(0, fireTargetManWon - fireNetWorthManWon)
+  const heroLabel = displayMode === 'amount' ? 'FIRE까지 남은 금액' : 'FIRE까지 남은 기간'
+  const heroValue =
+    displayMode === 'amount'
+      ? remainingManWon.toLocaleString('ko-KR')
+      : hasDistance
+        ? `${years}년 ${months}개월`
+        : '계산 대기'
+
   return (
     <Card radius="hero" className={cn('p-6', className)}>
-      <p className="text-[13px] font-medium text-fb-ink-3">우리 가족 표시 순자산</p>
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-[13px] font-medium text-fb-ink-3">{heroLabel}</p>
+        <div className="flex rounded-full border border-fb-line bg-white p-1">
+          {(['amount', 'period'] as const).map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => onDisplayModeChange?.(mode)}
+              className={cn(
+                'h-8 rounded-full px-3 text-[12px] font-bold transition-colors',
+                displayMode === mode ? 'bg-fb-ink text-white' : 'text-fb-ink-2 hover:bg-fb-card-alt',
+              )}
+            >
+              {mode === 'amount' ? '금액' : '기간'}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="fb-num mt-1.5 flex items-baseline gap-1.5">
         <span className="text-[44px] font-bold leading-[1.1] tracking-[-0.024em] text-fb-ink">
-          {totalManWon.toLocaleString('ko-KR')}
+          {heroValue}
         </span>
-        <span className="text-[18px] font-bold text-fb-ink-2">만원</span>
+        {displayMode === 'amount' ? <span className="text-[18px] font-bold text-fb-ink-2">만원</span> : null}
       </div>
-      {deltaManWon != null ? (
-        <div className="mt-2 flex items-center gap-2">
-          <span
-            className={cn(
-              'fb-num text-[13px] font-semibold',
-              deltaManWon >= 0 ? 'text-fb-positive' : 'text-fb-negative',
-            )}
-          >
-            {deltaManWon >= 0 ? '↑' : '↓'} {Math.abs(deltaManWon).toLocaleString('ko-KR')}만원
-          </span>
-          <span className="text-[12px] font-medium text-fb-ink-3">지난 달 대비</span>
-        </div>
-      ) : null}
+      <p className="mt-2 text-[12px] font-medium leading-5 text-fb-ink-3">
+        월 {targetMonthlyExpenseManWon.toLocaleString('ko-KR')}만원 생활비 기준 · 연 5%, 25배 룰
+      </p>
 
       <div className="my-5 fb-divider" />
 
       <div className="grid grid-cols-2 gap-x-4 gap-y-4">
-        <BreakdownItem label="거주 부동산" value={homeManWon} />
-        <BreakdownItem label="투자가능" value={investableManWon} highlight badge="FIRE" />
-        <BreakdownItem label="기타 순자산" value={otherManWon} />
-        <BreakdownItem label="FIRE 목표" value={fireTargetManWon} />
+        <BreakdownItem label="목표 월 생활비" value={targetMonthlyExpenseManWon} />
+        <BreakdownItem label="FIRE 목표자산" value={fireTargetManWon} highlight />
+        <BreakdownItem label="FIRE 계산 순자산" value={fireNetWorthManWon} highlight badge="FIRE" />
+        <BreakdownItem label="월 자산 증가 여력" value={monthlyGrowthManWon} />
       </div>
     </Card>
   )

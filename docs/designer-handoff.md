@@ -1,302 +1,331 @@
-# Fire Banking 디자인 브리프
+# Fire Banking Design Refactor Handoff
 
-작성일: 2026-04-26
-문서 목적: 현재 개발된 R0/R1 알파 앱을 디자이너가 빠르게 이해하고, 제품 정체성에 맞는 UI/UX 개선안을 만들 수 있도록 전달한다.
+- Updated: 2026-05-04
+- Purpose: hand off only the app structure, screen requirements, component inventory, state rules, and implementation constraints needed for a product design refactor.
+- Source of truth: `fire_couple_app_prd_v2.md`
+- Out of scope for this handoff: brand tone, visual mood, color direction, typography direction, copy tone, marketing positioning, and decorative style guidance.
 
-## 1. 제품 한 줄 정의
+If this document conflicts with `fire_couple_app_prd_v2.md`, the PRD wins.
 
-**월 1회 3분, 부부가 함께 순자산과 경제적 자유(FIRE) 진척을 확인하는 앱**
+## Current App State
 
-Fire Banking은 상세 가계부가 아니라, 부부/커플이 같은 숫자를 보고 돈 이야기를 덜 불편하게 시작하도록 돕는 월간 재무 체크인 앱이다.
+The app is a Next.js 16 / React 19 closed-beta FIRE check-in product for couples.
 
-## 2. 현재 제품 단계
+Implemented or partially implemented surfaces:
 
-현재 구현은 **R0 Internal Alpha + Invite Intent** 단계다.
+- `/`: entry/login surface.
+- `/onboarding`: Admin first-input flow with four primary numbers.
+- onboarding result bridge: first FIRE result plus spouse invite CTA and dashboard fallback.
+- `/dashboard`: primary home dashboard.
+- `/dashboard/mobile`: mobile dashboard preview/test surface.
+- `/history`: monthly snapshot history with empty-state behavior.
+- `/together`: partner connection and check-in status.
+- `/settings`: limited settings with only working or explainable items.
+- `/invite/[token]`: spouse invite acceptance entry.
+- `/subscribe`: FIRE living expense adjuster.
+- `/assets`: FIRE asset diagnosis.
+- `/showcase` and `/design-system`: internal visual/component preview routes.
 
-- 한 명의 리드 파트너가 로그인한다.
-- 세후 월수입, 순자산, 고정비, 변동비, 정기저축/투자를 입력한다.
-- 투자가능 순자산 기준 FIRE 예상 도달 시점을 본다.
-- 배우자 초대 링크를 만들고 복사하거나 카카오톡으로 공유한다.
-- 고정비 시뮬레이터에서 반복 지출이 미래 자산에 주는 영향을 확인한다.
+Current implementation has active work in progress. Do not assume every route is final. The design refactor should preserve the product model below and may reorganize layout/component hierarchy.
 
-디자인 목표는 외부 공개용 랜딩 페이지보다, **부부가 월 1회 계속 돌아와도 부담 없는 실제 앱 경험**을 만드는 것이다.
+## Product Model
 
-## 3. 핵심 사용자
+Fire Banking is not a daily ledger, portfolio analytics product, or investment recommendation tool.
 
-### Admin
+The app centers on one monthly loop:
 
-- FIRE, 저축, 투자, 자산 형성에 관심이 높은 사람
-- 숫자 입력과 시뮬레이션에 비교적 익숙함
-- 배우자와 같은 목표를 보고 싶어함
-- 앱 안에서 신뢰 가능한 결과와 설명을 원함
+1. Admin enters or confirms the household FIRE baseline.
+2. Admin sees a first FIRE result quickly.
+3. Admin invites spouse/partner.
+4. Lite partner enters three numbers.
+5. The couple sees a shared FIRE result.
+6. Monthly snapshots create history over time.
 
-### Lite
+Primary calculations:
 
-- 돈 관리 앱을 매일 쓰고 싶지는 않은 사람
-- 복잡한 입력은 싫어하지만 관계를 위해 최소 참여는 가능함
-- "큰 숫자 1개 + 버튼 1개" 수준의 단순한 UX가 필요함
-- 비난받는 느낌, 감시당하는 느낌을 피해야 함
+- monthly living expense
+- annual living expense
+- FIRE target asset
+- FIRE reflected net worth
+- remaining FIRE amount
+- monthly asset growth capacity
+- estimated time to FIRE when calculable
 
-## 4. 제품 원칙
+Calculation assumptions that must stay visible in relevant result screens:
 
-1. **월 체크인이 기본**
-   - 매일 쓰는 가계부가 아니다.
-   - 월 1회, 지난달 값을 재사용할 수 있는 리추얼 앱이다.
+- 25x annual expense rule
+- 5% annual compounding assumption
+- simple simulation, not investment advice
+- couple workspace amount data is shared between partners
 
-2. **입력 부담은 비대칭**
-   - Admin은 자세히 입력할 수 있다.
-   - Lite는 최소 입력만으로도 참여해야 한다.
+## Navigation And IA
 
-3. **미래 중심**
-   - 과거 소비를 추궁하지 않는다.
-   - "이번 달 입력으로 FIRE가 얼마나 가까워졌는지"를 보여준다.
+Closed beta bottom navigation has four tabs:
 
-4. **숫자는 신뢰 가능해야 함**
-   - 거주 부동산, 기타 순자산, 투자가능 순자산의 차이를 명확히 보여준다.
-   - R0 계산은 연 5%, 25배 룰 기준의 참고용 시뮬레이션임을 숨기지 않는다.
+- Home: `/dashboard`
+- History: `/history`
+- Together: `/together`
+- Settings: `/settings`
 
-5. **부부 관계를 해치지 않는 톤**
-   - 절약 압박, 죄책감, 감시 느낌을 피한다.
-   - 차분하고 현실적인 언어를 쓴다.
+The app must not expose a separate Analysis tab in closed beta.
 
-## 5. 현재 구현 화면
+Secondary entries from Home:
 
-### `/`
+- FIRE living expense adjuster: `/subscribe`
+- FIRE asset diagnosis: `/assets`
 
-홈/로그인 진입 화면.
+Auth and onboarding routes:
 
-- 핵심 카피: "부부가 함께 순자산과 경제적 자유 진척을 확인하는 앱"
-- 현재는 짧은 소개와 로그인 버튼 중심
-- 외부 마케팅 랜딩보다는 알파 사용자의 진입 화면에 가까움
+- `/`
+- `/onboarding`
+- `/invite/[token]`
+- `/auth/callback`
 
-### `/onboarding`
+Internal-only routes:
 
-R0 온보딩 입력 화면.
+- `/showcase`
+- `/design-system`
 
-입력 항목:
+## Required Screens
 
-- 가구 세후 월수입
-- 투자가능 순자산
-- 거주 부동산 순자산
-- 기타 순자산
-- 가구 월 고정비 총액
-- 평소 한 달 예상 변동비
-- 월 정기저축/투자
+### Entry
 
-중요한 UX 포인트:
+Required content blocks:
 
-- 단위는 `만원`
-- 정확한 회계 입력보다 대략적인 첫 거리감을 보는 것이 목적
-- 거주 부동산은 표시 순자산에는 포함되지만 R0 FIRE 계산에서는 제외됨
+- app identity
+- concise product definition
+- sign-in action
+- auth error state when callback fails
 
-### `/dashboard`
+The entry screen is not the main product experience. It should lead users into onboarding or dashboard quickly.
 
-R0 결과 대시보드.
+### Admin Onboarding
 
-현재 표시되는 주요 지표:
+Required inputs:
 
-- 우리 가족 표시 순자산
-- FIRE 계산 순자산
-- 거주 부동산 순자산
-- 월 세후수입
-- 월 생활비
-- 월 정기저축/투자
-- 월 자산 증가 여력
-- FIRE 목표 자산
-- 예상 FIRE 도달 시점
+- target monthly living expense, unit `만원`
+- after-tax monthly income, unit `만원`
+- total monthly expense, unit `만원`
+- investable net worth, unit `만원`
 
-중요한 UX 포인트:
+Required behaviors:
 
-- "경제적 자유까지 남은 거리"가 핵심 메시지
-- 결과는 참고용 시뮬레이션이며 투자 자문이 아님
-- 목표 도달 시점 계산이 불가능하면 억지로 날짜를 보여주지 않음
+- input formatting for Korean `만원` amounts
+- clear confirmation of large numbers
+- submit action to save the first snapshot
+- edit path should be able to prefill from the latest snapshot when data exists
 
-### `/dashboard` 안의 배우자 초대 카드
+### First FIRE Result Bridge
 
-Admin이 배우자를 초대하는 영역.
+Required components:
 
-- 초대 링크 생성
-- 링크 복사
-- 카카오톡 공유
-- 연결된 배우자가 없을 때 invite intent를 측정하는 핵심 액션
+- first FIRE result summary
+- FIRE target asset explanation
+- remaining amount
+- spouse invite recommendation
+- primary CTA: ask spouse for three numbers
+- secondary CTA: view dashboard first
 
-디자인상 이 액션은 단순 보조 기능이 아니라, 제품 가설 검증에 매우 중요하다.
+This screen should not become a full dashboard. It is a one-time comprehension and invite bridge.
 
-### `/invite/[token]`
+### Dashboard
 
-배우자가 초대 링크로 들어왔을 때 보는 화면.
+Dashboard is the core screen for the design refactor.
 
-- "배우자 워크스페이스에 참여해요"
-- 초대 수락 버튼
-- 이후 Lite 입력 플로우로 확장될 예정
+Required top-level modules:
 
-### `/subscribe`
+- current check-in month
+- check-in status
+- FIRE goal graph
+- target monthly living expense
+- FIRE target asset
+- FIRE reflected net worth
+- monthly asset growth capacity
+- estimated time to FIRE or calculation-unavailable state
+- current month cashflow summary
+- spouse check-in card only when spouse work is incomplete
+- entry card for FIRE living expense adjuster
+- entry card for FIRE asset diagnosis
 
-고정비 시뮬레이터.
+Required FIRE goal graph:
 
-현재 기능:
+- Use the attached reference structure: title `FIRE까지 남은 금액`, right-aligned remaining amount, horizontal progress track, current-position marker, 0% / 25% / 50% / 100% ticks.
+- The 100% end of the FIRE bar must use the existing animated fire GIF already implemented in `components/fire-banking/fire-timeline.tsx`.
+- The fire GIF source currently used by the app is `https://em-content.zobj.net/source/animated-noto-color-emoji/356/fire_1f525.gif`.
+- The designer may change layout and sizing, but the moving fire indicator at the FIRE end should remain part of the dashboard graph requirement.
+- The graph must support both mobile and desktop dashboard widths without label overlap.
+- The graph must handle 0%, partial progress, 100%, and over-target clamped states.
 
-- 월 실수령액
-- 시뮬레이션 기간
-- 투자 비율
-- 예상 수익률
-- 월 고정비
-- 매월 남는 돈
-- 고정비 영향
-- 투자 예상액
-- 구독/생활 고정지출 항목 on/off 및 금액 입력
-- 결과 공유 모달
+Required spouse-card state rules:
 
-이 화면은 향후 `월 현금흐름 엔진`의 출발점이다. 단순 구독 계산기가 아니라, 반복 지출이 FIRE 목표에 미치는 영향을 보여주는 기능으로 봐야 한다.
+- no invite yet: show invite recommendation/action
+- invite sent but not accepted: show waiting state and copy/share action
+- accepted but no Lite input: show input waiting state
+- Lite input completed: remove the invite/pending card from dashboard and show completion status elsewhere
 
-## 6. 현재 시각 스타일
+### Lite Invite And Check-In
 
-현재 UI는 Tailwind 기반의 매우 단순한 스타일이다.
+Required flow:
 
-- 배경: `stone-50`
-- 본문/제목: `slate`
-- 주요 강조색: `emerald`
-- 카드: 흰색 배경, 얇은 slate border, 8px 안팎 radius
-- 버튼: slate black 또는 emerald
-- 레이아웃: 좁은 단일 컬럼, 일부 2~4열 카드 그리드
+1. invite link entry
+2. invite acceptance
+3. after-tax monthly income input
+4. monthly recurring expense input
+5. monthly recurring savings/investment input
+6. completion confirmation
 
-현재 스타일의 장점:
+Required component behavior:
 
-- 금융 앱답게 과하게 튀지 않는다.
-- 정보 위계가 비교적 명확하다.
-- 구현 부담이 낮다.
+- one primary numeric decision per step
+- quick reuse action for previous-month values when available
+- completion should return the user to the shared result or a clear next state
 
-현재 스타일의 한계:
+### FIRE Living Expense Adjuster
 
-- 브랜드 기억점이 약하다.
-- 지표 카드가 모두 비슷하게 보여 핵심 수치가 덜 살아난다.
-- Admin/Lite의 정서 차이가 UI에 거의 반영되어 있지 않다.
-- 고정비 시뮬레이터는 기능은 있으나, "돈이 새는 느낌"과 "미래 자산 차이"가 시각적으로 충분히 전달되지 않는다.
-- 모바일에서 월간 리추얼 앱다운 안정감과 손맛이 더 필요하다.
+Required summary modules:
 
-## 7. 디자인 요청 범위
+- fixed expense
+- variable expense
+- buffer
+- recommended target monthly living expense
+- difference from current dashboard baseline
 
-### 우선순위 1: 제품 정체성 정의
+Required detail modules:
 
-디자이너에게 기대하는 것:
+- fixed-cost categories
+- variable-cost groups
+- buffer input
+- save draft
+- apply recommendation to dashboard baseline
 
-- Fire Banking의 브랜드 무드 제안
-- 금융 앱이지만 차갑지 않고, 부부 앱이지만 유치하지 않은 톤
-- Admin에게는 신뢰감, Lite에게는 부담 없음이 느껴지는 디자인 방향
-- 색상, 타이포그래피, 간격, 카드, 버튼, 입력 컴포넌트의 기본 시스템
+State rule:
 
-피해야 할 방향:
+- Saving a draft must not change the dashboard baseline.
+- Applying the recommendation is the explicit action that updates dashboard values.
 
-- 투자 앱처럼 공격적인 수익률/차트 중심 UI
-- 가계부 앱처럼 소비 추궁 느낌이 강한 UI
-- 데이트/커플 앱처럼 지나치게 귀엽거나 감성적인 UI
-- 랜딩 페이지처럼 과한 히어로/마케팅 구성
+### FIRE Asset Diagnosis
 
-### 우선순위 2: 핵심 화면 리디자인
+Required top module:
 
-필수 화면:
+```text
+FIRE reflected net worth
+= immediately usable investment assets
+- investment-linked loans
+```
 
-1. 로그인/진입 화면
-2. R0 온보딩 입력 화면
-3. 결과 대시보드
-4. 배우자 초대 카드/상태
-5. 초대 수락 화면
-6. 고정비 시뮬레이터
+Required groups:
 
-각 화면은 모바일 우선으로 디자인하고, 데스크톱에서는 좁은 앱형 레이아웃 또는 밀도 있는 대시보드형 레이아웃을 제안해도 된다.
+- FIRE reflected investment assets
+- restricted/future assets
+- reference assets
+- investment-linked loans
+- excluded liabilities when present
 
-### 우선순위 3: 숫자 표현 방식
+Required interactions:
 
-중요 숫자 표현에 대한 디자인이 필요하다.
+- domestic instrument search
+- holding quantity add/edit/delete
+- manual US-listed holding valuation assist
+- liability add/edit/delete
 
-- 순자산
-- FIRE 계산 순자산
-- FIRE 목표 자산
-- 예상 도달 시점
-- 월 자산 증가 여력
-- 고정비가 미래 자산에 주는 영향
+Dashboard dependency:
 
-요청:
+- Dashboard FIRE reflected net worth must use the same inclusion/exclusion rule as this screen.
 
-- 모든 숫자를 같은 카드로 나열하지 말고, 핵심 숫자와 보조 숫자의 위계를 만든다.
-- 긍정/주의/계산 불가 상태를 명확히 구분한다.
-- 음수 현금흐름도 사용자를 탓하지 않는 시각 표현이 필요하다.
+### History
 
-### 우선순위 4: Lite 사용자 경험 대비
+Required states:
 
-Lite 화면은 아직 완전히 구현되지 않았지만, 디자인 설계에는 포함되어야 한다.
+- actual monthly snapshot list when data exists
+- empty state when no snapshot exists
+- month status: temporary or finalized
+- previous-month comparison when computable
 
-예상 Lite 플로우:
+Hard requirement:
 
-1. 초대 링크 접속
-2. 초대 수락
-3. 내 세후 월수입 입력
-4. 내 월 반복지출 총액 입력
-5. 내 월 정기저축/투자 총액 입력
-6. 완료 후 부부 합산 결과 확인
+- Do not show hard-coded sample history as if it were real user data.
 
-Lite UX 원칙:
+### Together
 
-- 입력 필드 수를 최소화한다.
-- 상세 설명을 줄이고, 안심 문구를 잘 배치한다.
-- "지난달과 같아요" 같은 빠른 액션을 중심에 둔다.
-- 배우자에게 평가받는 느낌을 만들지 않는다.
+Required modules:
 
-## 8. 카피 톤
+- partner connection status
+- invite link creation/re-share
+- current month check-in status
+- Lite input completion state
+- next check-in context
 
-권장 톤:
+### Settings
 
-- 조용하고 현실적인 조언자
-- 숫자를 숨기지 않지만 겁주지 않음
-- 부부가 같은 편이라는 느낌
-- 한국어 금융 문맥에 자연스러운 표현
+Required modules:
 
-좋은 예:
+- profile/account
+- data and couple-sharing scope
+- FIRE calculation assumptions
+- non-advice disclaimer
+- sign out
 
-- "먼저 신뢰할 수 있는 첫 결과를 확인해요"
-- "정확하지 않아도 괜찮아요. 지금은 첫 거리감을 보는 단계예요."
-- "배우자 체크인이 완료되면 이번 달 결과가 확정돼요."
-- "현재 입력 기준으로는 목표 도달 시점을 계산하기 어려워요."
+Hard requirement:
 
-피해야 할 예:
+- Do not show fake settings rows or clickable-looking actions that do nothing.
 
-- "당신은 너무 많이 쓰고 있어요"
-- "절약하지 않으면 은퇴할 수 없습니다"
-- "부자 되는 비법"
-- "AI가 완벽하게 분석해드려요"
+## Component Inventory
 
-## 9. 디자인 산출물 요청
+Existing reusable components to preserve or refactor:
 
-희망 산출물:
+- app shell: `MobileAppShell`, `DesktopDashboard`, `BottomNav`, `ScreenTopBar`
+- cards: `Card`, `MetricCard`, `FireHeroCard`, `DashboardFireOverview`
+- FIRE graph: `FireTimeline`, `FireTimelineWide`
+- cashflow: `CashflowSummary`, `CashflowStrip`
+- check-in: `CheckinRow`, `StatusPill`
+- partner: `InviteCard`, `AdminPartnerCard`, `PartnerWaitingCard`, `PartnerReadOnlyCard`
+- forms: `FormField`, `MoneyInputRow`, onboarding stepper fields
+- navigation/action: `Button`, icon buttons, entry cards
 
-1. 제품 무드보드 또는 레퍼런스 방향 2~3안
-2. 색상/타이포/간격/버튼/입력/카드 기본 시스템
-3. 모바일 기준 핵심 화면 와이어 또는 하이파이 시안
-4. 데스크톱 대시보드 대응안
-5. 핵심 지표 카드 컴포넌트 규칙
-6. Admin/Lite 상태별 화면 차이
-7. 에러/빈값/계산 불가/음수 현금흐름 상태 디자인
+The design refactor can rename or reorganize components, but each of the responsibilities above needs a clear replacement.
 
-최종 전달 형태는 Figma를 선호한다.
+## Data States
 
-## 10. 기술/구현 제약
+Every major metric component needs these states:
 
-- 프레임워크: Next.js 16, React 19
-- 스타일링: Tailwind CSS 4
-- 인증/DB: Supabase
-- 현재 디자인 시스템 라이브러리는 없음
-- 아이콘 라이브러리는 아직 없음
-- 구현 난이도가 너무 높은 인터랙션보다, 반복 사용에 안정적인 UI를 우선한다.
-- 모바일 반응형은 필수다.
+- loading
+- no data
+- partial couple data
+- complete couple data
+- calculation unavailable
+- negative monthly cashflow
+- over-target FIRE progress
+- unauthenticated or signed-out fallback
+- provider/search unavailable for asset valuation
 
-## 11. 디자이너에게 꼭 전달할 판단
+Use explicit empty and unavailable states instead of placeholder sample numbers.
 
-이 앱은 "돈을 더 잘 관리하는 앱"이기도 하지만, 더 정확히는 **부부가 같은 숫자를 보고 같은 편이 되게 하는 앱**이다.
+## Implementation Constraints
 
-그래서 디자인의 성공 기준은 화려한 금융 대시보드가 아니다.
+- Framework: Next.js 16 App Router
+- React: 19
+- Styling: Tailwind CSS 4
+- Auth and database: Supabase
+- Tests: Vitest, Testing Library, Playwright
+- Current project has no external design-system package.
+- Current app uses local `components/fire-banking/*` components.
+- The design should be implementable as responsive app screens, not a marketing landing page.
+- Mobile is required; desktop dashboard may use a denser layout.
 
-- Admin은 "이 숫자는 믿을 수 있다"고 느껴야 한다.
-- Lite는 "이 정도면 나도 참여할 수 있다"고 느껴야 한다.
-- 두 사람 모두 "돈 이야기를 시작하기가 조금 덜 불편하다"고 느껴야 한다.
+## Designer Deliverables
 
-이 기준에 맞지 않는 시각적 멋은 과감히 버려도 된다.
+Requested deliverables:
+
+- mobile dashboard layout
+- desktop dashboard layout
+- Admin onboarding flow
+- first FIRE result bridge
+- Lite invite/check-in flow
+- Together state screens
+- FIRE living expense adjuster screen
+- FIRE asset diagnosis screen
+- History empty/list states
+- Settings data-sharing/calculation sections
+- component inventory with states for cards, graph, inputs, bottom navigation, status pills, and action rows
+
+Do not spend deliverable effort on brand tone, visual mood boards, marketing hero direction, or copywriting system unless separately requested.

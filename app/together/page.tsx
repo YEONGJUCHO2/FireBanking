@@ -1,11 +1,17 @@
 import { BottomNav, MobileAppShell } from '@/components/fire-banking'
 import { cn } from '@/lib/cn'
+import { AdminPartnerCard } from '@/src/features/dashboard/components/AdminPartnerCard'
+import { getDashboardPartnerState } from '@/src/features/dashboard/lib/getDashboardPartnerState'
+import { formatNextCheckinDate } from '@/src/lib/checkinDate'
 
-export default function TogetherPage() {
+export default async function TogetherPage() {
+  const partnerState = await getDashboardPartnerState()
   const adminDone = true
-  const liteDone = false
-  const myName = '지윤'
-  const partnerName = '민호'
+  const liteDone = partnerState.state === 'complete'
+  const myName = '나'
+  const partnerName = '배우자'
+  const hasWorkspace = partnerState.state !== 'no_workspace'
+  const partnerPending = partnerState.state === 'needs_invite' || partnerState.state === 'waiting_for_input'
 
   return (
     <MobileAppShell>
@@ -18,30 +24,45 @@ export default function TogetherPage() {
         <section className="px-4 pt-5 space-y-2.5">
           <PartnerRow
             name={myName}
-            initial="지"
-            role="관리자 · 풀 입력"
+            initial="나"
+            role="나 · 전체 입력"
             done={adminDone}
             tone="admin"
           />
           <PartnerRow
             name={partnerName}
-            initial="민"
-            role="배우자 · Lite 입력"
+            initial="배"
+            role="배우자 · 간단 입력"
             done={liteDone}
             tone="lite"
           />
 
           <div className="mt-6 rounded-[14px] border border-fb-trust/20 bg-fb-trust/[0.04] px-4 py-5">
             <p className="text-[13px] font-semibold tracking-[-0.005em] text-fb-trust">다음 체크인</p>
-            <p className="mt-1 text-[18px] font-bold tracking-[-0.012em] text-fb-ink">2026년 5월 1일</p>
+            <p className="mt-1 text-[18px] font-bold tracking-[-0.012em] text-fb-ink">
+              {formatNextCheckinDate()}
+            </p>
             <p className="mt-1.5 text-[12px] leading-[1.5] text-fb-ink-2">
               매달 첫째 주에 함께 3분만 들여요.<br />
               알림은 두 분 모두에게 갑니다.
             </p>
           </div>
+
+          {hasWorkspace ? (
+            <section className="mt-6 space-y-3">
+              <h2 className="text-[15px] font-bold tracking-[-0.010em] text-fb-ink">
+                {partnerState.state === 'needs_invite' ? '배우자 초대' : '배우자 연결'}
+              </h2>
+              <AdminPartnerCard
+                coupleId={partnerState.coupleId}
+                connectedPartnerCount={partnerState.connectedPartnerCount}
+                latestInviteUrl={partnerState.latestInviteUrl}
+              />
+            </section>
+          ) : null}
         </section>
       </main>
-      <BottomNav active="together" />
+      <BottomNav active="together" partnerPending={partnerPending} />
     </MobileAppShell>
   )
 }

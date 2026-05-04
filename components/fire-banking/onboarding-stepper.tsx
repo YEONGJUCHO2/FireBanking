@@ -5,15 +5,13 @@ import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/cn'
 import { Icon } from './icons'
 import { StatusPill } from './status-pill'
+import { suggestFireMonthlyExpenseFromSpending } from '@/src/features/fire/lib/suggestFireMonthlyExpense'
 
 export type OnboardingValues = {
+  goalExpense: number
   income: number
-  fixed: number
-  variable: number
-  save: number
+  totalExpense: number
   investable: number
-  home: number
-  other: number
 }
 
 type StepKey = keyof OnboardingValues
@@ -32,87 +30,52 @@ type Step = {
 
 const STEPS: Step[] = [
   {
+    key: 'totalExpense',
+    group: '가구 캐시플로우',
+    groupIdx: 1,
+    groupOf: 3,
+    title: '한 달 총지출은\n얼마쯤인가요?',
+    sub: '지금 생활의 기준점부터 잡아요.\n고정비와 변동비를 나누지 않고 총액만 입력해도 됩니다.',
+    helper: '정확한 가계부보다 첫 FIRE 거리감을 보는 것이 먼저입니다.',
+    shortLabel: '월 총지출',
+  },
+  {
+    key: 'goalExpense',
+    group: 'FIRE 기준 설정',
+    groupIdx: 2,
+    groupOf: 3,
+    title: '은퇴 후 생활비 기준은\n이렇게 잡을게요',
+    sub: '방금 입력한 한 달 총지출을 기본값으로 넣어뒀어요.\n더 줄이거나 늘리고 싶으면 여기서 직접 바꿀 수 있습니다.',
+    helper: '이 금액 × 12 × 25배가 첫 FIRE 목표자산입니다.',
+    shortLabel: '은퇴 후 월 생활비',
+  },
+  {
     key: 'income',
-    group: '내 캐시플로우',
-    groupIdx: 1,
+    group: '가구 캐시플로우',
+    groupIdx: 2,
     groupOf: 3,
-    title: '내 세후 월수입은\n얼마나 되나요?',
-    sub: '본인 기준이에요.\n배우자 분은 초대 후 따로 입력하면 합산돼요.',
+    title: '세후 월수입은\n얼마나 되나요?',
+    sub: '가구 기준으로 빠르게 시작해요.\n배우자 분은 초대 후 3개 숫자를 따로 입력할 수 있어요.',
     helper: '보너스는 12개월로 나눠 평균값을 넣어도 좋아요.',
-    shortLabel: '내 세후 월수입',
-  },
-  {
-    key: 'fixed',
-    group: '내 캐시플로우',
-    groupIdx: 1,
-    groupOf: 3,
-    title: '내가 책임지는\n월 고정비는요?',
-    sub: '내 명의 구독·보험·통신비처럼\n매달 비슷하게 빠져나가는 지출.',
-    helper: '공과금/관리비는 분담분만 적어주세요.',
-    shortLabel: '내 월 고정비',
-  },
-  {
-    key: 'variable',
-    group: '내 캐시플로우',
-    groupIdx: 1,
-    groupOf: 3,
-    title: '내 평소 한 달\n변동비는 얼마쯤이죠?',
-    sub: '식비, 외식, 쇼핑처럼 그때그때 다른 지출.\n본인 카드/계좌 기준이에요.',
-    helper: '평균이면 충분해요.',
-    shortLabel: '내 월 변동비',
-  },
-  {
-    key: 'save',
-    group: '내 캐시플로우',
-    groupIdx: 1,
-    groupOf: 3,
-    title: '매달 내가 저축·투자로\n빠져나가는 돈은요?',
-    sub: '본인 명의 자동이체 합계.\n비상금 적립도 포함해 주세요.',
-    helper: '아직 없으면 0으로 두셔도 괜찮아요.',
-    shortLabel: '내 월 저축·투자',
+    shortLabel: '세후 월수입',
   },
   {
     key: 'investable',
-    group: '가구 공동 자산',
-    groupIdx: 2,
+    group: 'FIRE 자산',
+    groupIdx: 3,
     groupOf: 3,
-    title: '투자가능 순자산은\n부부 합쳐서 얼마쯤?',
-    sub: '현금성 + 투자 자산을 부부 합산으로요.\nFIRE 거리감 계산의 핵심 숫자예요.',
-    helper: '대출/카드 미결제는 빼고 적어주세요.',
-    shortLabel: '가구 투자가능 순자산',
-  },
-  {
-    key: 'home',
-    group: '가구 공동 자산',
-    groupIdx: 2,
-    groupOf: 3,
-    title: '거주 부동산\n순자산이 있어요?',
-    sub: '시세에서 대출을 뺀 값.\n표시 순자산엔 포함되지만 FIRE 계산엔 빠져요.',
-    helper: '없거나 잘 모르면 건너뛰어도 돼요.',
-    shortLabel: '거주 부동산 순자산',
-    optional: true,
-  },
-  {
-    key: 'other',
-    group: '가구 공동 자산',
-    groupIdx: 2,
-    groupOf: 3,
-    title: '기타 자산도\n있을까요?',
-    sub: '자동차, 보증금처럼 환금성 낮은 자산.\n부부 합쳐서요.',
-    helper: '없으면 건너뛰어도 좋아요.',
-    shortLabel: '기타 자산',
-    optional: true,
+    title: '내가 확인 가능한\n투자가능 자산은요?',
+    sub: '현금성 자산, 주식, ETF처럼 FIRE 생활비를 만들 수 있는 자산이에요.\n배우자 몫은 초대 후 따로 받거나 확인 요청할 수 있어요.',
+    helper: '부동산과 기타자산은 나중에 자산 관리 총괄에서 따로 정리해요.',
+    shortLabel: '내 투자가능 순자산',
   },
 ]
 
 const DEFAULT_VALUES: OnboardingValues = {
+  goalExpense: 0,
   income: 0,
-  fixed: 0,
-  variable: 0,
-  save: 0,
+  totalExpense: 0,
   investable: 0,
-  home: 0,
-  other: 0,
 }
 
 export function OnboardingStepper({
@@ -132,6 +95,8 @@ export function OnboardingStepper({
   const [values, setValues] = useState<OnboardingValues>({ ...DEFAULT_VALUES, ...initial })
   const [idx, setIdx] = useState(0)
   const [dir, setDir] = useState<'fwd' | 'bwd'>('fwd')
+  const [showResultBridge, setShowResultBridge] = useState(false)
+  const [shareNotice, setShareNotice] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const total = STEPS.length
@@ -146,9 +111,14 @@ export function OnboardingStepper({
   }, [idx, onSummary])
 
   const setVal = (key: StepKey, val: number) => setValues((v) => ({ ...v, [key]: val }))
+  const suggestedGoalExpense = suggestFireMonthlyExpenseFromSpending(values.totalExpense)
 
   const next = () => {
     setDir('fwd')
+    const nextStep = STEPS[idx + 1]
+    if (step?.key === 'totalExpense' && nextStep?.key === 'goalExpense' && values.goalExpense === 0) {
+      setVal('goalExpense', suggestedGoalExpense)
+    }
     setIdx((i) => i + 1)
   }
   const back = () => {
@@ -162,10 +132,55 @@ export function OnboardingStepper({
 
   const finish = () => {
     if (onDone) onDone(values)
-    router.push(doneHref)
+    setShowResultBridge(true)
+  }
+
+  const goToDashboard = () => router.push(doneHref)
+  const openFixedCostSimulator = () => router.push('/subscribe?returnTo=/onboarding')
+
+  const shareSpouseRequest = async () => {
+    const shareUrl =
+      typeof window === 'undefined' ? undefined : new URL('/onboarding', window.location.origin).toString()
+    const shareData = {
+      title: 'Fire Banking 배우자 입력 요청',
+      text: 'Fire Banking에서 우리 FIRE 결과를 더 정확히 보려고 해요. 세후 수입, 월 지출, 투자가능 자산 3개 숫자만 입력해 주세요.',
+      url: shareUrl,
+    }
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData)
+        return
+      }
+    } catch {
+      // Some desktop and in-app browsers expose Web Share but reject it.
+    }
+
+    try {
+      if (navigator.clipboard && shareUrl) {
+        await navigator.clipboard.writeText(`${shareData.text}\n${shareUrl}`)
+        setShareNotice('공유창을 열 수 없어 요청 문구를 복사했어요.')
+        return
+      }
+    } catch {
+      // Fall through to visible manual guidance below.
+    }
+
+    setShareNotice('공유창을 열 수 없어요. 배우자에게 세후 수입, 월 지출, 투자가능 자산 3개 숫자를 부탁해 주세요.')
   }
 
   const pct = (idx / total) * 100
+
+  if (showResultBridge) {
+    return (
+      <FireResultBridge
+        values={values}
+        onInvite={shareSpouseRequest}
+        onDashboard={goToDashboard}
+        shareNotice={shareNotice}
+      />
+    )
+  }
 
   return (
     <div className="relative flex h-full flex-1 flex-col overflow-hidden bg-fb-page">
@@ -210,8 +225,8 @@ export function OnboardingStepper({
               <br />
               결과를 함께 볼까요?
             </h1>
-            <p className="mt-3.5 text-[14px] font-medium leading-[1.55] text-fb-ink-2">
-              언제든 대시보드에서 다시 고칠 수 있어요.
+              <p className="mt-3.5 text-[14px] font-medium leading-[1.55] text-fb-ink-2">
+              목표 생활비와 투자가능 자산 기준으로 첫 FIRE 거리감을 계산해요.
             </p>
 
             <div className="mt-6 flex flex-col gap-2.5">
@@ -260,6 +275,15 @@ export function OnboardingStepper({
                 onSubmit={next}
               />
               <p className="mt-3.5 text-[12px] font-medium leading-[1.55] text-fb-ink-3">{step.helper}</p>
+
+              {step.key === 'goalExpense' && values.totalExpense > 0 ? (
+                <p className="mt-3 text-[12px] font-semibold leading-[1.55] text-fb-trust">
+                  월 총지출 {values.totalExpense.toLocaleString('ko-KR')}만원에 10% 버퍼를 더해{' '}
+                  {suggestedGoalExpense.toLocaleString('ko-KR')}만원을 먼저 넣어뒀어요.
+                </p>
+              ) : null}
+
+              {step.key === 'totalExpense' ? <SimulatorChoicePanel onOpen={openFixedCostSimulator} /> : null}
 
               {prevValues &&
               prevValues[step.key] != null &&
@@ -311,6 +335,103 @@ export function OnboardingStepper({
         )}
       </BottomCta>
     </div>
+  )
+}
+
+function FireResultBridge({
+  values,
+  onInvite,
+  onDashboard,
+  shareNotice,
+}: {
+  values: OnboardingValues
+  onInvite: () => void
+  onDashboard: () => void
+  shareNotice?: string | null
+}) {
+  const targetAssetManWon = values.goalExpense * 12 * 25
+  const remainingManWon = Math.max(0, targetAssetManWon - values.investable)
+
+  return (
+    <div className="relative flex h-full flex-1 flex-col overflow-hidden bg-fb-page px-6 pb-8 pt-14">
+      <div className="text-[12px] font-semibold uppercase tracking-[0.10em] text-fb-trust">
+        첫 FIRE 결과
+      </div>
+      <h1 className="mt-3 text-[28px] font-bold leading-[1.28] tracking-[-0.024em] text-fb-ink">
+        지금 숫자로 본
+        <br />
+        경제적 자유 거리
+      </h1>
+
+      <div className="mt-8 rounded-[22px] border border-fb-line bg-white p-5">
+        <p className="text-[14px] font-bold leading-[1.55] text-fb-ink">
+          월 {values.goalExpense.toLocaleString('ko-KR')}만원으로 살려면 FIRE 기준은 {formatKoreanEok(targetAssetManWon)}이에요.
+        </p>
+        <p className="mt-3 text-[14px] font-medium leading-[1.55] text-fb-ink-2">
+          현재 투자가능 순자산 기준으로는 {formatKoreanEok(remainingManWon)} 남았습니다.
+        </p>
+        <p className="mt-4 rounded-[14px] bg-fb-trust-soft px-4 py-3 text-[13px] font-medium leading-[1.55] text-fb-trust-ink">
+          배우자 숫자 3개가 더해지면 우리 가족 기준으로 더 정확해져요.
+        </p>
+      </div>
+
+      <p className="mt-4 text-[12px] font-medium leading-5 text-fb-ink-3">
+        참고용 단순 시뮬레이션이며 연 5%, 25배 룰 기준입니다. 투자 자문이 아닙니다.
+      </p>
+
+      <div className="flex-1" />
+
+      <div className="grid gap-2.5">
+        <button
+          type="button"
+          onClick={onInvite}
+          className="fbpress flex h-[54px] w-full items-center justify-center rounded-[14px] bg-fb-ink text-[15px] font-bold text-white"
+        >
+          배우자에게 3개 숫자 부탁하기
+        </button>
+        {shareNotice ? (
+          <p className="rounded-[12px] bg-fb-trust-soft px-4 py-3 text-center text-[12px] font-semibold leading-5 text-fb-trust-ink">
+            {shareNotice}
+          </p>
+        ) : null}
+        <button
+          type="button"
+          onClick={onDashboard}
+          className="fbpress flex h-[52px] w-full items-center justify-center rounded-[14px] border border-fb-line-strong bg-white text-[15px] font-semibold text-fb-ink"
+        >
+          대시보드 먼저 보기
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function formatKoreanEok(valueManWon: number) {
+  const eok = Math.floor(valueManWon / 10_000)
+  const remainder = valueManWon % 10_000
+
+  if (remainder === 0) {
+    return `${eok.toLocaleString('ko-KR')}억원`
+  }
+
+  return `${eok.toLocaleString('ko-KR')}억 ${remainder.toLocaleString('ko-KR')}만원`
+}
+
+function SimulatorChoicePanel({ onOpen }: { onOpen: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="fbpress mt-4 flex w-full items-center justify-between rounded-[16px] border border-fb-trust-soft bg-fb-trust-soft px-4 py-3 text-left"
+    >
+      <span>
+        <span className="block text-[13px] font-bold text-fb-trust-ink">고정비 시뮬레이터로 더 정확히 보기</span>
+        <span className="mt-0.5 block text-[12px] font-medium text-fb-trust-ink/75">
+          반복 지출을 쪼개서 목표 월 생활비를 잡아요
+        </span>
+      </span>
+      <Icon name="chevron-right" className="size-4 text-fb-trust" />
+    </button>
   )
 }
 

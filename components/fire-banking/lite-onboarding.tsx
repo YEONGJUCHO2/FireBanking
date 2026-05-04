@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { MoneyInputRow } from './form-field'
 import { Button } from './button'
 import { Icon } from './icons'
+import { suggestFireMonthlyExpenseFromSpending } from '@/src/features/fire/lib/suggestFireMonthlyExpense'
+import { formatCheckinMonthLabel, formatPreviousMonthReuseLabel } from '@/src/lib/checkinDate'
 
 type LiteValues = {
   income: number
@@ -24,8 +26,9 @@ export function LiteOnboarding({
   doneHref?: string
 }) {
   const router = useRouter()
-  const [v, setV] = useState<LiteValues>({ income: 380, recur: 180, save: 60, ...initial })
+  const [v, setV] = useState<LiteValues>({ income: 0, recur: 0, save: 0, ...initial })
   const [hasPrev] = useState(Boolean(prevValues))
+  const suggestedFireExpense = suggestFireMonthlyExpenseFromSpending(v.recur)
 
   const set = (key: keyof LiteValues) => (val: number | '') =>
     setV((cur) => ({ ...cur, [key]: typeof val === 'number' ? val : 0 }))
@@ -42,19 +45,19 @@ export function LiteOnboarding({
         >
           <Icon name="chevron-left" className="size-[22px]" />
         </button>
-        <div className="text-[14px] font-semibold text-fb-ink">민호님 체크인</div>
+        <div className="text-[14px] font-semibold text-fb-ink">배우자 체크인</div>
         <span className="size-9" />
       </div>
 
       <div className="flex-1 overflow-auto px-5 pb-[140px] pt-6">
         <div className="mb-2.5 text-[12px] font-semibold uppercase tracking-[0.10em] text-fb-trust">
-          2026. 04. 체크인
+          {formatCheckinMonthLabel()}
         </div>
         <h1 className="text-[24px] font-bold leading-[1.30] tracking-[-0.020em] text-fb-ink">
-          민호님 숫자<br />3가지만 알려주세요.
+          내 숫자<br />3가지만 알려주세요.
         </h1>
         <p className="mt-3 text-[14px] font-medium leading-[1.55] text-fb-ink-2">
-          지윤님께는 합산 결과만 보여요.<br />
+          초대한 계정에는 합산 결과만 보여요.<br />
           평소 평균이면 충분해요.
         </p>
 
@@ -73,7 +76,7 @@ export function LiteOnboarding({
             <span className="flex-1">
               <span className="block text-[15px] font-bold text-fb-ink">지난달과 같아요</span>
               <span className="mt-0.5 block text-[12px] font-medium text-fb-ink-3">
-                3월 입력값 그대로 사용
+                {formatPreviousMonthReuseLabel()}
               </span>
             </span>
             <Icon name="chevron-right" className="size-5 text-fb-ink-3" />
@@ -105,6 +108,16 @@ export function LiteOnboarding({
             onValueChange={set('recur')}
             hint="고정비 + 변동비 합. 정확하지 않아도 괜찮아요."
           />
+          {v.recur > 0 ? (
+            <div className="rounded-[14px] bg-fb-trust-soft px-4 py-3">
+              <p className="text-[13px] font-bold text-fb-trust-ink">
+                FIRE 기준 참고값은 월 {suggestedFireExpense.toLocaleString('ko-KR')}만원이에요.
+              </p>
+              <p className="mt-1 text-[12px] font-medium leading-[1.5] text-fb-trust-ink/75">
+                월 반복지출 {v.recur.toLocaleString('ko-KR')}만원에 10% 버퍼를 더한 값입니다.
+              </p>
+            </div>
+          ) : null}
           <MoneyInputRow
             label="내 월 정기저축 / 투자"
             value={v.save}
@@ -116,7 +129,7 @@ export function LiteOnboarding({
         <div className="mt-6 flex items-start gap-2.5 rounded-[16px] bg-fb-card-alt p-4">
           <Icon name="lock" className="mt-0.5 size-[18px] text-fb-ink-2" />
           <span className="text-[13px] font-medium leading-[1.55] text-fb-ink-2">
-            <b className="font-bold text-fb-ink">지윤님은 개별 숫자를 볼 수 없어요.</b>
+            <b className="font-bold text-fb-ink">초대한 계정은 개별 숫자를 볼 수 없어요.</b>
             <br />
             합산된 우리 가족 결과만 함께 봐요.
           </span>

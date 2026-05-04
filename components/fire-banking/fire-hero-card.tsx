@@ -1,6 +1,6 @@
 import { cn } from '@/lib/cn'
 import { Card, SectionHeader } from './card'
-import { FireTimeline, type FireMode } from './fire-timeline'
+import { FireTimeline, type FireDisplayMode, type FireMode } from './fire-timeline'
 
 type FireHeroCardProps = {
   /** Progress 0..1 toward FIRE */
@@ -9,6 +9,7 @@ type FireHeroCardProps = {
   months?: number
   dateLabel?: string
   mode?: FireMode
+  displayMode?: FireDisplayMode
   /** Coast FIRE position 0..1 */
   coastPercent?: number
   /** Δ vs prior month in percentage points */
@@ -31,6 +32,7 @@ export function FireHeroCard({
   months,
   dateLabel,
   mode = 'distance',
+  displayMode = 'amount',
   coastPercent,
   momentumPp,
   goalManWon,
@@ -51,6 +53,7 @@ export function FireHeroCard({
         goalManWon={goalManWon}
         coastManWon={coastManWon}
         mode={mode}
+        displayMode={displayMode}
       />
       {detailsHref ? <a href={detailsHref} className="sr-only">FIRE 계산 자세히 보기</a> : null}
       {detailsAction ? (

@@ -95,6 +95,6 @@ describe("unlinkPartner", () => {
 
     const result = await unlinkPartner(createFormData("couple-1"));
 
-    expect(result).toEqual({ error: "관리자 계정만 배우자 연동을 해제할 수 있습니다." });
+    expect(result).toEqual({ error: "리드 파트너 계정만 배우자 연동을 해제할 수 있습니다." });
   });
 });

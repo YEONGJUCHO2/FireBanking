@@ -10,6 +10,13 @@ const initialState: SaveR0SnapshotState = {};
 
 const fields = [
   [
+    "targetMonthlyExpense",
+    "목표 월 생활비",
+    "300",
+    "만원 단위입니다. 은퇴 후 매달 쓰고 싶은 생활비이며 FIRE 목표자산의 기준입니다.",
+    true,
+  ],
+  [
     "monthlyNetIncome",
     "가구 세후 월수입",
     "720",
@@ -18,44 +25,16 @@ const fields = [
   ],
   [
     "investableNetWorth",
-    "투자가능 순자산",
+    "내 투자가능 순자산",
     "12000",
-    "만원 단위입니다. 예금, 주식, ETF, 연금저축 등 FIRE 계산에 넣을 자산입니다.",
+    "만원 단위입니다. 현금성 자산, 주식, ETF처럼 FIRE 생활비를 만들 수 있는 자산입니다.",
     true,
   ],
   [
-    "primaryResidenceNetWorth",
-    "거주 부동산 순자산",
-    "70000",
-    "만원 단위입니다. 자가 시세에서 주담대를 뺀 금액입니다. 없거나 모르겠으면 비워도 괜찮아요.",
-    false,
-  ],
-  [
-    "otherNetWorth",
-    "기타 순자산",
-    "2000",
-    "만원 단위입니다. 차량, 보증금, 애매한 자산입니다. 없거나 모르겠으면 비워도 괜찮아요.",
-    false,
-  ],
-  [
-    "monthlyFixedExpense",
-    "가구 월 고정비 총액",
-    "230",
-    "만원 단위입니다. 주거비, 보험, 통신, 구독처럼 반복되는 비용입니다.",
-    true,
-  ],
-  [
-    "monthlyVariableExpense",
-    "평소 한 달 예상 변동비",
-    "170",
-    "만원 단위입니다. 지난달 실제 지출이 아니라 보통 한 달에 쓸 금액입니다.",
-    true,
-  ],
-  [
-    "monthlyRegularInvestment",
-    "월 정기저축/투자",
-    "200",
-    "만원 단위입니다. 매달 투자가능 자산으로 쌓이는 저축과 투자입니다.",
+    "monthlyTotalExpense",
+    "가구 월 총지출",
+    "400",
+    "만원 단위입니다. 고정비와 변동비를 나누지 않고 첫 FIRE 거리감을 보는 총액입니다.",
     true,
   ],
 ] as const;

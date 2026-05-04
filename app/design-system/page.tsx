@@ -72,8 +72,8 @@ export default function DesignSystemPage() {
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <Card className="p-6"><h2 className="text-lg font-bold">6. Admin 모드</h2><p className="mt-2 text-sm leading-6 text-fb-muted">더 많은 항목과 세부 입력 제공. 정확한 수치를 기반으로 한 분석 제공.</p><div className="mt-5 grid grid-cols-2 gap-3"><MetricCard title="총 자산" value="4억 9,200만원" /><MetricCard title="저축률" value="36%" variant="positive" delta="전월 대비 +4%p" /></div></Card>
-        <Card className="p-6"><h2 className="text-lg font-bold">Lite 모드</h2><p className="mt-2 text-sm leading-6 text-fb-muted">간단한 입력만으로 참여. 부담 없는 질문과 안심 문구 중심.</p><div className="mt-5 space-y-3"><MoneyInputRow label="내 세후 월수입" value={300} soft /><Button className="w-full" variant="soft">정확하지 않아도 괜찮아요</Button></div></Card>
+        <Card className="p-6"><h2 className="text-lg font-bold">6. 리드 파트너 입력</h2><p className="mt-2 text-sm leading-6 text-fb-muted">더 많은 항목과 세부 입력 제공. 정확한 수치를 기반으로 한 참고 지표 제공.</p><div className="mt-5 grid grid-cols-2 gap-3"><MetricCard title="총 자산" value="입력 후 표시" /><MetricCard title="저축률" value="계산 대기" variant="positive" /></div></Card>
+        <Card className="p-6"><h2 className="text-lg font-bold">배우자 간단 입력</h2><p className="mt-2 text-sm leading-6 text-fb-muted">간단한 입력만으로 참여. 부담 없는 질문과 안심 문구 중심.</p><div className="mt-5 space-y-3"><MoneyInputRow label="내 세후 월수입" value={0} soft /><Button className="w-full" variant="soft">정확하지 않아도 괜찮아요</Button></div></Card>
       </div>
     </PageCanvas>
   )

@@ -2,12 +2,11 @@ import Link from 'next/link'
 import { cn } from '@/lib/cn'
 import { Icon, type IconName } from './icons'
 
-type TabId = 'home' | 'history' | 'analyze' | 'together' | 'settings'
+type TabId = 'home' | 'history' | 'together' | 'settings'
 
 const tabs: Array<{ id: TabId; href: string; label: string; icon: IconName }> = [
   { id: 'home', href: '/dashboard', label: '홈', icon: 'home' },
   { id: 'history', href: '/history', label: '기록', icon: 'history' },
-  { id: 'analyze', href: '/insights', label: '분석', icon: 'sparkle' },
   { id: 'together', href: '/together', label: '함께', icon: 'users' },
   { id: 'settings', href: '/settings', label: '설정', icon: 'settings' },
 ]
@@ -28,7 +27,7 @@ export function BottomNav({
         className,
       )}
     >
-      <div className="grid grid-cols-5">
+      <div className="grid grid-cols-4">
         {tabs.map((tab) => {
           const isActive = tab.id === active
           const showBadge = tab.id === 'together' && partnerPending

@@ -1,32 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { createSupabaseServerClient } from "@/src/lib/supabase/server";
+import { fixedCostSimulationConfigSchema } from "@/src/features/subscribe/lib/fixedCostConfigSchema";
 import type { FixedCostSimulatorConfig } from "@/src/features/subscribe/lib/fixedCostTypes";
-
-const itemSchema = z.object({
-  id: z.string().min(1),
-  name: z.string().min(1),
-  monthlyAmount: z.number().min(0).max(100_000_000),
-  enabled: z.boolean().optional(),
-});
-
-const configSchema = z.object({
-  monthlyIncome: z.number().min(0).max(1_000_000_000),
-  periodMonths: z.number().int().min(1).max(360),
-  annualReturnRate: z.number().min(0).max(0.2),
-  investmentRatio: z.number().min(0).max(1),
-  subscriptionCategories: z.array(
-    z.object({
-      id: z.string().min(1),
-      name: z.string().min(1),
-      prompt: z.string(),
-      items: z.array(itemSchema.extend({ enabled: z.boolean() })),
-    }),
-  ),
-  livingExpenses: z.array(itemSchema.omit({ enabled: true })),
-});
 
 export type SaveFixedCostSimulationState = {
   error?: string;
@@ -36,7 +13,7 @@ export type SaveFixedCostSimulationState = {
 export async function saveFixedCostSimulation(
   config: FixedCostSimulatorConfig,
 ): Promise<SaveFixedCostSimulationState> {
-  const parsed = configSchema.safeParse(config);
+  const parsed = fixedCostSimulationConfigSchema.safeParse(config);
 
   if (!parsed.success) {
     return { error: "저장할 입력값을 확인해주세요." };
@@ -66,4 +43,28 @@ export async function saveFixedCostSimulation(
 
   revalidatePath("/subscribe");
   return { saved: true };
+}
+
+export async function getSavedFixedCostSimulationConfig(): Promise<FixedCostSimulatorConfig | null> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("fixed_cost_simulations")
+    .select("config")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  const parsed = fixedCostSimulationConfigSchema.safeParse(data.config);
+  return parsed.success ? parsed.data : null;
 }

@@ -3,6 +3,7 @@ export type FixedCostItem = {
   name: string;
   monthlyAmount: number;
   enabled: boolean;
+  note?: string;
 };
 
 export type FixedCostCategory = {
@@ -19,19 +20,31 @@ export type LivingExpenseItem = {
 };
 
 export type FixedCostSimulatorConfig = {
-  monthlyIncome: number;
   periodMonths: number;
   annualReturnRate: number;
   investmentRatio: number;
+  bufferMonthlyAmount: number;
+  dashboardBaseline?: {
+    targetMonthlyExpense: number;
+    fireNetWorth: number;
+    monthlyAssetGrowthCapacity: number;
+  };
   subscriptionCategories: FixedCostCategory[];
   livingExpenses: LivingExpenseItem[];
 };
 
 export type FixedCostProjection = {
+  monthlyRecurringFixedExpense: number;
+  monthlyVariableExpense: number;
+  monthlyBufferExpense: number;
+  recommendedTargetMonthlyExpense: number;
+  fireTargetAsset: number;
+  remainingAmount: number;
+  targetMonthlyExpenseDelta: number;
+  fireTargetAssetDelta: number;
+  remainingAmountDelta: number;
+  monthlyAssetGrowthCapacityDelta: number;
   monthlyFixedExpense: number;
-  monthlyRemainingCash: number;
-  monthlyInvestmentAmount: number;
   simpleFixedCostTotal: number;
   futureFixedCostImpact: number;
-  futureInvestmentValue: number;
 };

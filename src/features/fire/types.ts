@@ -3,8 +3,11 @@ export type FireProjectionInput = {
   primaryResidenceNetWorth: number;
   otherNetWorth: number;
   monthlyNetIncome: number;
+  targetMonthlyExpense?: number;
   monthlyFixedExpense: number;
   monthlyVariableExpense: number;
+  monthlyDebtInterestExpense: number;
+  monthlyDebtPrincipalPayment: number;
   monthlyRegularInvestment: number;
   annualReturnRate: number;
   fireMultiplier: number;

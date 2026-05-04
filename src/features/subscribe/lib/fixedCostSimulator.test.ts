@@ -2,12 +2,17 @@ import { describe, expect, it } from "vitest";
 import { calculateFixedCostProjection } from "./fixedCostSimulator";
 
 describe("calculateFixedCostProjection", () => {
-  it("calculates monthly fixed costs and lost future value", () => {
+  it("calculates recommended FIRE living expense from fixed, variable, and buffer inputs", () => {
     const result = calculateFixedCostProjection({
-      monthlyIncome: 4_000_000,
       periodMonths: 120,
       annualReturnRate: 0.05,
       investmentRatio: 0.5,
+      bufferMonthlyAmount: 300_000,
+      dashboardBaseline: {
+        targetMonthlyExpense: 3_000_000,
+        fireNetWorth: 120_000_000,
+        monthlyAssetGrowthCapacity: 2_000_000,
+      },
       subscriptionCategories: [
         {
           id: "digital",
@@ -22,19 +27,24 @@ describe("calculateFixedCostProjection", () => {
       livingExpenses: [{ id: "food", name: "식비", monthlyAmount: 1_000_000 }],
     });
 
-    expect(result.monthlyFixedExpense).toBe(1_014_900);
-    expect(result.monthlyRemainingCash).toBe(2_985_100);
-    expect(result.monthlyInvestmentAmount).toBe(1_492_550);
-    expect(result.simpleFixedCostTotal).toBe(121_788_000);
+    expect(result.monthlyRecurringFixedExpense).toBe(14_900);
+    expect(result.monthlyVariableExpense).toBe(1_000_000);
+    expect(result.monthlyBufferExpense).toBe(300_000);
+    expect(result.recommendedTargetMonthlyExpense).toBe(1_314_900);
+    expect(result.fireTargetAsset).toBe(394_470_000);
+    expect(result.remainingAmount).toBe(274_470_000);
+    expect(result.targetMonthlyExpenseDelta).toBe(-1_685_100);
+    expect(result.monthlyFixedExpense).toBe(1_314_900);
+    expect(result.simpleFixedCostTotal).toBe(157_788_000);
     expect(result.futureFixedCostImpact).toBeGreaterThan(result.simpleFixedCostTotal);
   });
 
-  it("never shows negative remaining cash or investment amount", () => {
+  it("clamps negative item and buffer amounts out of the living expense total", () => {
     const result = calculateFixedCostProjection({
-      monthlyIncome: 1_000_000,
       periodMonths: 120,
       annualReturnRate: 0.05,
       investmentRatio: 1,
+      bufferMonthlyAmount: -100_000,
       subscriptionCategories: [
         {
           id: "debt",
@@ -43,10 +53,12 @@ describe("calculateFixedCostProjection", () => {
           items: [{ id: "loan", name: "대출", monthlyAmount: 2_000_000, enabled: true }],
         },
       ],
-      livingExpenses: [],
+      livingExpenses: [{ id: "food", name: "식비", monthlyAmount: -500_000 }],
     });
 
-    expect(result.monthlyRemainingCash).toBe(0);
-    expect(result.monthlyInvestmentAmount).toBe(0);
+    expect(result.monthlyRecurringFixedExpense).toBe(2_000_000);
+    expect(result.monthlyVariableExpense).toBe(0);
+    expect(result.monthlyBufferExpense).toBe(0);
+    expect(result.recommendedTargetMonthlyExpense).toBe(2_000_000);
   });
 });

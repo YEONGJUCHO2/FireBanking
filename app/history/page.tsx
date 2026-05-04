@@ -1,13 +1,4 @@
 import { BottomNav, MobileAppShell } from '@/components/fire-banking'
-import { cn } from '@/lib/cn'
-
-const months = [
-  { m: '2026. 04', net: '5억 1,500', delta: '+220', mood: '편안' },
-  { m: '2026. 03', net: '5억 1,280', delta: '+180', mood: '편안' },
-  { m: '2026. 02', net: '5억 1,100', delta: '-40', mood: '걱정' },
-  { m: '2026. 01', net: '5억 1,140', delta: '+310', mood: '기쁨' },
-  { m: '2025. 12', net: '5억 0,830', delta: '+90', mood: '편안' },
-]
 
 export default function HistoryPage() {
   return (
@@ -22,35 +13,70 @@ export default function HistoryPage() {
           </p>
         </header>
 
-        <div className="space-y-2.5 px-4 pt-3">
-          {months.map((mo) => {
-            const isPos = mo.delta.startsWith('+')
-            return (
-              <div
-                key={mo.m}
-                className="flex items-center justify-between rounded-[14px] border border-fb-line bg-white px-4 py-4"
-              >
-                <div>
-                  <div className="text-[11px] font-semibold tracking-[0.06em] text-fb-ink-3">{mo.m}</div>
-                  <div className="fb-num mt-1 text-[18px] font-bold tracking-[-0.012em] text-fb-ink">
-                    {mo.net}만원
-                  </div>
-                  <div className="mt-0.5 text-[12px] text-fb-ink-3">분위기 · {mo.mood}</div>
-                </div>
-                <div
-                  className={cn(
-                    'fb-num text-[14px] font-bold',
-                    isPos ? 'text-fb-positive' : 'text-fb-negative',
-                  )}
-                >
-                  {mo.delta}만
+        <div className="px-4 pt-5 space-y-3">
+          <div className="rounded-[18px] border border-fb-line bg-white p-5 shadow-card">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-[18px] font-bold tracking-[-0.014em] text-fb-ink">
+                  2026년 5월
+                </h2>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-[12px] font-semibold text-fb-ink-3">FIRE까지 남은 금액</p>
+                <div className="mt-1 flex items-baseline justify-end gap-2">
+                  <span className="text-[15px] font-black text-fb-positive">↓ 320만원</span>
+                  <span className="text-[24px] font-black tracking-[-0.020em] text-fb-trust">
+                    7억 6,500만원
+                  </span>
                 </div>
               </div>
-            )
-          })}
+            </div>
+
+            <details className="mt-4 group rounded-[14px] border border-fb-line bg-fb-card-alt">
+              <summary
+                role="button"
+                aria-label="상세 정보 보기"
+                className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-[13px] font-bold text-fb-ink"
+              >
+                상세 정보 보기
+                <span className="text-fb-ink-3 transition-transform group-open:rotate-180">⌄</span>
+              </summary>
+              <div className="border-t border-fb-line px-4 pb-4 pt-3">
+                <p className="text-[12px] font-medium text-fb-ink-3">
+                  목표 월 생활비 300만원 · FIRE 목표자산 9억원 기준
+                </p>
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <HistoryMiniMetric label="FIRE 반영 순자산" value="1억 3,500만원" />
+                  <HistoryMiniMetric label="월 자산 증가 여력" value="+280만원" />
+                  <HistoryMiniMetric label="예상 도달" value="13년 6개월 후" />
+                  <HistoryMiniMetric label="계산 가정" value="연 5% · 25배" muted />
+                </div>
+              </div>
+            </details>
+
+          </div>
         </div>
       </main>
       <BottomNav active="history" />
     </MobileAppShell>
+  )
+}
+
+function HistoryMiniMetric({
+  label,
+  value,
+  muted,
+}: {
+  label: string
+  value: string
+  muted?: boolean
+}) {
+  return (
+    <div className="rounded-[13px] border border-fb-line bg-white px-3 py-3">
+      <p className="text-[11px] font-semibold text-fb-ink-3">{label}</p>
+      <p className={`mt-1 text-[14px] font-bold ${muted ? 'text-fb-ink-3' : 'text-fb-ink'}`}>
+        {value}
+      </p>
+    </div>
   )
 }
