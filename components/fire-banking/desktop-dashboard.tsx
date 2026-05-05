@@ -82,6 +82,14 @@ export function DesktopDashboard({
           <span className="text-[12px] font-medium text-fb-ink-3">
             {formatCheckinMonthLabel()} 진행 중
           </span>
+          <Link
+            href="/settings"
+            aria-label="설정"
+            data-od-id="nav-settings"
+            className="fbpress flex size-9 items-center justify-center rounded-full text-fb-ink-2 hover:bg-fb-card-alt hover:text-fb-ink"
+          >
+            <Icon name="settings" className="size-[18px]" />
+          </Link>
           <span className="flex size-8 items-center justify-center rounded-full bg-fb-ink text-[12px] font-bold text-white">
             나
           </span>
@@ -171,8 +179,8 @@ export function DesktopDashboard({
             </div>
 
             {/* FIRE timeline card */}
-            <div data-od-id="fire-timeline">
-              <Card radius="hero" className="p-7">
+            <div data-od-id="fire-timeline" className="flex flex-1">
+              <Card radius="hero" className="flex w-full flex-col p-7">
                 <div className="mb-5 flex items-baseline justify-between">
                   <div>
                     <div className="text-[11px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">
@@ -221,8 +229,8 @@ export function DesktopDashboard({
             </div>
 
             {/* cashflow card */}
-            <div data-od-id="cashflow-summary">
-              <Card radius="hero" className="p-6">
+            <div data-od-id="cashflow-summary" className="flex flex-1">
+              <Card radius="hero" className="flex w-full flex-col p-6">
                 <div className="mb-3 h-[2px] w-6 rounded-[2px] bg-fb-ink" />
                 <h3 className="text-[17px] font-bold text-fb-ink">이번 달 현금흐름</h3>
                 <div className="mt-4 flex flex-col gap-3">
