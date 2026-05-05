@@ -439,3 +439,93 @@ export function SimulatorScreenPreview() {
     </div>
   )
 }
+
+export function AssetsScreenPreview() {
+  // Mock data — static, no Supabase
+  const mockHoldings = [
+    { name: '삼성전자', symbol: '005930', category: '일반', value: '1,530', badge: 'FIRE 반영' },
+    { name: 'TIGER 미국S&P500', symbol: '360750', category: '일반', value: '210', badge: 'FIRE 반영' },
+    { name: '연금저축 펀드', symbol: 'IRP', category: '연금저축', value: '3,200', badge: '제한·미래' },
+  ]
+  const mockLoans = [
+    { label: '주식담보대출', balance: '500', interest: '15' },
+  ]
+
+  return (
+    <div className="flex h-full flex-col bg-fb-page pt-2">
+      <MockStatusBar />
+
+      {/* Top nav */}
+      <div className="flex items-center justify-between border-b border-fb-line-soft bg-white/85 px-4 py-2 backdrop-blur">
+        <span className="text-[11px] font-bold text-fb-ink">‹ 홈</span>
+        <span className="text-[11px] font-semibold text-fb-ink">FIRE 자산 진단</span>
+        <span className="w-8" />
+      </div>
+
+      <div className="flex-1 overflow-hidden px-3 pb-0 pt-3 space-y-2.5">
+        {/* Hero — 공식 카드 */}
+        <section className="rounded-[14px] border border-fb-line bg-fb-card p-3 shadow-elevated">
+          <p className="text-[7px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">FIRE 반영 순자산 공식</p>
+          <p className="mt-1 text-[10px] font-bold leading-snug tracking-[-0.012em] text-fb-ink">
+            즉시 운용 가능 투자자산 <span className="text-fb-ink-3">−</span> 투자 연계 부채
+          </p>
+          <p className="mt-1.5 text-[7px] font-medium leading-[1.55] text-fb-ink-2">
+            일반·기타 계좌 국내주식·ETF와 해외거래소 직접 보유는 FIRE 반영,
+            연금저축·IRP는 제한·미래 자산으로 제외해요.
+          </p>
+        </section>
+
+        {/* 투자자산 그룹 */}
+        <section className="rounded-[14px] border border-fb-line bg-fb-card p-3 shadow-card">
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <div>
+              <p className="text-[9px] font-bold text-fb-ink">투자자산</p>
+              <p className="text-[7px] font-medium text-fb-ink-3 mt-px leading-snug">
+                국내주식·ETF 자동 시세, 미국 주식 수량×달러가×환율로 입력해요.
+              </p>
+            </div>
+            <span className="inline-flex items-center rounded-full bg-fb-trust-soft px-1.5 py-px text-[7px] font-semibold text-fb-trust-ink">국내 상장 우선</span>
+          </div>
+          <div className="space-y-1.5">
+            {mockHoldings.map((h, i) => (
+              <div key={i} className="flex items-center justify-between border-b border-fb-line-soft py-1 last:border-0">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1">
+                    <p className="text-[8px] font-bold text-fb-ink truncate">{h.name}</p>
+                    <span className={`inline-flex items-center rounded-full px-1 py-px text-[6px] font-semibold ${h.badge === 'FIRE 반영' ? 'bg-fb-trust-soft text-fb-trust-ink' : 'bg-fb-card-alt text-fb-ink-3'}`}>{h.badge}</span>
+                  </div>
+                  <p className="fb-num text-[6px] font-medium text-fb-ink-3">{h.symbol} · {h.category}</p>
+                </div>
+                <p className="fb-num text-[9px] font-bold text-fb-ink shrink-0">{h.value}<span className="text-[6px] font-semibold text-fb-ink-3 ml-0.5">만</span></p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 투자 연계 부채 그룹 */}
+        <section className="rounded-[14px] border border-fb-line bg-fb-card p-3 shadow-card">
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <div>
+              <p className="text-[9px] font-bold text-fb-ink">투자 연동 대출</p>
+              <p className="text-[7px] font-medium text-fb-ink-3 mt-px leading-snug">
+                투자자산 취득을 위한 대출만 FIRE 반영 순자산에서 차감해요.
+              </p>
+            </div>
+            <span className="inline-flex items-center rounded-full bg-fb-trust-soft px-1.5 py-px text-[7px] font-semibold text-fb-trust-ink">FIRE 보정</span>
+          </div>
+          {mockLoans.map((lb, i) => (
+            <div key={i} className="flex items-center justify-between py-1 border-b border-fb-line-soft last:border-0">
+              <div>
+                <p className="text-[8px] font-bold text-fb-ink">{lb.label}</p>
+                <p className="fb-num text-[6px] font-medium text-fb-ink-3">월 이자 {lb.interest}만원</p>
+              </div>
+              <p className="fb-num text-[9px] font-bold text-fb-ink">{lb.balance}<span className="text-[6px] font-semibold text-fb-ink-3 ml-0.5">만</span></p>
+            </div>
+          ))}
+        </section>
+      </div>
+
+      <MockBottomNav active="홈" />
+    </div>
+  )
+}

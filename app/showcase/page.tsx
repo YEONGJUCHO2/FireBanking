@@ -1,4 +1,4 @@
-import { BrandLockup, DashboardScreenPreview, DesktopDashboard, InviteScreenPreview, LiteScreenPreview, LoginScreenPreview, OnboardingScreenPreview, PageCanvas, PhoneMockup, SimulatorScreenPreview } from '@/components/fire-banking'
+import { AssetsScreenPreview, BrandLockup, DashboardScreenPreview, DesktopDashboard, InviteScreenPreview, LiteScreenPreview, LoginScreenPreview, OnboardingScreenPreview, PageCanvas, PhoneMockup, SimulatorScreenPreview } from '@/components/fire-banking'
 
 export default function ShowcasePage() {
   return (
@@ -16,6 +16,7 @@ export default function ShowcasePage() {
           <div data-od-id="phone-mockup-invite"><PhoneMockup label="4 배우자 초대" subtitle="함께 보면 더 정확하게"><InviteScreenPreview /></PhoneMockup></div>
           <div data-od-id="phone-mockup-lite"><PhoneMockup label="5 초대 수락 / 배우자 입력" subtitle="3가지 입력으로 참여"><LiteScreenPreview /></PhoneMockup></div>
           <div data-od-id="phone-mockup-simulator"><PhoneMockup label="6 FIRE 생활비 조정기" subtitle="목표 생활비 조정"><SimulatorScreenPreview /></PhoneMockup></div>
+          <div data-od-id="phone-mockup-assets"><PhoneMockup label="자산 진단" subtitle="FIRE 계산 순자산 구성"><AssetsScreenPreview /></PhoneMockup></div>
         </div>
 
         <section className="mt-4" data-od-id="desktop-dashboard">
