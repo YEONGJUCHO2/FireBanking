@@ -384,58 +384,158 @@ export function LiteScreenPreview() {
 }
 
 export function SimulatorScreenPreview() {
+  // Mock data — static, no Supabase
+  const fixedTotal = 230 // 만원
+  const variableTotal = 85
+  const buffer = 15
+  const recommended = fixedTotal + variableTotal + buffer // 330
+  const baseline = 300
+  const diff = recommended - baseline // +30
+
+  const summaryTiles = [
+    { label: '월 고정비', value: fixedTotal, highlight: false },
+    { label: '월 변동비', value: variableTotal, highlight: false },
+    { label: '버퍼', value: buffer, highlight: false },
+    { label: '계산된 월 생활비', value: recommended, highlight: true },
+  ]
+
+  const categories = [
+    { name: '주거', amount: 100, on: true },
+    { name: '통신', amount: 15, on: true },
+    { name: '보험', amount: 30, on: true },
+    { name: '구독', amount: 12, on: true },
+    { name: '차량', amount: 40, on: false },
+    { name: '교육', amount: 15, on: true },
+    { name: '기타', amount: 18, on: true },
+  ]
+
   return (
-    <div className="flex h-full flex-col px-4 pb-5 pt-3">
+    <div className="flex h-full flex-col bg-fb-page pt-2">
       <MockStatusBar />
-      <div className="mt-3"><MockBackButton /></div>
-      <header className="mt-2">
-        <h1 className="text-[16px] font-black tracking-normal text-fb-ink">고정비 시뮬레이터</h1>
-      </header>
-      <div className="mt-4 grid grid-cols-2 gap-2 rounded-[0.9rem] border border-fb-line bg-white p-3 shadow-card">
-        <button className="h-9 rounded-[0.5rem] bg-fb-trust text-[12px] font-bold text-white">설정</button>
-        <button className="h-9 rounded-[0.5rem] bg-fb-card-alt/70 text-[12px] font-bold text-fb-ink-2">결과 비교</button>
+
+      {/* Top nav */}
+      <div className="flex items-center justify-between border-b border-fb-line bg-white/85 px-4 py-2 backdrop-blur">
+        <span className="text-[11px] font-bold text-fb-ink">‹ 홈</span>
+        <span className="text-[11px] font-semibold text-fb-ink">FIRE 생활비 조정기</span>
+        <span className="w-8" />
       </div>
-      <section className="mt-4 space-y-2.5">
-        {[
-          ['월 실수령액', '600'],
-          ['시뮬레이션 기간', '20년'],
-          ['투자 비율', '50%'],
-          ['예상 수익률 (연)', '5.0%'],
-        ].map(([label, value]) => (
-          <div key={label} className="flex items-center justify-between border-b border-fb-line/70 py-1.5">
-            <span className="text-[11px] font-bold text-fb-ink">{label}</span>
-            <span className="text-[11px] font-bold text-fb-ink-2">{value}</span>
+
+      <div className="flex-1 overflow-hidden px-3 pb-0 pt-3 space-y-2.5">
+        {/* Hero card */}
+        <section className="rounded-[18px] border border-fb-line bg-fb-card p-3 shadow-card">
+          <p className="text-[7px] font-bold tracking-[-0.005em] text-fb-trust">FIRE 생활비 조정기</p>
+          <h2 className="mt-0.5 text-[11px] font-bold leading-[1.30] tracking-[-0.020em] text-fb-ink">
+            목표 월 생활비를 현실적인 생활 수준으로 조정해요
+          </h2>
+
+          {/* 4-tile metrics */}
+          <div className="mt-2 grid grid-cols-2 gap-1.5">
+            {summaryTiles.map((tile) => (
+              <div
+                key={tile.label}
+                className={`rounded-[7px] p-2 ${
+                  tile.highlight
+                    ? 'border border-[rgba(0,102,255,0.22)] bg-[#EAF2FE]'
+                    : 'border border-[rgba(112,115,124,0.10)] bg-fb-card-alt'
+                }`}
+              >
+                <p className="text-[6px] font-semibold text-fb-ink-3">{tile.label}</p>
+                <p className={`fb-num mt-0.5 text-[10px] font-bold tracking-[-0.012em] ${tile.highlight ? 'text-[#003B95]' : 'text-fb-ink'}`}>
+                  {tile.value}<span className="ml-px text-[6px] font-semibold text-fb-ink-3">만원</span>
+                </p>
+              </div>
+            ))}
           </div>
-        ))}
-      </section>
-      <section className="mt-4">
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-[12px] font-black text-fb-ink">월 고정비 항목</h2>
-          <span className="text-[10px] font-bold text-fb-ink-2">현재 합계 230만원</span>
-        </div>
-        <div className="space-y-1.5">
-          {['주거비(대출/관리비)', '통신비', '보험료', '구독/멤버십', '차량유지비', '교육비', '기타 고정비'].map((label, index) => (
-            <div key={label} className="grid grid-cols-[18px_1fr_58px] items-center gap-2 rounded-[0.45rem] bg-white px-2 py-1.5 shadow-[0_0_0_1px_var(--color-fb-line)]">
-              <span className="grid size-4 place-items-center rounded-[0.18rem] bg-fb-trust text-white"><Icon name="check" className="size-3" /></span>
-              <span className="text-[10px] font-bold text-fb-ink">{label}</span>
-              <span className="rounded-[0.25rem] border border-fb-line px-2 py-1 text-right text-[10px] font-bold text-fb-ink">{[100, 15, 30, 12, 40, 15, 18][index]}</span>
+
+          {/* 대시보드 대비 */}
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            <span className="text-[7px] font-medium text-fb-ink-3">대시보드 기준 {baseline}만원 대비</span>
+            <span className="fb-num rounded-full bg-[#FFF7F0] px-1.5 py-px text-[7px] font-bold text-[#9C5612]">
+              +{diff}만원
+            </span>
+          </div>
+
+          {/* 활성 고정비 */}
+          <div className="mt-2 rounded-[7px] border border-[rgba(112,115,124,0.10)] bg-fb-card-alt px-2 py-1.5">
+            <p className="fb-num text-[7px] font-bold text-fb-ink">활성 고정비 6개</p>
+            <p className="mt-0.5 text-[6px] font-medium leading-[1.5] text-fb-ink-2">
+              대시보드 수익률은 연 5% 기준으로 고정하고, 이 화면에서는 생활비 구성만 조정해요.
+            </p>
+          </div>
+        </section>
+
+        {/* 고정비 섹션 */}
+        <section className="rounded-[14px] border border-fb-line bg-fb-card p-3 shadow-card">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[9px] font-bold tracking-[-0.012em] text-fb-ink">고정비</p>
+              <p className="fb-num mt-px text-[8px] font-bold text-fb-trust">{fixedTotal}만원</p>
             </div>
-          ))}
-        </div>
-      </section>
-      <section className="mt-4 rounded-[0.8rem] border border-fb-line bg-white p-3 shadow-card">
-        <h2 className="text-[12px] font-black text-fb-ink">고정비를 줄이면 달라지는 미래 자산</h2>
-        <div className="mt-4 flex h-28 items-end justify-center gap-10 rounded-[0.7rem] bg-fb-trust-soft p-3">
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-[10px] font-black text-fb-ink">4.2억</span>
-            <span className="h-12 w-9 rounded-t bg-fb-ink-2/35" />
+            <span className="text-[7px] font-bold text-fb-ink-3">펼치기</span>
           </div>
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-[10px] font-black text-fb-trust">5.6억</span>
-            <span className="h-20 w-9 rounded-t bg-fb-trust" />
+          <div className="mt-2 space-y-1">
+            {categories.map((cat) => (
+              <div
+                key={cat.name}
+                className={`grid grid-cols-[20px_1fr_32px] items-center gap-1.5 rounded-[5px] border px-2 py-1 ${
+                  cat.on
+                    ? 'border-[rgba(0,102,255,0.22)] bg-[rgba(0,102,255,0.04)]'
+                    : 'border-fb-line bg-white opacity-50'
+                }`}
+              >
+                <span
+                  className={`h-[13px] w-[22px] rounded-full relative ${cat.on ? 'bg-fb-trust' : 'bg-[#DBDCDF]'}`}
+                >
+                  <span
+                    className="absolute top-[2px] size-[9px] rounded-full bg-white shadow"
+                    style={{ left: cat.on ? 11 : 2 }}
+                  />
+                </span>
+                <span className="text-[7px] font-bold text-fb-ink">{cat.name}</span>
+                <span className="text-right text-[7px] font-bold text-fb-ink">{cat.amount}</span>
+              </div>
+            ))}
           </div>
+        </section>
+
+        {/* 변동비 섹션 */}
+        <section className="rounded-[14px] border border-fb-line bg-fb-card p-3 shadow-card">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[9px] font-bold tracking-[-0.012em] text-fb-ink">변동비</p>
+              <p className="fb-num mt-px text-[8px] font-bold text-fb-trust">{variableTotal}만원</p>
+            </div>
+            <span className="text-[7px] font-bold text-fb-ink-3">펼치기</span>
+          </div>
+        </section>
+
+        {/* 버퍼 섹션 */}
+        <section className="rounded-[14px] border border-fb-line bg-fb-card p-3 shadow-card">
+          <div className="flex items-center justify-between">
+            <p className="text-[9px] font-bold text-fb-ink">버퍼</p>
+            <p className="fb-num text-[8px] font-bold text-fb-trust">{buffer}만원</p>
+          </div>
+          <div className="mt-2 flex gap-1">
+            {[0, 5, 10, 15].map((p) => (
+              <span key={p} className="flex-1 rounded-full border border-[rgba(112,115,124,0.22)] bg-white py-1 text-center text-[6px] font-bold text-fb-ink">
+                {p}%
+              </span>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      {/* CTA 버튼 */}
+      <div className="border-t border-fb-line bg-fb-page/95 px-3 pb-3 pt-2">
+        <div className="grid grid-cols-2 gap-2">
+          <button className="h-9 rounded-[0.6rem] border border-[rgba(112,115,124,0.32)] bg-white text-[10px] font-bold text-fb-ink">
+            초안 저장
+          </button>
+          <button className="h-9 rounded-[0.6rem] bg-fb-trust text-[10px] font-bold text-white">
+            대시보드에 적용
+          </button>
         </div>
-      </section>
+      </div>
     </div>
   )
 }
