@@ -34,23 +34,77 @@ export function PhoneMockup({ children, label, subtitle, scale = 1 }: { children
 
 export function LoginScreenPreview() {
   return (
-    <div className="relative flex h-full flex-col overflow-hidden px-5 py-6">
-      <Image src="/fire-banking/landing-background.png" alt="" fill sizes="320px" className="absolute inset-0 object-cover object-center" />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0.34)_48%,rgba(0,102,255,0.28)_100%)]" />
-      <div className="relative z-10">
+    <div
+      data-screen-label="login"
+      className="flex h-full flex-col bg-fb-page px-5 pb-6 pt-14"
+    >
+      <div data-od-id="brand-lockup">
         <BrandLockup />
-        <section className="mt-12">
-          <h1 className="text-[2rem] font-bold leading-tight tracking-normal text-fb-ink">부부가 함께<br />순자산과 경제적 자유<br />진척을 확인해요.</h1>
-        </section>
       </div>
-      <div className="relative z-10 mt-auto">
-        <div className="grid gap-3"><Button size="lg">시작하기</Button><Button variant="secondary" size="lg">로그인</Button></div>
-        <div className="mt-5 flex gap-3 rounded-card border border-white/75 bg-white/84 p-4 text-xs leading-5 text-fb-ink-2 shadow-card backdrop-blur">
-          <Icon name="shield" className="mt-0.5 size-4 shrink-0 text-fb-trust" />
-          <p><span className="font-bold text-fb-trust">안전하게 보호돼요.</span> 결과 계산에 필요한 정보만 다룹니다.</p>
+
+      <div data-od-id="product-definition" className="mt-16">
+        <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.10em] text-fb-trust">
+          월 1회 · 3분 · 부부
+        </p>
+        <h1 className="text-[22px] font-bold leading-[1.28] tracking-[-0.024em] text-fb-ink">
+          같은 숫자를 보면<br />
+          돈 이야기가<br />
+          조금 덜 불편해져요.
+        </h1>
+        <p className="mt-3.5 text-[12px] font-medium leading-[1.55] text-fb-ink-2">
+          부부가 함께 순자산과 경제적 자유 진척을<br />
+          확인하는 월간 재무 체크인 앱이에요.
+        </p>
+      </div>
+
+      <div className="flex-1" />
+
+      <div className="mb-3 flex items-center gap-1.5 text-[10px] font-medium text-fb-ink-3">
+        <span>가계부 아님</span>
+        <span aria-hidden>·</span>
+        <span>매일 입력 안 함</span>
+        <span aria-hidden>·</span>
+        <span>지난달 값 재사용</span>
+      </div>
+
+      {/* CTA stack — mock only, no Supabase */}
+      <div className="flex flex-col gap-2" data-od-id="cta-google-signin">
+        <button
+          type="button"
+          className="flex h-14 w-full items-center justify-center gap-2.5 rounded-button bg-fb-ink text-[13px] font-bold text-white"
+        >
+          <MockGoogleMark />
+          Google로 시작하기
+        </button>
+        <div data-od-id="kakao-login">
+          <button
+            type="button"
+            className="flex h-14 w-full items-center justify-center gap-2 rounded-button bg-fb-kakao text-[13px] font-bold text-fb-kakao-ink"
+          >
+            카카오로 시작하기
+          </button>
         </div>
       </div>
+
+      <p className="mt-3.5 text-center text-[10px] font-medium leading-[1.5] text-fb-ink-3">
+        계속 진행하면{' '}
+        <span className="font-semibold text-fb-ink underline underline-offset-[3px]">이용약관</span>과{' '}
+        <span className="font-semibold text-fb-ink underline underline-offset-[3px]">개인정보 처리방침</span>에 동의하게 돼요.
+      </p>
     </div>
+  )
+}
+
+function MockGoogleMark() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" className="shrink-0">
+      <path d="M4.5 6.5v11h3.2V9.9L12 13.1l4.3-3.2v7.6h3.2v-11L12 12.1 4.5 6.5Z" fill="#FFFFFF" />
+      <path d="M4.5 6.5 12 12.1l7.5-5.6v2.9L12 15 4.5 9.4V6.5Z" fill="#EA4335" />
+      <path d="M4.5 9.4v8.1h3.2v-5.7L4.5 9.4Z" fill="#34A853" />
+      <path d="M16.3 11.8v5.7h3.2V9.4l-3.2 2.4Z" fill="#4285F4" />
+      <path d="M4.5 6.5 12 12.1l2.1-1.6L6.8 5H5.7C5 5 4.5 5.6 4.5 6.5Z" fill="#FBBC04" />
+      <path d="M17.2 5 12 8.9l7.5-2.4C19.5 5.6 19 5 18.3 5h-1.1Z" fill="#C5221F" />
+    </svg>
   )
 }
 
@@ -947,3 +1001,111 @@ export function AssetsScreenPreview() {
   )
 }
 
+// ─── Settings Screen Preview ──────────────────────────────────────────────────
+// Mock data only — no Supabase.
+
+function MockSettingsGroup({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="mt-3">
+      <p className="px-1 pb-1.5 pt-0.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-fb-ink-3">
+        {label}
+      </p>
+      <div className="overflow-hidden rounded-[10px] border border-fb-line bg-white">
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function MockSettingsRow({
+  label,
+  value,
+  hint,
+  isLast = false,
+}: {
+  label: string
+  value: string
+  hint?: string
+  isLast?: boolean
+}) {
+  return (
+    <div
+      className={
+        'cursor-default px-3 py-2.5' +
+        (isLast ? '' : ' border-b border-fb-line-soft')
+      }
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[9px] font-medium text-fb-ink">{label}</span>
+        <span className="fb-num text-right text-[8px] font-semibold text-fb-ink-3">{value}</span>
+      </div>
+      {hint ? (
+        <p className="mt-0.5 text-[7px] font-medium text-fb-ink-3">{hint}</p>
+      ) : null}
+    </div>
+  )
+}
+
+export function SettingsScreenPreview() {
+  return (
+    <div
+      data-screen-label="settings"
+      className="flex h-full flex-col bg-fb-page"
+    >
+      {/* Header */}
+      <div className="border-b border-fb-line-soft px-4 pb-3 pt-10">
+        <p className="text-[8px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">SETTINGS</p>
+        <h1 className="mt-1 text-[16px] font-bold tracking-[-0.020em] text-fb-ink">설정</h1>
+      </div>
+
+      <div className="flex-1 overflow-hidden px-3 pb-4 pt-3">
+        {/* 프로필 / 계정 */}
+        <div data-od-id="row-profile">
+          <MockSettingsGroup label="프로필 / 계정">
+            <MockSettingsRow label="로그인 상태" value="연결됨" />
+            <MockSettingsRow label="화폐 단위" value="원 (만원 표시)" isLast />
+          </MockSettingsGroup>
+        </div>
+
+        {/* 데이터 + 부부 공유 */}
+        <div data-od-id="row-data-sharing">
+          <MockSettingsGroup label="데이터 · 부부 공유">
+            <MockSettingsRow
+              label="공유 범위"
+              value="합산 결과만"
+              hint="개별 숫자는 서로 보이지 않아요"
+              isLast
+            />
+          </MockSettingsGroup>
+        </div>
+
+        {/* FIRE 계산 가정 */}
+        <div data-od-id="row-fire-assumptions">
+          <MockSettingsGroup label="FIRE 계산 가정">
+            <MockSettingsRow label="목표 자산 룰" value="연 생활비 × 25배" />
+            <MockSettingsRow label="연 수익률 가정" value="5% (단순)" isLast />
+          </MockSettingsGroup>
+        </div>
+
+        {/* 면책 */}
+        <div
+          data-od-id="row-disclaimer"
+          className="mt-3 rounded-[9px] bg-fb-card-alt px-3 py-2.5 text-[8px] font-medium leading-[1.55] text-fb-ink-3"
+        >
+          이 앱은 25배 룰과 연 5% 가정의 단순 시뮬레이션이에요.{' '}
+          <strong className="font-bold text-fb-ink">투자 자문이 아닙니다.</strong>{' '}
+          실제 투자 결정은 본인 판단으로요.
+        </div>
+
+        {/* 로그아웃 */}
+        <div data-od-id="cta-sign-out" className="mt-5 text-center">
+          <span className="cursor-default text-[11px] font-semibold text-fb-ink-3">로그아웃</span>
+        </div>
+      </div>
+
+      <div data-od-id="bottom-nav">
+        <MockBottomNav active="설정" />
+      </div>
+    </div>
+  )
+}

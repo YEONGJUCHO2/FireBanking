@@ -22,7 +22,7 @@ export function AppHeader({ links = [] }: AppHeaderProps) {
           <Link
             key={link.href}
             href={link.href}
-            className="text-sm font-bold text-fb-green hover:text-fb-green-900"
+            className="text-sm font-bold text-fb-trust hover:text-fb-trust-strong"
           >
             {link.label}
           </Link>
@@ -30,7 +30,7 @@ export function AppHeader({ links = [] }: AppHeaderProps) {
         <form action={signOut}>
           <button
             type="submit"
-            className="text-sm font-semibold text-fb-muted underline-offset-4 hover:text-fb-ink hover:underline"
+            className="text-sm font-semibold text-fb-ink-3 underline-offset-4 hover:text-fb-ink hover:underline"
           >
             로그아웃
           </button>

@@ -50,7 +50,7 @@ export function SignInButton({ callbackPath = "/auth/callback" }: { callbackPath
       {inAppBrowser === "kakaotalk" ? (
         <div
           role="alert"
-          className="grid gap-3 rounded-card border border-fb-warning/25 bg-fb-warning-bg p-4 text-sm text-fb-ink"
+          className="grid gap-3 rounded-card border border-fb-cautionary/25 bg-fb-cautionary-soft p-4 text-sm text-fb-ink"
         >
           <div className="grid gap-1">
             <p className="font-semibold">
@@ -67,25 +67,28 @@ export function SignInButton({ callbackPath = "/auth/callback" }: { callbackPath
           <button
             type="button"
             onClick={openExternalBrowser}
-            className="fb-focus w-full rounded-button border border-fb-warning/30 bg-white px-4 py-3 text-sm font-semibold text-fb-ink shadow-card hover:bg-fb-sand sm:w-fit"
+            className="fb-focus w-full rounded-button border border-fb-cautionary/30 bg-white px-4 py-3 text-sm font-semibold text-fb-ink shadow-card hover:bg-fb-cautionary-soft sm:w-fit"
           >
             외부 브라우저로 열기
           </button>
         </div>
       ) : null}
       {kakaoAuthEnabled ? (
-        <button
-          type="button"
-          onClick={() => signInWithProvider("kakao")}
-          className="fb-focus h-14 w-full rounded-button bg-fb-kakao px-4 py-3 text-sm font-bold text-[#381E1F] shadow-card hover:brightness-95"
-        >
-          카카오로 시작하기
-        </button>
+        // Brand-locked: bg-fb-kakao text-fb-kakao-ink rounded-button h-14 font-bold — do not restyle
+        <div data-od-id="kakao-login">
+          <button
+            type="button"
+            onClick={() => signInWithProvider("kakao")}
+            className="fb-focus h-14 w-full rounded-button bg-fb-kakao px-4 py-3 text-sm font-bold text-fb-kakao-ink shadow-card hover:brightness-95"
+          >
+            카카오로 시작하기
+          </button>
+        </div>
       ) : null}
       <button
         type="button"
         onClick={() => signInWithProvider("google")}
-        className="fb-focus h-14 w-full rounded-button border border-fb-line bg-white px-4 py-3 text-sm font-bold text-fb-ink shadow-card hover:border-fb-green/30"
+        className="fb-focus h-14 w-full rounded-button border border-fb-line bg-white px-4 py-3 text-sm font-bold text-fb-ink shadow-card hover:border-fb-line-strong"
       >
         Google로 시작하기
       </button>
