@@ -14,16 +14,24 @@ type LiteValues = {
   save: number
 }
 
+export type LiteOnboardingCompletePayload = {
+  incomeMan: number
+  expenseMan: number
+  savingsMan: number
+}
+
 export function LiteOnboarding({
   token,
   initial,
   prevValues,
   doneHref = '/dashboard',
+  onComplete,
 }: {
   token: string
   initial?: Partial<LiteValues>
   prevValues?: Partial<LiteValues> | null
   doneHref?: string
+  onComplete?: (payload: LiteOnboardingCompletePayload) => void
 }) {
   const router = useRouter()
   const [v, setV] = useState<LiteValues>({ income: 0, recur: 0, save: 0, ...initial })
@@ -33,8 +41,24 @@ export function LiteOnboarding({
   const set = (key: keyof LiteValues) => (val: number | '') =>
     setV((cur) => ({ ...cur, [key]: typeof val === 'number' ? val : 0 }))
 
+  const handleComplete = (values: LiteValues) => {
+    const payload: LiteOnboardingCompletePayload = {
+      incomeMan: values.income,
+      expenseMan: values.recur,
+      savingsMan: values.save,
+    }
+    if (onComplete) {
+      onComplete(payload)
+    } else {
+      router.push(doneHref)
+    }
+  }
+
   return (
-    <div className="relative flex flex-1 flex-col overflow-hidden bg-fb-page">
+    <div
+      data-screen-label="lite-onboarding"
+      className="relative flex flex-1 flex-col overflow-hidden bg-fb-page"
+    >
       {/* nav */}
       <div className="flex items-center justify-between border-b border-fb-line bg-white/85 px-4 py-3 backdrop-blur">
         <button
@@ -50,7 +74,8 @@ export function LiteOnboarding({
       </div>
 
       <div className="flex-1 overflow-auto px-5 pb-[140px] pt-6">
-        <div className="mb-2.5 text-[12px] font-semibold uppercase tracking-[0.10em] text-fb-trust">
+        {/* stepper indicator — all 3 steps visible in single-page form */}
+        <div data-od-id="stepper" className="mb-2.5 text-[12px] font-semibold uppercase tracking-[0.10em] text-fb-trust">
           {formatCheckinMonthLabel()}
         </div>
         <h1 className="text-[24px] font-bold leading-[1.30] tracking-[-0.020em] text-fb-ink">
@@ -62,25 +87,32 @@ export function LiteOnboarding({
         </p>
 
         {hasPrev ? (
-          <button
-            type="button"
-            onClick={() => {
-              if (prevValues) setV({ income: prevValues.income ?? 0, recur: prevValues.recur ?? 0, save: prevValues.save ?? 0 })
-              router.push(doneHref)
-            }}
-            className="fbpress mt-6 flex w-full items-center gap-3 rounded-[16px] border border-fb-trust bg-white p-4 text-left"
-          >
-            <span className="flex size-10 items-center justify-center rounded-[12px] bg-fb-trust-soft text-fb-trust-ink">
-              <Icon name="refresh" className="size-5" />
-            </span>
-            <span className="flex-1">
-              <span className="block text-[15px] font-bold text-fb-ink">지난달과 같아요</span>
-              <span className="mt-0.5 block text-[12px] font-medium text-fb-ink-3">
-                {formatPreviousMonthReuseLabel()}
+          <div data-od-id="cta-reuse-prev">
+            <button
+              type="button"
+              onClick={() => {
+                const reuseValues: LiteValues = {
+                  income: prevValues?.income ?? 0,
+                  recur: prevValues?.recur ?? 0,
+                  save: prevValues?.save ?? 0,
+                }
+                setV(reuseValues)
+                handleComplete(reuseValues)
+              }}
+              className="fbpress mt-6 flex w-full items-center gap-3 rounded-[16px] border border-fb-trust bg-white p-4 text-left"
+            >
+              <span className="flex size-10 items-center justify-center rounded-[12px] bg-fb-trust-soft text-fb-trust-ink">
+                <Icon name="refresh" className="size-5" />
               </span>
-            </span>
-            <Icon name="chevron-right" className="size-5 text-fb-ink-3" />
-          </button>
+              <span className="flex-1">
+                <span className="block text-[15px] font-bold text-fb-ink">지난달과 같아요</span>
+                <span className="mt-0.5 block text-[12px] font-medium text-fb-ink-3">
+                  {formatPreviousMonthReuseLabel()}
+                </span>
+              </span>
+              <Icon name="chevron-right" className="size-5 text-fb-ink-3" />
+            </button>
+          </div>
         ) : null}
 
         {hasPrev ? (
@@ -95,19 +127,23 @@ export function LiteOnboarding({
           <div className="mt-6" />
         )}
 
-        <div className="flex flex-col gap-4">
-          <MoneyInputRow
-            label="내 세후 월수입"
-            value={v.income}
-            onValueChange={set('income')}
-            hint="대략 평균이면 돼요."
-          />
-          <MoneyInputRow
-            label="내 월 반복지출"
-            value={v.recur}
-            onValueChange={set('recur')}
-            hint="고정비 + 변동비 합. 정확하지 않아도 괜찮아요."
-          />
+        <div data-od-id="step-active" className="flex flex-col gap-4">
+          <div data-od-id="input-income">
+            <MoneyInputRow
+              label="내 세후 월수입"
+              value={v.income}
+              onValueChange={set('income')}
+              hint="대략 평균이면 돼요."
+            />
+          </div>
+          <div data-od-id="input-expense">
+            <MoneyInputRow
+              label="내 월 반복지출"
+              value={v.recur}
+              onValueChange={set('recur')}
+              hint="고정비 + 변동비 합. 정확하지 않아도 괜찮아요."
+            />
+          </div>
           {v.recur > 0 ? (
             <div className="rounded-[14px] bg-fb-trust-soft px-4 py-3">
               <p className="text-[13px] font-bold text-fb-trust-ink">
@@ -118,12 +154,14 @@ export function LiteOnboarding({
               </p>
             </div>
           ) : null}
-          <MoneyInputRow
-            label="내 월 정기저축 / 투자"
-            value={v.save}
-            onValueChange={set('save')}
-            hint="자동이체로 빠져나가는 금액."
-          />
+          <div data-od-id="input-savings">
+            <MoneyInputRow
+              label="내 월 정기저축 / 투자"
+              value={v.save}
+              onValueChange={set('save')}
+              hint="자동이체로 빠져나가는 금액."
+            />
+          </div>
         </div>
 
         <div className="mt-6 flex items-start gap-2.5 rounded-[16px] bg-fb-card-alt p-4">
@@ -138,15 +176,17 @@ export function LiteOnboarding({
 
       {/* sticky CTA */}
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-b from-fb-page/0 via-fb-page/92 to-fb-page px-5 pb-7 pt-3">
-        <Button
-          variant="inverse"
-          size="lg"
-          full
-          href={doneHref}
-          iconRight={<Icon name="chevron-right" className="size-[18px]" />}
-        >
-          체크인 마치기
-        </Button>
+        <div data-od-id="cta-primary">
+          <Button
+            variant="inverse"
+            size="lg"
+            full
+            onClick={() => handleComplete(v)}
+            iconRight={<Icon name="chevron-right" className="size-[18px]" />}
+          >
+            체크인 마치기
+          </Button>
+        </div>
       </div>
     </div>
   )

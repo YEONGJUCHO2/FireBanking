@@ -1,24 +1,12 @@
 import { BrandLockup, Button, Card, MobileAppShell } from '@/components/fire-banking'
 import { Icon } from '@/components/fire-banking/icons'
-import { LiteOnboarding } from '@/components/fire-banking/lite-onboarding'
 
 export default async function InvitePage({
   params,
-  searchParams,
 }: {
   params: Promise<{ token: string }>
-  searchParams?: Promise<{ lite?: string }>
 }) {
   const { token } = await params
-  const query = await searchParams
-
-  if (query?.lite === '1') {
-    return (
-      <MobileAppShell>
-        <LiteOnboarding token={token} doneHref="/dashboard" />
-      </MobileAppShell>
-    )
-  }
 
   return (
     <MobileAppShell>
@@ -63,9 +51,8 @@ export default async function InvitePage({
         <div className="flex-1" />
 
         <div className="flex flex-col gap-2.5">
-          {/* Task 9 will rewire primary CTA to /invite/[token]/lite */}
           <div data-od-id="cta-primary">
-            <Button variant="inverse" size="lg" full href={`/invite/${token}?lite=1`}>
+            <Button variant="inverse" size="lg" full href={`/invite/${token}/lite`}>
               워크스페이스 참여하기
             </Button>
           </div>

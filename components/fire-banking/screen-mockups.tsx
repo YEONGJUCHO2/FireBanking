@@ -1,8 +1,7 @@
-import { dashboardMetrics, liteRows } from '@/lib/sample-data'
-import { formatManWon, formatNumber } from '@/lib/format'
+import { dashboardMetrics } from '@/lib/sample-data'
+import { formatManWon } from '@/lib/format'
 import { BrandLockup } from './brand'
 import { Button } from './button'
-import { ProgressStepper } from './progress-stepper'
 import { Icon } from './icons'
 import Image from 'next/image'
 
@@ -131,23 +130,6 @@ export function OnboardingScreenPreview() {
         </button>
       </div>
     </div>
-  )
-}
-
-function CompactMoneyRow({ label, value }: { label: string; value: number }) {
-  return (
-    <label className="grid grid-cols-[132px_1fr] items-center gap-2">
-      <span className="whitespace-nowrap text-[11px] font-extrabold leading-none tracking-normal text-fb-ink">{label}</span>
-      <span className="relative block">
-        <input
-          readOnly
-          value={formatNumber(value)}
-          className="fb-input h-10 rounded-[0.55rem] px-3 pr-9 text-right text-[12px] font-extrabold"
-          aria-label={label}
-        />
-        <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-fb-ink-2">만원</span>
-      </span>
-    </label>
   )
 }
 
@@ -415,27 +397,118 @@ function MockReassureRow({ text }: { text: string }) {
 }
 
 export function LiteScreenPreview() {
+  // Mock data — static, no Supabase
+  const mockIncome = 380
+  const mockRecur = 180
+  const mockSave = 60
+  const fireRef = Math.round(mockRecur * 1.1)
+
   return (
-    <div className="flex h-full flex-col px-5 pb-5 pt-3">
-      <MockStatusBar />
-      <div className="mt-3"><MockBackButton /></div>
-      <header className="mt-2">
-        <h1 className="text-[16px] font-black tracking-normal text-fb-ink">나의 기본 정보</h1>
-        <p className="mt-3 text-[12px] font-medium leading-5 text-fb-ink-2">정확하지 않아도 괜찮아요.<br />지금은 첫 거리감을 보는 단계예요.</p>
-      </header>
-      <p className="mt-5 text-right text-[10px] font-bold text-fb-ink-2">단위: 만원</p>
-      <div className="mt-3 space-y-5">
-        {liteRows.map((row) => (
-          <CompactMoneyRow key={row.label} label={row.label} value={row.value} />
-        ))}
+    <div className="relative flex h-full flex-col overflow-hidden bg-fb-page">
+      {/* nav */}
+      <div className="flex items-center justify-between border-b border-fb-line bg-white/85 px-3 py-2.5 backdrop-blur">
+        <MockBackButton />
+        <span className="text-[11px] font-semibold text-fb-ink">배우자 체크인</span>
+        <span className="size-7" />
       </div>
-      <div className="mt-9 rounded-[0.75rem] bg-fb-trust-soft p-4 text-center text-[12px] font-bold text-fb-trust">
-        지난달과 같아요
+
+      <div className="flex-1 overflow-hidden px-4 pb-[100px] pt-4">
+        {/* month label */}
+        <div className="mb-2 text-[9px] font-semibold uppercase tracking-[0.10em] text-fb-trust">
+          2026. 04. 체크인
+        </div>
+        <h1 className="text-[16px] font-bold leading-[1.30] tracking-[-0.020em] text-fb-ink">
+          내 숫자<br />3가지만 알려주세요.
+        </h1>
+        <p className="mt-2 text-[10px] font-medium leading-[1.55] text-fb-ink-2">
+          초대한 계정에는 합산 결과만 보여요.<br />
+          평소 평균이면 충분해요.
+        </p>
+
+        {/* reuse-previous button (shown when prev data exists) */}
+        <button
+          type="button"
+          className="mt-3 flex w-full items-center gap-2.5 rounded-[12px] border border-fb-trust bg-white p-3 text-left"
+        >
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-[9px] bg-fb-trust-soft">
+            <Icon name="refresh" className="size-4 text-fb-trust-ink" />
+          </span>
+          <span className="flex-1 min-w-0">
+            <span className="block text-[11px] font-bold text-fb-ink">지난달과 같아요</span>
+            <span className="block text-[9px] font-medium text-fb-ink-3">3월 입력값 그대로 사용</span>
+          </span>
+          <Icon name="chevron-right" className="size-3.5 text-fb-ink-3 shrink-0" />
+        </button>
+
+        {/* divider */}
+        <div className="my-3 flex items-center gap-2">
+          <span className="h-px flex-1 bg-fb-line" />
+          <span className="text-[8px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">또는 새로 입력</span>
+          <span className="h-px flex-1 bg-fb-line" />
+        </div>
+
+        {/* 3 inputs */}
+        <div className="flex flex-col gap-3">
+          {/* 세후 월수입 */}
+          <div>
+            <span className="mb-1 block text-[9px] font-semibold text-fb-ink">내 세후 월수입</span>
+            <div className="flex h-9 items-center rounded-[9px] border border-fb-trust bg-white px-3 shadow-[0_0_0_2px_rgba(0,102,255,0.10)]">
+              <span className="fb-num flex-1 text-[12px] font-semibold text-fb-ink">{mockIncome}</span>
+              <span className="text-[10px] font-medium text-fb-ink-3">만원</span>
+            </div>
+            <p className="mt-1 text-[8px] font-medium text-fb-ink-3">대략 평균이면 돼요.</p>
+          </div>
+
+          {/* 월 반복지출 */}
+          <div>
+            <span className="mb-1 block text-[9px] font-semibold text-fb-ink">내 월 반복지출</span>
+            <div className="flex h-9 items-center rounded-[9px] border border-fb-line-strong bg-white px-3">
+              <span className="fb-num flex-1 text-[12px] font-semibold text-fb-ink">{mockRecur}</span>
+              <span className="text-[10px] font-medium text-fb-ink-3">만원</span>
+            </div>
+            <p className="mt-1 text-[8px] font-medium text-fb-ink-3">고정비 + 변동비 합.</p>
+          </div>
+
+          {/* FIRE 참고값 */}
+          <div className="rounded-[10px] bg-fb-trust-soft px-3 py-2">
+            <p className="text-[8px] font-bold text-fb-trust-ink">
+              FIRE 기준 참고값은 월 {fireRef}만원이에요.
+            </p>
+            <p className="mt-0.5 text-[7px] font-medium leading-[1.5] text-fb-trust-ink/75">
+              월 반복지출 {mockRecur}만원에 10% 버퍼를 더한 값입니다.
+            </p>
+          </div>
+
+          {/* 월 저축·투자 */}
+          <div>
+            <span className="mb-1 block text-[9px] font-semibold text-fb-ink">내 월 정기저축 / 투자</span>
+            <div className="flex h-9 items-center rounded-[9px] border border-fb-line-strong bg-white px-3">
+              <span className="fb-num flex-1 text-[12px] font-semibold text-fb-ink">{mockSave}</span>
+              <span className="text-[10px] font-medium text-fb-ink-3">만원</span>
+            </div>
+            <p className="mt-1 text-[8px] font-medium text-fb-ink-3">자동이체로 빠져나가는 금액.</p>
+          </div>
+        </div>
+
+        {/* privacy note */}
+        <div className="mt-3 flex items-start gap-2 rounded-[12px] bg-fb-card-alt p-3">
+          <Icon name="lock" className="mt-0.5 size-3.5 shrink-0 text-fb-ink-2" />
+          <span className="text-[8px] font-medium leading-[1.55] text-fb-ink-2">
+            <b className="font-bold text-fb-ink">초대한 계정은 개별 숫자를 볼 수 없어요.</b>{' '}
+            합산된 우리 가족 결과만 함께 봐요.
+          </span>
+        </div>
       </div>
-      <p className="mt-5 rounded-[0.75rem] bg-fb-card-alt/60 p-4 text-[11px] leading-5 text-fb-ink-2">지난달과 같다면 빠르게 진행할 수 있어요.</p>
-      <button className="mt-auto h-12 rounded-[0.65rem] bg-fb-trust text-[13px] font-bold text-white shadow-card">다음</button>
-      <div className="pt-4">
-        <ProgressStepper steps={['입력', '확인', '완료']} current={0} />
+
+      {/* sticky CTA */}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-b from-fb-page/0 via-fb-page/92 to-fb-page px-4 pb-5 pt-2.5">
+        <button
+          type="button"
+          className="flex h-11 w-full items-center justify-center gap-1.5 rounded-[11px] bg-fb-ink text-[12px] font-bold text-white"
+        >
+          체크인 마치기
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </button>
       </div>
     </div>
   )
