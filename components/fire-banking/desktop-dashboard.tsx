@@ -124,14 +124,6 @@ export function DesktopDashboard({
             <Button variant="secondary" size="md" iconLeft={<Icon name="share" className="size-[18px]" />}>
               결과 공유
             </Button>
-            <Button
-              variant="inverse"
-              size="md"
-              href="/subscribe"
-              iconRight={<Icon name="chevron-right" className="size-[18px]" />}
-            >
-              시뮬레이터 열기
-            </Button>
           </div>
         </div>
 
