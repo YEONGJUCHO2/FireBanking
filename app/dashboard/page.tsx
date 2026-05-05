@@ -13,6 +13,8 @@ import { CheckinRow } from "@/components/fire-banking/checkin-row";
 import { Icon } from "@/components/fire-banking/icons";
 import { getAssetManagementData } from "@/src/features/assets/lib/getAssetManagementData";
 import { SignOutButton } from "@/src/features/auth/components/SignOutButton";
+import { getCurrentUser } from "@/src/features/auth/lib/getCurrentUser";
+import { getUserAvatar } from "@/src/features/auth/lib/getUserAvatar";
 import { AdminPartnerCard } from "@/src/features/dashboard/components/AdminPartnerCard";
 import {
   getDashboardCashflowSnapshot,
@@ -43,11 +45,13 @@ const baseData = {
 };
 
 export default async function DashboardPage() {
-  const [assetData, cashflowSnapshot, partnerState] = await Promise.all([
+  const [assetData, cashflowSnapshot, partnerState, currentUser] = await Promise.all([
     getAssetManagementData(),
     getDashboardCashflowSnapshot(),
     getDashboardPartnerState(),
+    getCurrentUser(),
   ]);
+  const avatar = getUserAvatar(currentUser);
   const data = withFireDistance(deriveDashboardData(assetData, cashflowSnapshot));
   const percent = Math.max(0, Math.min(1, data.investableMan / data.fireTargetMan));
   const pendingPartnerState =
@@ -157,6 +161,7 @@ export default async function DashboardPage() {
           footerAction={<SignOutButton />}
           data={{ ...data, netDeltaMan: data.netWorthDeltaMan }}
           partnerPending={partnerPending}
+          avatar={avatar}
         />
         <div className="mx-auto mt-6 w-full max-w-[1280px]">
           <FireLivingExpenseAdjusterLink />

@@ -40,10 +40,12 @@ export function DesktopDashboard({
   footerAction,
   data: dashboardData = data,
   partnerPending = true,
+  avatar,
 }: {
   footerAction?: ReactNode
   data?: DesktopDashboardData
   partnerPending?: boolean
+  avatar?: { url?: string | null; initial?: string; alt?: string }
 }) {
   const percent = Math.max(0, Math.min(1, dashboardData.investableMan / dashboardData.fireTargetMan))
   const [displayMode, setDisplayMode] = useState<FireDisplayMode>('amount')
@@ -90,9 +92,19 @@ export function DesktopDashboard({
           >
             <Icon name="settings" className="size-[18px]" />
           </Link>
-          <span className="flex size-8 items-center justify-center rounded-full bg-fb-ink text-[12px] font-bold text-white">
-            나
-          </span>
+          {avatar?.url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={avatar.url}
+              alt={avatar.alt ?? '내 프로필'}
+              referrerPolicy="no-referrer"
+              className="size-8 rounded-full object-cover"
+            />
+          ) : (
+            <span className="flex size-8 items-center justify-center rounded-full bg-fb-ink text-[12px] font-bold text-white">
+              {avatar?.initial ?? '나'}
+            </span>
+          )}
           {footerAction}
         </div>
       </header>

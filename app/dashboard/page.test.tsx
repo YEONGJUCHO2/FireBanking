@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   getAssetManagementData: vi.fn(),
   getDashboardCashflowSnapshot: vi.fn(),
   getDashboardPartnerState: vi.fn(),
+  getCurrentUser: vi.fn(),
 }));
 
 vi.mock("@/src/features/assets/lib/getAssetManagementData", () => ({
@@ -18,6 +19,10 @@ vi.mock("@/src/features/dashboard/lib/getDashboardCashflowSnapshot", () => ({
 
 vi.mock("@/src/features/dashboard/lib/getDashboardPartnerState", () => ({
   getDashboardPartnerState: mocks.getDashboardPartnerState,
+}));
+
+vi.mock("@/src/features/auth/lib/getCurrentUser", () => ({
+  getCurrentUser: mocks.getCurrentUser,
 }));
 
 vi.mock("@/src/features/dashboard/components/AdminPartnerCard", () => ({
@@ -46,6 +51,8 @@ describe("DashboardPage", () => {
       connectedPartnerCount: 0,
       latestInviteUrl: "/invite/token-1",
     });
+    mocks.getCurrentUser.mockReset();
+    mocks.getCurrentUser.mockResolvedValue(null);
   });
 
   it("keeps asset and liability management panels out of the home dashboard", async () => {
