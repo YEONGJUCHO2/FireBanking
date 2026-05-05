@@ -174,34 +174,6 @@ export function FireTimelineWide({
           ))}
         </div>
       </div>
-
-      <div className="mt-[18px] flex items-center justify-between">
-        <div className="fb-num text-[13px] font-semibold text-fb-ink-2">
-          진척 <span className="font-bold text-fb-trust">{Math.round(pct * 100)}%</span>
-        </div>
-        <div className="fb-num text-[16px] font-bold text-fb-ink">
-          {displayMode === 'amount' ? (
-            <>
-              남은 금액 <span className="text-fb-trust">{remainingManWon.toLocaleString('ko-KR')}만원</span>
-            </>
-          ) : mode === 'date' ? (
-            <>
-              예상 도달 <span className="text-fb-trust">{dateLabel}</span>
-            </>
-          ) : mode === 'meter' ? (
-            <>
-              <span className="text-fb-trust">{Math.round(pct * 100)}%</span> 도달
-            </>
-          ) : (
-            <>
-              남은 거리{' '}
-              <span className="text-fb-trust">
-                {years}년 {months}개월
-              </span>
-            </>
-          )}
-        </div>
-      </div>
     </div>
   )
 }

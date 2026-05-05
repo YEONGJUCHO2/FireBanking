@@ -192,11 +192,6 @@ export function DesktopDashboard({
                   hereValueManWon={dashboardData.investableMan}
                   displayMode={displayMode}
                 />
-
-                {/* bottom stat */}
-                <div className="mt-6 flex items-baseline justify-end" data-od-id="metric-time-to-fire">
-                  <DStat label="FIRE 도달 시점" value={`${dashboardData.fireYears}년 ${dashboardData.fireMonths}개월 후`} />
-                </div>
               </Card>
             </div>
           </div>
@@ -270,33 +265,6 @@ function HeroStat({
       >
         {value.toLocaleString('ko-KR')}
         <span className="ml-1 text-[12px] font-semibold text-fb-ink-3">만원</span>
-      </div>
-    </div>
-  )
-}
-
-function DStat({
-  label,
-  value,
-  unit,
-  trust,
-}: {
-  label: string
-  value: string
-  unit?: string
-  trust?: boolean
-}) {
-  return (
-    <div>
-      <div className="text-[12px] font-medium text-fb-ink-3">{label}</div>
-      <div
-        className={cn(
-          'fb-num mt-1 text-[24px] font-bold tracking-[-0.012em]',
-          trust ? 'text-fb-trust' : 'text-fb-ink',
-        )}
-      >
-        {value}
-        {unit ? <span className="ml-1 text-[11px] font-semibold text-fb-ink-3">{unit}</span> : null}
       </div>
     </div>
   )
