@@ -10,7 +10,6 @@ import { Card } from '@/components/fire-banking/card'
 import { CheckinRow } from '@/components/fire-banking/checkin-row'
 import { FireHeroCard } from '@/components/fire-banking/fire-hero-card'
 import { Icon } from '@/components/fire-banking/icons'
-import { MetricCard } from '@/components/fire-banking/metric-card'
 import { NetWorthHero } from '@/components/fire-banking/networth-hero'
 import { SignOutButton } from '@/src/features/auth/components/SignOutButton'
 import { formatCheckinMonthLabel } from '@/src/lib/checkinDate'
@@ -113,45 +112,6 @@ function DashboardMobilePage() {
                 <span>이미 FIRE 목표 자산을 넘었어요. 목표 월 생활비를 다시 점검해 볼까요?</span>
               </div>
             ) : null}
-          </div>
-
-          {/* 2-up secondary metric grid */}
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <div data-od-id="metric-net-worth">
-              <MetricCard
-                title="FIRE 계산 순자산"
-                value={data.investableMan.toLocaleString('ko-KR')}
-                unit="만원"
-                size="secondary"
-                tone="trust"
-              />
-            </div>
-            <div data-od-id="metric-fire-net-worth">
-              <MetricCard
-                title="FIRE 목표자산"
-                value={data.fireTargetMan.toLocaleString('ko-KR')}
-                unit="만원"
-                size="secondary"
-              />
-            </div>
-            <div data-od-id="metric-monthly-growth">
-              <MetricCard
-                title="월 자산 증가 여력"
-                value={data.monthlyAddMan.toLocaleString('ko-KR')}
-                unit="만원"
-                size="secondary"
-                tone={data.monthlyAddMan >= 0 ? 'positive' : 'negative'}
-              />
-            </div>
-            <div data-od-id="metric-time-to-fire">
-              <MetricCard
-                title="FIRE까지"
-                value={`${data.fireYears}년 ${data.fireMonths}개월`}
-                unit={null}
-                size="secondary"
-                tone="trust"
-              />
-            </div>
           </div>
 
           {/* Cashflow summary */}
