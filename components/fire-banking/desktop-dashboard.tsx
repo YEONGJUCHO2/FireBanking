@@ -46,10 +46,14 @@ export function DesktopDashboard({
   const percent = Math.max(0, Math.min(1, dashboardData.investableMan / dashboardData.fireTargetMan))
   const [displayMode, setDisplayMode] = useState<FireDisplayMode>('amount')
   const remainingManWon = Math.max(0, dashboardData.fireTargetMan - dashboardData.investableMan)
+
   return (
-    <section className="mx-auto w-full max-w-[1280px] rounded-[28px] border border-fb-line bg-white">
-      {/* topbar */}
-      <header className="flex h-16 items-center justify-between border-b border-fb-line-soft bg-white/85 px-8 backdrop-blur">
+    <section
+      className="mx-auto w-full max-w-[1200px]"
+      data-screen-label="dashboard-desktop"
+    >
+      {/* top navigation */}
+      <header className="flex h-16 items-center justify-between rounded-t-[28px] border border-fb-line bg-white/85 px-8 backdrop-blur">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2.5">
             <BrandMark size="sm" />
@@ -83,7 +87,7 @@ export function DesktopDashboard({
         </div>
       </header>
 
-      <div className="px-12 py-8">
+      <div className="rounded-b-[28px] border-x border-b border-fb-line bg-white px-12 py-8">
         {/* page header */}
         <div className="mb-6 flex items-baseline justify-between">
           <div>
@@ -109,124 +113,174 @@ export function DesktopDashboard({
           </div>
         </div>
 
+        {/* 2-column main grid: 1.6fr | 1fr */}
         <div className="grid gap-5" style={{ gridTemplateColumns: '1.6fr 1fr' }}>
-          {/* LEFT */}
+          {/* LEFT column */}
           <div className="flex flex-col gap-5">
-            <Card radius="hero" className="p-8">
-              <div className="flex items-baseline justify-between">
-                <div className="text-[13px] font-medium text-fb-ink-3">
-                  {displayMode === 'amount' ? 'FIRE까지 남은 금액' : 'FIRE까지 남은 기간'}
-                </div>
-                <StatusPill tone="trust">월 {dashboardData.targetMonthlyExpenseMan}만원 기준</StatusPill>
-              </div>
-              <div className="fb-num mt-2 flex items-baseline gap-1.5">
-                <span className="text-[64px] font-bold leading-none tracking-[-0.030em] text-fb-ink">
-                  {displayMode === 'amount'
-                    ? remainingManWon.toLocaleString('ko-KR')
-                    : `${dashboardData.fireYears}년 ${dashboardData.fireMonths}개월`}
-                </span>
-                {displayMode === 'amount' ? <span className="text-[22px] font-bold text-fb-ink-2">만원</span> : null}
-              </div>
-              <div className="mt-4 inline-flex rounded-full border border-fb-line bg-white p-1">
-                {(['amount', 'period'] as const).map((mode) => (
-                  <button
-                    key={mode}
-                    type="button"
-                    onClick={() => setDisplayMode(mode)}
-                    className={cn(
-                      'h-8 rounded-full px-3 text-[12px] font-bold transition-colors',
-                      displayMode === mode ? 'bg-fb-ink text-white' : 'text-fb-ink-2 hover:bg-fb-card-alt',
-                    )}
-                  >
-                    {mode === 'amount' ? '남은 금액' : '남은 기간'}
-                  </button>
-                ))}
-              </div>
-              <p className="mt-3 text-[13px] font-medium text-fb-ink-3">
-                FIRE 목표자산은 목표 월 생활비 × 12 × 25배로 계산해요.
-              </p>
-
-              <div className="mt-7 grid grid-cols-4 gap-5 border-t border-fb-line pt-6">
-                <Stat label="목표 월 생활비" value={dashboardData.targetMonthlyExpenseMan} />
-                <Stat label="FIRE 목표자산" value={dashboardData.fireTargetMan} muted />
-                <Stat label="FIRE 계산 순자산" value={dashboardData.investableMan} highlight />
-                <Stat label="월 자산 증가 여력" value={dashboardData.monthlyAddMan} />
-              </div>
-            </Card>
-
-            <Card radius="hero" className="p-7">
-              <div className="mb-5 flex items-baseline justify-between">
-                <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">
-                    FIRE까지 남은 거리
+            {/* Hero: FIRE-centric net worth */}
+            <div data-od-id="hero-fire">
+              <Card radius="hero" className="p-8">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-[13px] font-medium text-fb-ink-3">
+                    {displayMode === 'amount' ? 'FIRE까지 남은 금액' : 'FIRE까지 남은 기간'}
+                  </p>
+                  <div className="flex rounded-full border border-fb-line bg-white p-1">
+                    {(['amount', 'period'] as const).map((mode) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => setDisplayMode(mode)}
+                        className={cn(
+                          'h-8 rounded-full px-3 text-[12px] font-bold transition-colors',
+                          displayMode === mode ? 'bg-fb-ink text-white' : 'text-fb-ink-2 hover:bg-fb-card-alt',
+                        )}
+                      >
+                        {mode === 'amount' ? '금액' : '기간'}
+                      </button>
+                    ))}
                   </div>
-                  <h3 className="mt-1.5 text-[20px] font-bold tracking-[-0.012em] text-fb-ink">
-                    현재 입력 기준 시뮬레이션
-                  </h3>
                 </div>
-                <div className="flex gap-1.5">
-                  {(['거리감', '날짜', '%'] as const).map((label, i) => (
-                    <button
-                      key={label}
-                      className={cn(
-                        'h-[30px] rounded-full border px-3 text-[12px] font-semibold',
-                        i === 0
-                          ? 'border-fb-ink bg-fb-ink text-white'
-                          : 'border-fb-line-strong bg-white text-fb-ink-2',
-                      )}
-                    >
-                      {label}
-                    </button>
-                  ))}
+                <div className="fb-num mt-2 flex items-baseline gap-1.5">
+                  <span className="text-[48px] font-bold leading-none tracking-[-0.030em] text-fb-ink">
+                    {displayMode === 'amount'
+                      ? remainingManWon.toLocaleString('ko-KR')
+                      : `${dashboardData.fireYears}년 ${dashboardData.fireMonths}개월`}
+                  </span>
+                  {displayMode === 'amount' ? (
+                    <span className="text-[22px] font-bold text-fb-ink-2">만원</span>
+                  ) : null}
                 </div>
-              </div>
+                <p className="mt-2 text-[12px] font-medium leading-5 text-fb-ink-3">
+                  월 {dashboardData.targetMonthlyExpenseMan.toLocaleString('ko-KR')}만원 생활비 기준 · 연 5%, 25배 룰
+                </p>
 
-              <FireTimelineWide
-                percent={percent}
-                years={dashboardData.fireYears}
-                months={dashboardData.fireMonths}
-                fireValueManWon={dashboardData.fireTargetMan}
-                hereValueManWon={dashboardData.investableMan}
-                displayMode={displayMode}
-              />
+                {/* 4-column FIRE breakdown */}
+                <div className="mt-7 grid grid-cols-4 gap-5 border-t border-fb-line pt-6">
+                  <HeroStat label="목표 월 생활비" value={dashboardData.targetMonthlyExpenseMan} />
+                  <HeroStat label="FIRE 목표자산" value={dashboardData.fireTargetMan} muted />
+                  <div data-od-id="metric-fire-net-worth">
+                    <HeroStat label="FIRE 계산 순자산" value={dashboardData.investableMan} highlight />
+                  </div>
+                  <div data-od-id="metric-monthly-growth">
+                    <HeroStat label="월 자산 증가 여력" value={dashboardData.monthlyAddMan} />
+                  </div>
+                </div>
+              </Card>
+            </div>
 
-              <div className="mt-6 grid grid-cols-3 gap-6">
-                <DStat label="월 자산 증가 여력" value={`+${dashboardData.monthlyAddMan}`} unit="만원" trust />
-                <DStat label="이번 달 저축률" value="21" unit="%" />
-                <DStat label="FIRE 도달 시점" value={`${dashboardData.fireYears}년 ${dashboardData.fireMonths}개월 후`} />
-              </div>
-            </Card>
+            {/* FIRE timeline card */}
+            <div data-od-id="fire-timeline">
+              <Card radius="hero" className="p-7">
+                <div className="mb-5 flex items-baseline justify-between">
+                  <div>
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">
+                      FIRE까지 남은 거리
+                    </div>
+                    <h3 className="mt-1.5 text-[20px] font-bold tracking-[-0.012em] text-fb-ink">
+                      현재 입력 기준 시뮬레이션
+                    </h3>
+                  </div>
+                </div>
+
+                <FireTimelineWide
+                  percent={percent}
+                  years={dashboardData.fireYears}
+                  months={dashboardData.fireMonths}
+                  fireValueManWon={dashboardData.fireTargetMan}
+                  hereValueManWon={dashboardData.investableMan}
+                  displayMode={displayMode}
+                />
+
+                {/* bottom 3-stat row */}
+                <div className="mt-6 grid grid-cols-3 gap-6">
+                  <div data-od-id="metric-net-worth">
+                    <DStat label="표시 순자산" value={dashboardData.totalNetWorthMan.toLocaleString('ko-KR')} unit="만원" />
+                  </div>
+                  <DStat label="이번 달 저축률" value="21" unit="%" />
+                  <div data-od-id="metric-time-to-fire">
+                    <DStat label="FIRE 도달 시점" value={`${dashboardData.fireYears}년 ${dashboardData.fireMonths}개월 후`} />
+                  </div>
+                </div>
+              </Card>
+            </div>
           </div>
 
-          {/* RIGHT */}
+          {/* RIGHT column */}
           <div className="flex flex-col gap-5">
-            {partnerPending ? (
+            {/* couple check-in card — always shown; content reflects partner state */}
+            <div data-od-id="checkin-row">
               <Card radius="hero" className="p-6">
                 <div className="mb-3 h-[2px] w-6 rounded-[2px] bg-fb-ink" />
                 <h3 className="text-[17px] font-bold text-fb-ink">이번 달 부부 체크인</h3>
                 <div className="mt-3">
-                  <CheckinRow name="나" role="admin" status="done" when="오늘 14:08 입력" />
-                  <div className="fb-divider" />
-                  <CheckinRow name="배우자" role="lite" status="pending" when="초대 수락 · 입력 대기 중" />
-                </div>
-                <div className="mt-3 rounded-[12px] bg-fb-cautionary-soft p-3 text-[12px] font-medium leading-[1.5] text-fb-cautionary-ink">
-                  배우자 체크인이 완료되면 이번 달 결과가 확정돼요.
+                  {partnerPending ? (
+                    <div data-od-id="spouse-card">
+                      <CheckinRow name="나" role="admin" status="done" when="오늘 14:08 입력" />
+                      <div className="fb-divider" />
+                      <CheckinRow name="배우자" role="lite" status="pending" when="초대 수락 · 입력 대기 중" />
+                      <div className="mt-3 rounded-[12px] bg-fb-cautionary-soft p-3 text-[12px] font-medium leading-[1.5] text-fb-cautionary-ink">
+                        배우자 체크인이 완료되면 이번 달 결과가 확정돼요.
+                      </div>
+                    </div>
+                  ) : (
+                    <CheckinRow name="나" role="admin" status="done" when="체크인 완료" />
+                  )}
                 </div>
               </Card>
-            ) : null}
+            </div>
 
-            <Card radius="hero" className="p-6">
-              <div className="mb-3 h-[2px] w-6 rounded-[2px] bg-fb-ink" />
-              <h3 className="text-[17px] font-bold text-fb-ink">이번 달 현금흐름</h3>
-              <div className="mt-4 flex flex-col gap-3">
-                <CFRow label="월 세후 수입" value={`+${dashboardData.incomeMan}`} />
-                <CFRow label="고정비" value={`−${dashboardData.fixedMan}`} />
-                <CFRow label="변동비" value={`−${dashboardData.variableMan}`} />
-                <CFRow label="저축 / 투자" value={`−${dashboardData.saveMan}`} trust />
-                <div className="fb-divider" />
-                <CFRow label="자산 증가 여력" value={`+${dashboardData.monthlyAddMan}`} hero />
-              </div>
-            </Card>
+            {/* cashflow card */}
+            <div data-od-id="cashflow-summary">
+              <Card radius="hero" className="p-6">
+                <div className="mb-3 h-[2px] w-6 rounded-[2px] bg-fb-ink" />
+                <h3 className="text-[17px] font-bold text-fb-ink">이번 달 현금흐름</h3>
+                <div className="mt-4 flex flex-col gap-3">
+                  <CFRow label="월 세후 수입" value={`+${dashboardData.incomeMan}`} />
+                  <CFRow label="고정비" value={`−${dashboardData.fixedMan}`} />
+                  <CFRow label="변동비" value={`−${dashboardData.variableMan}`} />
+                  <CFRow label="저축 / 투자" value={`−${dashboardData.saveMan}`} trust />
+                  <div className="fb-divider" />
+                  <CFRow label="자산 증가 여력" value={`+${dashboardData.monthlyAddMan}`} hero />
+                </div>
+              </Card>
+            </div>
+
+            {/* entry shortcuts */}
+            <div data-od-id="entry-subscribe">
+              <Link
+                href="/subscribe"
+                className="fbpress flex items-center gap-3.5 rounded-[20px] border border-fb-line bg-white p-5"
+              >
+                <span className="flex size-11 items-center justify-center rounded-[14px] bg-fb-trust-soft text-fb-trust-ink">
+                  <Icon name="refresh" className="size-[22px]" />
+                </span>
+                <span className="flex-1">
+                  <span className="block text-[14px] font-bold text-fb-ink">FIRE 생활비 조정기</span>
+                  <span className="mt-0.5 block text-[12px] font-medium text-fb-ink-3">
+                    고정비·변동비·버퍼로 목표 생활비 조정
+                  </span>
+                </span>
+                <Icon name="chevron-right" className="size-5 text-fb-ink-3" />
+              </Link>
+            </div>
+
+            <div data-od-id="entry-assets">
+              <Link
+                href="/assets"
+                className="fbpress flex items-center gap-3.5 rounded-[20px] border border-fb-line bg-white p-5"
+              >
+                <span className="flex size-11 items-center justify-center rounded-[14px] bg-fb-trust-soft text-fb-trust-ink">
+                  <Icon name="wallet" className="size-[22px]" />
+                </span>
+                <span className="flex-1">
+                  <span className="block text-[14px] font-bold text-fb-ink">FIRE 자산 진단</span>
+                  <span className="mt-0.5 block text-[12px] font-medium text-fb-ink-3">
+                    투자자산과 투자 연동 대출을 분리해요
+                  </span>
+                </span>
+                <Icon name="chevron-right" className="size-5 text-fb-ink-3" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -234,7 +288,7 @@ export function DesktopDashboard({
   )
 }
 
-function Stat({
+function HeroStat({
   label,
   value,
   highlight,
