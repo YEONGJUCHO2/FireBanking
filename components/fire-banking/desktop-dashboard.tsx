@@ -9,7 +9,6 @@ import { Card } from './card'
 import { CheckinRow } from './checkin-row'
 import { FireTimelineWide, type FireDisplayMode } from './fire-timeline'
 import { Icon } from './icons'
-import { StatusPill } from './status-pill'
 import { cn } from '@/lib/cn'
 import { formatCheckinMonthLabel, formatWorkspaceMonthLabel } from '@/src/lib/checkinDate'
 
@@ -34,8 +33,6 @@ type DesktopDashboardData = typeof data
 
 const navItems = [
   { label: '대시보드', href: '/dashboard' },
-  { label: '체크인', href: '/together' },
-  { label: '시뮬레이터', href: '/subscribe' },
   { label: '히스토리', href: '/history' },
 ] as const
 
@@ -196,15 +193,9 @@ export function DesktopDashboard({
                   displayMode={displayMode}
                 />
 
-                {/* bottom 3-stat row */}
-                <div className="mt-6 grid grid-cols-3 gap-6">
-                  <div data-od-id="metric-net-worth">
-                    <DStat label="표시 순자산" value={dashboardData.totalNetWorthMan.toLocaleString('ko-KR')} unit="만원" />
-                  </div>
-                  <DStat label="이번 달 저축률" value="21" unit="%" />
-                  <div data-od-id="metric-time-to-fire">
-                    <DStat label="FIRE 도달 시점" value={`${dashboardData.fireYears}년 ${dashboardData.fireMonths}개월 후`} />
-                  </div>
+                {/* bottom stat */}
+                <div className="mt-6 flex items-baseline justify-end" data-od-id="metric-time-to-fire">
+                  <DStat label="FIRE 도달 시점" value={`${dashboardData.fireYears}년 ${dashboardData.fireMonths}개월 후`} />
                 </div>
               </Card>
             </div>
@@ -217,18 +208,18 @@ export function DesktopDashboard({
               <Card radius="hero" className="p-6">
                 <div className="mb-3 h-[2px] w-6 rounded-[2px] bg-fb-ink" />
                 <h3 className="text-[17px] font-bold text-fb-ink">이번 달 부부 체크인</h3>
-                <div className="mt-3">
+                <div className="mt-3" data-od-id="spouse-card">
+                  <CheckinRow name="나" role="admin" status="done" when="오늘 14:08 입력" />
+                  <div className="fb-divider" />
                   {partnerPending ? (
-                    <div data-od-id="spouse-card">
-                      <CheckinRow name="나" role="admin" status="done" when="오늘 14:08 입력" />
-                      <div className="fb-divider" />
+                    <>
                       <CheckinRow name="배우자" role="lite" status="pending" when="초대 수락 · 입력 대기 중" />
                       <div className="mt-3 rounded-[12px] bg-fb-cautionary-soft p-3 text-[12px] font-medium leading-[1.5] text-fb-cautionary-ink">
                         배우자 체크인이 완료되면 이번 달 결과가 확정돼요.
                       </div>
-                    </div>
+                    </>
                   ) : (
-                    <CheckinRow name="나" role="admin" status="done" when="체크인 완료" />
+                    <CheckinRow name="배우자" role="lite" status="done" when="체크인 완료" />
                   )}
                 </div>
               </Card>
@@ -250,42 +241,6 @@ export function DesktopDashboard({
               </Card>
             </div>
 
-            {/* entry shortcuts */}
-            <div data-od-id="entry-subscribe">
-              <Link
-                href="/subscribe"
-                className="fbpress flex items-center gap-3.5 rounded-[20px] border border-fb-line bg-white p-5"
-              >
-                <span className="flex size-11 items-center justify-center rounded-[14px] bg-fb-trust-soft text-fb-trust-ink">
-                  <Icon name="refresh" className="size-[22px]" />
-                </span>
-                <span className="flex-1">
-                  <span className="block text-[14px] font-bold text-fb-ink">FIRE 생활비 조정기</span>
-                  <span className="mt-0.5 block text-[12px] font-medium text-fb-ink-3">
-                    고정비·변동비·버퍼로 목표 생활비 조정
-                  </span>
-                </span>
-                <Icon name="chevron-right" className="size-5 text-fb-ink-3" />
-              </Link>
-            </div>
-
-            <div data-od-id="entry-assets">
-              <Link
-                href="/assets"
-                className="fbpress flex items-center gap-3.5 rounded-[20px] border border-fb-line bg-white p-5"
-              >
-                <span className="flex size-11 items-center justify-center rounded-[14px] bg-fb-trust-soft text-fb-trust-ink">
-                  <Icon name="wallet" className="size-[22px]" />
-                </span>
-                <span className="flex-1">
-                  <span className="block text-[14px] font-bold text-fb-ink">FIRE 자산 진단</span>
-                  <span className="mt-0.5 block text-[12px] font-medium text-fb-ink-3">
-                    투자자산과 투자 연동 대출을 분리해요
-                  </span>
-                </span>
-                <Icon name="chevron-right" className="size-5 text-fb-ink-3" />
-              </Link>
-            </div>
           </div>
         </div>
       </div>
