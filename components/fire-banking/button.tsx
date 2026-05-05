@@ -62,8 +62,12 @@ export function Button({
   )
 
   if (href && !disabled) {
+    // Forward data-* and aria-* attributes to the Link element.
+    const dataProps = Object.fromEntries(
+      Object.entries(buttonProps).filter(([k]) => k.startsWith('data-') || k.startsWith('aria-'))
+    )
     return (
-      <Link href={href} className={classes} aria-disabled={disabled || undefined}>
+      <Link href={href} className={classes} aria-disabled={disabled || undefined} {...dataProps}>
         {content}
       </Link>
     )
