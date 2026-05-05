@@ -39,12 +39,10 @@ const navItems = [
 export function DesktopDashboard({
   footerAction,
   data: dashboardData = data,
-  partnerPending = true,
   avatar,
 }: {
   footerAction?: ReactNode
   data?: DesktopDashboardData
-  partnerPending?: boolean
   avatar?: { url?: string | null; initial?: string; alt?: string }
 }) {
   const percent = Math.max(0, Math.min(1, dashboardData.investableMan / dashboardData.fireTargetMan))
@@ -218,16 +216,10 @@ export function DesktopDashboard({
                 <div className="mt-3" data-od-id="spouse-card">
                   <CheckinRow name="나" role="admin" status="done" when="오늘 14:08 입력" />
                   <div className="fb-divider" />
-                  {partnerPending ? (
-                    <>
-                      <CheckinRow name="배우자" role="lite" status="pending" when="초대 수락 · 입력 대기 중" />
-                      <div className="mt-3 rounded-[12px] bg-fb-cautionary-soft p-3 text-[12px] font-medium leading-[1.5] text-fb-cautionary-ink">
-                        배우자 체크인이 완료되면 이번 달 결과가 확정돼요.
-                      </div>
-                    </>
-                  ) : (
-                    <CheckinRow name="배우자" role="lite" status="done" when="체크인 완료" />
-                  )}
+                  <CheckinRow name="배우자" role="lite" status="pending" when="초대 수락 · 입력 대기 중" />
+                  <div className="mt-3 rounded-[12px] bg-fb-cautionary-soft p-3 text-[12px] font-medium leading-[1.5] text-fb-cautionary-ink">
+                    배우자 체크인이 완료되면 이번 달 결과가 확정돼요.
+                  </div>
                 </div>
               </Card>
             </div>

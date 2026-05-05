@@ -160,7 +160,6 @@ export default async function DashboardPage() {
         <DesktopDashboard
           footerAction={<SignOutButton />}
           data={{ ...data, netDeltaMan: data.netWorthDeltaMan }}
-          partnerPending={partnerPending}
           avatar={avatar}
         />
         <div className="mx-auto mt-6 w-full max-w-[1280px]">
