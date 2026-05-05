@@ -14,7 +14,7 @@ export default async function OnboardingPage() {
     <div data-screen-label="onboarding">
       <MobileAppShell className="h-[min(calc(100dvh-2.5rem),820px)]">
         <OnboardingStepper
-          doneHref="/dashboard"
+          doneHref="/onboarding/result"
           backOutHref="/"
         />
       </MobileAppShell>

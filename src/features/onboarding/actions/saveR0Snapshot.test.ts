@@ -187,7 +187,7 @@ describe("saveR0Snapshot", () => {
     mocks.createSupabaseServerClient.mockResolvedValue(refs.supabase);
 
     await expect(saveR0Snapshot({}, createFormData())).rejects.toThrow(
-      "NEXT_REDIRECT:/dashboard",
+      "NEXT_REDIRECT:/onboarding/result",
     );
 
     expect(refs.snapshotUpsert).toHaveBeenCalledWith(
@@ -222,7 +222,7 @@ describe("saveR0Snapshot", () => {
     mocks.createSupabaseServerClient.mockResolvedValue(refs.supabase);
 
     await expect(saveR0Snapshot({}, createFormData())).rejects.toThrow(
-      "NEXT_REDIRECT:/dashboard",
+      "NEXT_REDIRECT:/onboarding/result",
     );
 
     expect(refs.coupleInsert.insert).toHaveBeenCalledWith({
@@ -250,7 +250,7 @@ describe("saveR0Snapshot", () => {
     mocks.createSupabaseServerClient.mockResolvedValue(refs.supabase);
 
     await expect(saveR0Snapshot({}, createFormData())).rejects.toThrow(
-      "NEXT_REDIRECT:/dashboard",
+      "NEXT_REDIRECT:/onboarding/result",
     );
 
     expect(refs.recoveryMembershipLookup.maybeSingle).toHaveBeenCalledOnce();
