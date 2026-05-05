@@ -671,6 +671,101 @@ export function SimulatorScreenPreview() {
   )
 }
 
+export function HistoryScreenPreview() {
+  // Mock data — static, no Supabase. Shows LIST variant with 4 rows.
+  const rows = [
+    { id: '1', ym: '2026년 5월', fireNetworth: 13500, delta: null, status: 'temporary' as const },
+    { id: '2', ym: '2026년 4월', fireNetworth: 12800, delta: 2100, status: 'finalized' as const },
+    { id: '3', ym: '2026년 3월', fireNetworth: 10700, delta: -500, status: 'finalized' as const },
+    { id: '4', ym: '2026년 2월', fireNetworth: 11200, delta: 1800, status: 'finalized' as const },
+  ]
+
+  function fmtEok(v: number): string {
+    const eok = Math.floor(v / 10000)
+    const rem = v % 10000
+    if (eok === 0) return `${rem.toLocaleString('ko-KR')}만`
+    if (rem === 0) return `${eok.toLocaleString('ko-KR')}억`
+    return `${eok.toLocaleString('ko-KR')}억 ${rem.toLocaleString('ko-KR')}만`
+  }
+
+  function fmtDelta(delta: number): string {
+    const sign = delta >= 0 ? '+' : '−'
+    const abs = Math.abs(delta)
+    return `${sign}${abs.toLocaleString('ko-KR')}만`
+  }
+
+  return (
+    <div className="flex h-full flex-col bg-fb-page">
+      {/* Header */}
+      <div className="border-b border-fb-line-soft bg-fb-page px-4 pb-3 pt-10">
+        <p className="text-[8px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">HISTORY</p>
+        <h1 className="mt-1 text-[16px] font-bold tracking-[-0.020em] text-fb-ink">월별 체크인 기록</h1>
+        <p className="mt-1 text-[9px] leading-[1.5] text-fb-ink-2">
+          매달 저장된 우리 가족의 숫자. 지난 달과 비교해서 천천히 보세요.
+        </p>
+      </div>
+
+      {/* List */}
+      <div className="flex-1 overflow-hidden px-3 pt-4">
+        <div className="rounded-[14px] border border-fb-line bg-white px-3">
+          {/* Column headers */}
+          <div className="flex items-center justify-between gap-2 border-b border-fb-line py-1.5">
+            <p className="text-[7px] font-semibold text-fb-ink-3">월</p>
+            <div className="flex items-center gap-2.5 shrink-0">
+              <p className="text-[7px] font-semibold text-fb-ink-3">전월 대비</p>
+              <p className="text-[7px] font-semibold text-fb-ink-3">FIRE 순자산</p>
+              <p className="text-[7px] font-semibold text-fb-ink-3">상태</p>
+            </div>
+          </div>
+
+          {rows.map((row, i) => {
+            const deltaColor =
+              row.delta === null
+                ? 'text-fb-ink-3'
+                : row.delta >= 0
+                ? 'text-fb-positive'
+                : 'text-fb-negative'
+            const pillCls =
+              row.status === 'finalized'
+                ? 'bg-fb-trust-soft text-fb-trust-ink'
+                : 'bg-fb-card-alt text-fb-ink-3'
+            const pillLabel = row.status === 'finalized' ? '확정' : '임시'
+
+            return (
+              <div
+                key={row.id}
+                data-od-id={`row-month-${i + 1}`}
+                className="flex items-center justify-between gap-2 border-b border-fb-line-soft py-2.5 last:border-0"
+              >
+                <p className="min-w-0 shrink-0 text-[9px] font-semibold text-fb-ink-2">{row.ym}</p>
+                <div className="flex items-center gap-2.5 shrink-0">
+                  {row.delta !== null ? (
+                    <span className={`fb-num text-[8px] font-semibold ${deltaColor}`}>
+                      {fmtDelta(row.delta)}
+                    </span>
+                  ) : (
+                    <span className="text-[8px] text-fb-ink-3">—</span>
+                  )}
+                  <span className="fb-num text-right text-[9px] font-bold text-fb-ink">
+                    {fmtEok(row.fireNetworth)}
+                  </span>
+                  <div data-od-id={row.status === 'finalized' ? 'status-pill-finalized' : 'status-pill-temporary'}>
+                    <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[7px] font-semibold ${pillCls}`}>
+                      {pillLabel}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      <MockBottomNav active="기록" />
+    </div>
+  )
+}
+
 export function AssetsScreenPreview() {
   // Mock data — static, no Supabase
   const mockHoldings = [
