@@ -766,6 +766,97 @@ export function HistoryScreenPreview() {
   )
 }
 
+export function TogetherScreenPreview() {
+  // Mock data — static, no Supabase. State: invite sent, waiting for partner acceptance.
+  const myName = '나'
+  const partnerName = '배우자'
+  const mockLink = 'firebanking.app/invite/3a91'
+  const adminDone = true
+
+  const now = new Date()
+  const next = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+  const nextLabel = `${next.getFullYear()}년 ${next.getMonth() + 1}월 1일`
+
+  return (
+    <div className="flex h-full flex-col bg-[#FAFAFA]">
+      {/* Header */}
+      <div className="border-b border-fb-line-soft px-5 pb-4 pt-14">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">TOGETHER</p>
+        <h1 className="mt-1.5 text-[24px] font-bold tracking-[-0.020em] text-fb-ink">우리 가족</h1>
+      </div>
+
+      <div className="flex-1 overflow-hidden px-4 pb-4 pt-5 space-y-2.5">
+        {/* Admin card */}
+        <div className="rounded-[14px] border border-fb-line bg-white px-[18px] py-[18px]">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-full bg-fb-ink font-bold text-white text-[13px]">
+                {myName.slice(0, 1)}
+              </div>
+              <div>
+                <div className="text-[14px] font-semibold text-fb-ink">{myName}</div>
+                <div className="text-[11px] text-fb-ink-3">리드 파트너 · 풀 입력</div>
+              </div>
+            </div>
+            <div className="text-[11px] font-bold text-fb-positive">✓ 입력 완료</div>
+          </div>
+        </div>
+
+        {/* Partner card — sent state */}
+        <div className="rounded-[14px] border border-fb-line bg-white px-[18px] py-[18px]">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-full bg-fb-trust-soft font-bold text-fb-trust text-[13px]">
+                {partnerName.slice(0, 1)}
+              </div>
+              <div>
+                <div className="text-[14px] font-semibold text-fb-ink">{partnerName}</div>
+                <div className="text-[11px] text-fb-ink-3">배우자 · Lite 입력</div>
+              </div>
+            </div>
+            <div className="text-[11px] font-bold text-fb-trust">초대 보냄 · 수락 대기</div>
+          </div>
+
+          {/* Invite link row */}
+          <div className="mt-3.5">
+            <div className="flex items-center gap-2 rounded-[10px] bg-[#F4F4F5] px-3 py-2.5">
+              <span className="fb-num flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-medium text-fb-ink-2">
+                {mockLink}
+              </span>
+              <span className="h-[30px] rounded-full border border-fb-line bg-white px-2.5 text-[11px] font-bold text-fb-ink flex items-center">
+                복사
+              </span>
+            </div>
+            <div className="mt-2.5 flex h-[42px] w-full items-center justify-center rounded-[12px] border border-fb-line bg-white text-[13px] font-bold text-fb-ink">
+              초대 화면 미리보기
+            </div>
+          </div>
+        </div>
+
+        {/* 이번 달 체크인 상태 */}
+        <div className="rounded-[14px] border border-fb-line bg-white px-[18px] py-[18px]">
+          <p className="text-[12px] font-semibold tracking-[0.06em] text-fb-ink-3">이번 달 체크인</p>
+          <p className="mt-1.5 text-[14px] font-bold text-fb-ink">
+            {adminDone ? `${partnerName}님 입력이 끝나면 결과가 확정돼요` : '먼저 관리자 입력을 끝내 주세요'}
+          </p>
+        </div>
+
+        {/* 다음 체크인 */}
+        <div className="rounded-[14px] border border-[rgba(0,102,255,0.18)] bg-[rgba(0,102,255,0.04)] px-[18px] py-5">
+          <p className="text-[13px] font-semibold tracking-[-0.005em] text-fb-trust">다음 체크인</p>
+          <p className="mt-1 text-[18px] font-bold tracking-[-0.012em] text-fb-ink">{nextLabel}</p>
+          <p className="mt-1.5 text-[12px] leading-[1.5] text-fb-ink-2">
+            매달 첫째 주에 함께 3분만 들여요.<br />
+            알림은 두 분 모두에게 갑니다.
+          </p>
+        </div>
+      </div>
+
+      <MockBottomNav active="함께" />
+    </div>
+  )
+}
+
 export function AssetsScreenPreview() {
   // Mock data — static, no Supabase
   const mockHoldings = [
