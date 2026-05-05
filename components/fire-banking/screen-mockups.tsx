@@ -130,43 +130,127 @@ function CompactMoneyRow({ label, value }: { label: string; value: number }) {
 
 export function DashboardScreenPreview() {
   const m = dashboardMetrics
-  return (
-    <div className="flex h-full flex-col px-4 pb-0 pt-3">
-      <MockStatusBar />
-      <header className="mt-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-[17px] font-black tracking-normal text-fb-ink">대시보드</h1>
-          <p className="mt-1 text-[10px] font-medium leading-4 text-fb-ink-2">우리의 경제적 자유 현황을 한눈에</p>
-        </div>
-        <div className="flex gap-2">
-          <span className="grid size-8 place-items-center rounded-full border border-fb-line bg-white shadow-card"><Icon name="bell" className="size-4 text-fb-ink-2" /></span>
-          <span className="grid size-8 place-items-center rounded-full border border-fb-line bg-white shadow-card"><Icon name="users" className="size-4 text-fb-ink-2" /></span>
-        </div>
-      </header>
+  const percent = Math.max(0, Math.min(1, m.fireNetWorthMan / m.fireTargetAssetMan))
+  const pct = percent
+  const fireSize = 32
+  const fireTrackInset = fireSize / 2
 
-      <div className="mt-4 space-y-3">
-        <section className="relative min-h-[156px] overflow-hidden rounded-[0.9rem] p-4 text-white shadow-soft">
-          <Image src="/fire-banking/login-mountain.png" alt="" fill sizes="300px" className="object-cover brightness-[0.58] contrast-[1.08]" />
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,94,235,0.88),rgba(0,94,235,0.28))]" />
-          <div className="relative z-10">
-            <div className="flex justify-between gap-3">
-              <p className="text-[10px] font-bold opacity-90">예상 FIRE 도달 시점</p>
-              <span className="rounded-full bg-white/90 px-2 py-1 text-[10px] font-bold text-fb-positive">정상</span>
+  return (
+    <div className="flex h-full flex-col bg-fb-page pt-2">
+      <MockStatusBar />
+
+      {/* Top bar */}
+      <div className="flex items-center justify-between border-b border-fb-line-soft bg-white/85 px-4 py-2 backdrop-blur">
+        <div className="flex items-center gap-1.5">
+          <span className="flex size-5 items-center justify-center rounded-[5px] bg-fb-ink text-[9px] font-black text-white">FB</span>
+          <span className="text-[11px] font-semibold text-fb-ink">Fire Banking</span>
+        </div>
+        <span className="text-[10px] font-semibold text-fb-ink-3">⚙</span>
+      </div>
+
+      <div className="flex-1 overflow-hidden px-3 pb-0 pt-3">
+        {/* Month label + greeting + status pill */}
+        <div className="mb-2.5 flex items-center justify-between">
+          <div>
+            <div className="text-[8px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">2026. 05 체크인</div>
+            <div className="mt-0.5 text-[13px] font-bold tracking-[-0.012em] text-fb-ink">안녕하세요, 나님</div>
+          </div>
+          <span className="inline-flex items-center gap-1 rounded-full bg-fb-trust-soft px-2 py-0.5 text-[8px] font-semibold text-fb-trust-ink">
+            <span className="size-1 rounded-full bg-fb-trust" />
+            배우자 수락 대기
+          </span>
+        </div>
+
+        {/* Hero NetWorth card */}
+        <section className="rounded-[18px] border border-fb-line bg-fb-card p-3 shadow-elevated">
+          <div className="flex items-start justify-between">
+            <p className="text-[8px] font-medium text-fb-ink-3">FIRE까지 남은 금액</p>
+            <div className="flex rounded-full border border-fb-line bg-white p-0.5">
+              <span className="rounded-full bg-fb-ink px-1.5 py-px text-[7px] font-bold text-white">금액</span>
+              <span className="px-1.5 py-px text-[7px] font-bold text-fb-ink-2">기간</span>
             </div>
-            <p className="mt-4 text-[32px] font-black leading-none tracking-normal">{m.expectedFireDateLabel}</p>
-            <p className="mt-2 text-[11px] font-bold opacity-90">({m.expectedFireDistanceLabel})</p>
+          </div>
+          <div className="mt-1 flex items-baseline gap-1">
+            <span className="text-[28px] font-bold leading-[1.1] tracking-[-0.024em] text-fb-ink">
+              {(m.fireTargetAssetMan - m.fireNetWorthMan).toLocaleString('ko-KR')}
+            </span>
+            <span className="text-[12px] font-bold text-fb-ink-2">만원</span>
+          </div>
+          <p className="mt-1 text-[7px] font-medium text-fb-ink-3">
+            월 300만원 생활비 기준 · 연 5%, 25배 룰
+          </p>
+          <div className="my-2.5 h-px bg-fb-line" />
+          <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+            <MockBreakdown label="목표 월 생활비" value="300" />
+            <MockBreakdown label="FIRE 목표자산" value={formatManWon(m.fireTargetAssetMan)} highlight />
+            <MockBreakdown label="FIRE 계산 순자산" value={formatManWon(m.fireNetWorthMan)} highlight badge="FIRE" />
+            <MockBreakdown label="월 자산 증가 여력" value={formatManWon(m.monthlyAssetGrowthCapacityMan)} />
           </div>
         </section>
 
-        <div className="grid grid-cols-2 gap-2.5">
-          <MockMetric title="표시 순자산" value={formatManWon(m.displayNetWorthMan)} delta="+2,800만원" />
-          <MockMetric title="FIRE 계산 순자산" value={formatManWon(m.fireNetWorthMan)} delta="+320만원" />
-          <MockMetric title="월 자산 증가 여력" value={formatManWon(m.monthlyAssetGrowthCapacityMan)} small />
-          <MockMetric title="FIRE 목표 자산" value={formatManWon(m.fireTargetAssetMan)} small />
+        {/* FireTimeline card */}
+        <section className="mt-2.5 rounded-[18px] border border-fb-line bg-fb-card p-3 shadow-elevated">
+          <div className="mb-2 flex items-baseline justify-between">
+            <span className="text-[8px] font-bold text-fb-ink">FIRE까지 남은 금액</span>
+            <span className="text-[8px] font-extrabold text-fb-trust">
+              {(m.fireTargetAssetMan - m.fireNetWorthMan).toLocaleString('ko-KR')}만원
+            </span>
+          </div>
+          {/* Progress track */}
+          <div className="relative my-1 h-7">
+            <div
+              className="absolute left-0 top-2.5 h-1.5 overflow-hidden rounded-full bg-fb-card-mute"
+              style={{ width: `calc(100% - ${fireTrackInset}px)` }}
+            >
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-fb-trust to-[#3385FF]"
+                style={{ width: `${pct * 100}%` }}
+              />
+            </div>
+            <div
+              className="absolute top-[7px] size-[14px] rounded-full border-[3px] border-fb-trust bg-white shadow-[0_0_0_2px_rgba(0,102,255,0.12)]"
+              style={{ left: `calc(${pct * 100}% - ${fireTrackInset * pct + 7}px)` }}
+            />
+            {/* Fire GIF at 100% end */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://em-content.zobj.net/source/animated-noto-color-emoji/356/fire_1f525.gif"
+              alt="FIRE"
+              className="absolute right-0 top-[-2px] size-[32px] object-contain"
+              draggable={false}
+            />
+          </div>
+          {/* Tick labels */}
+          <div className="relative h-3 text-[7px] font-bold">
+            <span className={`absolute left-0 ${pct >= 0 ? 'text-fb-trust' : 'text-fb-ink-3'}`}>0%</span>
+            <span className={`absolute -translate-x-1/2 ${pct >= 0.25 ? 'text-fb-trust' : 'text-fb-ink-3'}`} style={{ left: '33.333%' }}>25%</span>
+            <span className={`absolute -translate-x-1/2 ${pct >= 0.5 ? 'text-fb-trust' : 'text-fb-ink-3'}`} style={{ left: '66.667%' }}>50%</span>
+            <span className={`absolute right-0 text-center ${pct >= 1 ? 'text-fb-trust' : 'text-fb-ink-3'}`} style={{ width: fireSize }}>100%</span>
+          </div>
+        </section>
+
+        {/* 2-up metric grid */}
+        <div className="mt-2.5 grid grid-cols-2 gap-2">
+          <MockMetric title="FIRE 계산 순자산" value={formatManWon(m.fireNetWorthMan)} trust />
+          <MockMetric title="FIRE 목표자산" value={formatManWon(m.fireTargetAssetMan)} />
+          <MockMetric title="월 자산 증가 여력" value={formatManWon(m.monthlyAssetGrowthCapacityMan)} positive />
+          <MockMetric title="FIRE까지" value="17년 3개월" trust />
         </div>
-        <MockMetric title="월 생활비 (예상)" value="300만원" caption="고정비 230만원 + 변동비 120만원 + 기타 20만원" wide />
-        <section className="rounded-[0.8rem] border border-fb-line bg-fb-card-alt/60 p-3 text-[10px] leading-4 text-fb-ink-2">
-          이 결과는 참고용 시뮬레이션이에요.
+
+        {/* Cashflow summary (compact) */}
+        <section className="mt-2.5 rounded-[14px] border border-fb-line bg-fb-card p-3">
+          <div className="mb-1.5 flex items-center gap-1">
+            <div className="h-[2px] w-3 rounded-full bg-fb-ink" />
+            <h2 className="text-[9px] font-bold text-fb-ink">이번 달 현금흐름</h2>
+          </div>
+          <div className="space-y-1.5">
+            <MockCFRow label="월 세후 수입" value="+850" positive />
+            <MockCFRow label="고정비" value="−350" />
+            <MockCFRow label="변동비" value="−220" />
+            <MockCFRow label="저축 / 투자" value="−180" trust />
+            <div className="h-px bg-fb-line" />
+            <MockCFRow label="자산 증가 여력" value="+280" hero />
+          </div>
         </section>
       </div>
 
@@ -175,13 +259,40 @@ export function DashboardScreenPreview() {
   )
 }
 
-function MockMetric({ title, value, delta, caption, small = false, wide = false }: { title: string; value: string; delta?: string; caption?: string; small?: boolean; wide?: boolean }) {
+function MockBreakdown({ label, value, highlight = false, badge }: { label: string; value: string; highlight?: boolean; badge?: string }) {
+  return (
+    <div>
+      <div className="flex items-center gap-1 text-[7px] font-medium text-fb-ink-3">
+        {label}
+        {badge ? <span className="rounded-[3px] bg-fb-trust-soft px-1 py-px text-[6px] font-bold text-fb-trust-ink">{badge}</span> : null}
+      </div>
+      <div className={`fb-num mt-0.5 text-[11px] font-bold ${highlight ? 'text-fb-trust' : 'text-fb-ink'}`}>
+        {value}<span className="ml-0.5 text-[8px] font-semibold text-fb-ink-3">만원</span>
+      </div>
+    </div>
+  )
+}
+
+function MockCFRow({ label, value, positive = false, trust = false, hero = false }: { label: string; value: string; positive?: boolean; trust?: boolean; hero?: boolean }) {
+  const color = positive ? 'text-fb-positive' : trust ? 'text-fb-trust' : hero ? 'text-fb-trust' : 'text-fb-ink'
+  return (
+    <div className="flex items-baseline justify-between">
+      <span className={`${hero ? 'text-[8px] font-bold text-fb-ink' : 'text-[7px] font-medium text-fb-ink-2'}`}>{label}</span>
+      <span className={`fb-num ${hero ? 'text-[13px] font-bold' : 'text-[9px] font-semibold'} ${color}`}>
+        {value}<span className="ml-0.5 text-[6px] font-semibold text-fb-ink-3">만원</span>
+      </span>
+    </div>
+  )
+}
+
+function MockMetric({ title, value, delta, caption, small = false, wide = false, trust = false, positive = false }: { title: string; value: string; delta?: string; caption?: string; small?: boolean; wide?: boolean; trust?: boolean; positive?: boolean }) {
+  const valueColor = trust ? 'text-fb-trust' : positive ? 'text-fb-positive' : 'text-fb-ink'
   return (
     <section className={wide ? 'rounded-[0.8rem] border border-fb-line bg-white p-3 shadow-card' : 'rounded-[0.8rem] border border-fb-line bg-white p-3 shadow-card'}>
-      <p className="text-[10px] font-bold tracking-normal text-fb-ink-2">{title}</p>
-      <p className={small ? 'mt-2 text-[16px] font-black leading-tight tracking-normal text-fb-ink' : 'mt-2 text-[18px] font-black leading-tight tracking-normal text-fb-ink'}>{value}</p>
-      {delta ? <p className="mt-1.5 text-[10px] font-bold text-fb-trust">전월 대비 {delta}</p> : null}
-      {caption ? <p className="mt-1.5 text-[10px] font-bold leading-4 text-fb-ink-2">{caption}</p> : null}
+      <p className="text-[9px] font-bold tracking-normal text-fb-ink-2">{title}</p>
+      <p className={`mt-1 font-black leading-tight tracking-normal ${valueColor} ${small ? 'text-[13px]' : 'text-[14px]'}`}>{value}</p>
+      {delta ? <p className="mt-1 text-[8px] font-bold text-fb-trust">전월 대비 {delta}</p> : null}
+      {caption ? <p className="mt-1 text-[8px] font-bold leading-4 text-fb-ink-2">{caption}</p> : null}
     </section>
   )
 }

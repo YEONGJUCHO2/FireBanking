@@ -17,6 +17,8 @@ type FireHeroCardProps = {
   goalManWon?: number
   coastManWon?: number
   className?: string
+  /** Card radius: 'card' (20px, default) | 'hero' (24px) */
+  radius?: 'card' | 'hero'
   /** Show "자세히" affordance (calculation assumptions sheet) */
   detailsHref?: string
   detailsAction?: () => void
@@ -40,9 +42,10 @@ export function FireHeroCard({
   detailsHref,
   detailsAction,
   className,
+  radius = 'card',
 }: FireHeroCardProps) {
   return (
-    <Card className={cn('p-5', className)}>
+    <Card radius={radius} className={cn('p-5', className)}>
       <FireTimeline
         percent={percent}
         years={years}
