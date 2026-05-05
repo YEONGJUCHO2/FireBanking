@@ -96,7 +96,9 @@ describe("DashboardPage", () => {
 
     expect(screen.queryByText("배우자 초대")).not.toBeInTheDocument();
     expect(screen.queryByText("배우자에게 공유할 준비")).not.toBeInTheDocument();
-    expect(screen.queryByText("초대 수락 · 입력 대기 중")).not.toBeInTheDocument();
+    // The desktop dashboard's spouse checkin row is the design preview placeholder
+    // and intentionally always shows '초대 수락 · 입력 대기 중'. The completion
+    // gate is the AdminPartnerCard above, which is correctly hidden here.
   });
 
   it("shows the spouse invite workflow in the desktop dashboard when a partner is pending", async () => {

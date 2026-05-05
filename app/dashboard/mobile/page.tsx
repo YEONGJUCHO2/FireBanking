@@ -6,7 +6,7 @@ import {
   ScreenTopBar,
   StatusPill,
 } from '@/components/fire-banking'
-import { Card, SectionHeader } from '@/components/fire-banking/card'
+import { Card } from '@/components/fire-banking/card'
 import { CheckinRow } from '@/components/fire-banking/checkin-row'
 import { FireHeroCard } from '@/components/fire-banking/fire-hero-card'
 import { Icon } from '@/components/fire-banking/icons'
@@ -165,23 +165,22 @@ function DashboardMobilePage() {
             />
           </div>
 
-          {/* Checkin row — spouse card hidden when partnerStatus === 'completed' */}
+          {/* Checkin card — matches PC dashboard exactly */}
           {showSpouseCard ? (
-            <section className="mt-6 space-y-3" data-od-id="checkin-row">
-              <SectionHeader title="이번 달 부부 체크인" subtitle="배우자 입력이 끝나면 결과가 확정돼요" />
-              <div data-od-id="spouse-card">
-                <Card className="px-4 py-1">
+            <div className="mt-6" data-od-id="checkin-row">
+              <Card radius="hero" className="p-5">
+                <div className="mb-3 h-[2px] w-6 rounded-[2px] bg-fb-ink" />
+                <h3 className="text-[16px] font-bold text-fb-ink">이번 달 부부 체크인</h3>
+                <div className="mt-3" data-od-id="spouse-card">
                   <CheckinRow name="나" role="admin" status="done" when="오늘 14:08 입력" />
                   <div className="fb-divider" />
-                  <CheckinRow
-                    name="배우자"
-                    role="lite"
-                    status={data.partnerStatus === 'accepted' ? 'pending' : 'invited'}
-                    when={data.partnerStatus === 'accepted' ? '수락 완료 · 입력 대기 중' : '초대 수락 대기 중'}
-                  />
-                </Card>
-              </div>
-            </section>
+                  <CheckinRow name="배우자" role="lite" status="pending" when="초대 수락 · 입력 대기 중" />
+                  <div className="mt-3 rounded-[12px] bg-fb-cautionary-soft p-3 text-[12px] font-medium leading-[1.5] text-fb-cautionary-ink">
+                    배우자 체크인이 완료되면 이번 달 결과가 확정돼요.
+                  </div>
+                </div>
+              </Card>
+            </div>
           ) : null}
 
           {/* Entry cards: subscribe (primary CTA) + assets */}
