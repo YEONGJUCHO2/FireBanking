@@ -344,37 +344,72 @@ function MockBottomNav({ active }: { active: string }) {
 
 export function InviteScreenPreview() {
   return (
-    <div className="flex h-full flex-col px-4 pb-4 pt-3">
+    <div className="flex h-full flex-col bg-fb-page px-5 pb-5 pt-3">
       <MockStatusBar />
-      <header className="mt-4 flex items-center gap-2">
-        <MockBackButton />
-        <h1 className="text-[15px] font-black tracking-normal text-fb-ink">배우자 초대</h1>
-      </header>
-      <section className="mt-[76px] text-center">
-        <Image src="/fire-banking/invite-mugs-cutout.png" alt="" width={128} height={96} className="mx-auto h-[84px] w-[118px] object-contain" />
-        <h2 className="mt-6 text-[18px] font-black leading-[1.55] tracking-normal text-fb-ink">
-          배우자가 참여하면
-          <br />
-          이번 달 결과가 더 또렷해져요.
-        </h2>
-      </section>
-      <div className="mt-7 space-y-4 text-[11px] font-bold leading-5 text-fb-ink-2">
-        <p className="flex items-center gap-3"><Icon name="wallet" className="size-5 shrink-0" />각자의 입력이 합쳐져 더 정확한 결과 제공</p>
-        <p className="flex items-center gap-3"><Icon name="users" className="size-5 shrink-0" />서로의 목표와 진행 상황을 함께 확인</p>
-        <p className="flex items-center gap-3"><Icon name="lock" className="size-5 shrink-0" />프라이버시는 지키면서 함께 설계</p>
+
+      {/* Brand header */}
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="flex size-7 items-center justify-center rounded-[8px] bg-fb-ink text-[12px] font-black text-white">FB</div>
+          <span className="text-[13px] font-semibold text-fb-ink">Fire Banking</span>
+        </div>
+        <button type="button" className="h-9 rounded-full bg-fb-card-alt px-3 text-[11px] font-semibold text-fb-ink-2">
+          Admin으로 돌아가기
+        </button>
       </div>
-      <div className="mt-auto rounded-[0.95rem] border border-fb-line bg-fb-trust-soft/55 p-3 shadow-card">
-        <p className="pb-3 text-center text-[11px] font-bold leading-5 text-fb-ink-2">
-          언제든 참여할 수 있어요.
-          <br />
-          부담 없이 초대해 보세요.
+
+      {/* Hero */}
+      <div className="mt-10">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-fb-trust">
+          초대가 도착했어요
         </p>
-        <div className="grid gap-2">
-          <button className="h-11 rounded-[0.55rem] bg-fb-trust text-[13px] font-bold text-white shadow-card">초대 링크 생성</button>
-          <button className="h-10 rounded-[0.55rem] border border-fb-line bg-white text-[12px] font-bold text-fb-ink">링크 복사</button>
-          <button className="inline-flex h-10 items-center justify-center rounded-[0.55rem] bg-fb-kakao text-[12px] font-bold text-[#381E1F]"><Icon name="kakao" className="mr-1.5 size-4" />카카오톡 공유</button>
+        <h2 className="mt-2 text-[20px] font-bold leading-[1.28] tracking-[-0.024em] text-fb-ink">
+          부부 워크스페이스에<br />함께 들어와 주세요.
+        </h2>
+        <p className="mt-2.5 text-[11px] font-medium leading-[1.55] text-fb-ink-2">
+          매일 쓰는 가계부가 아니에요.<br />월 1회, 큰 숫자 몇 개만 같이 보면 돼요.
+        </p>
+      </div>
+
+      {/* Reassurance card */}
+      <div className="mt-5 rounded-[16px] border border-fb-line bg-fb-card-alt p-3.5">
+        <div className="flex flex-col gap-2.5">
+          <MockReassureRow text="초대한 계정의 입력 내역은 보이지 않아요." />
+          <MockReassureRow text="내 숫자도 합산 결과로만 표시돼요." />
+          <MockReassureRow text="언제든 워크스페이스에서 나갈 수 있어요." />
         </div>
       </div>
+
+      <div className="flex-1" />
+
+      {/* CTAs */}
+      <div className="flex flex-col gap-2">
+        <button type="button" className="h-12 w-full rounded-[14px] bg-fb-ink text-[13px] font-bold text-white">
+          워크스페이스 참여하기
+        </button>
+        <button type="button" className="h-10 w-full rounded-[14px] text-[12px] font-semibold text-fb-ink-2">
+          나중에 할게요
+        </button>
+      </div>
+
+      {/* R0 alpha notice */}
+      <div className="mt-3 rounded-[11px] border border-fb-line bg-fb-card p-3">
+        <p className="text-[9px] font-bold leading-[1.55] text-fb-ink">배우자 체크인은 R1에서 열립니다</p>
+        <p className="mt-0.5 text-[8px] font-medium leading-[1.55] text-fb-ink-2">
+          R0에서 초대 의향을 확인하기 위한 알파 기능입니다.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function MockReassureRow({ text }: { text: string }) {
+  return (
+    <div className="flex items-start gap-2">
+      <span className="mt-0.5 flex size-[18px] shrink-0 items-center justify-center rounded-full border border-fb-line bg-white">
+        <Icon name="check" className="size-2.5 text-fb-ink" />
+      </span>
+      <span className="text-[10px] font-medium leading-[1.5] text-fb-ink">{text}</span>
     </div>
   )
 }
