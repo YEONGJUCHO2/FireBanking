@@ -32,7 +32,12 @@ const data = {
 
 type DesktopDashboardData = typeof data
 
-const navItems = ['대시보드', '체크인', '시뮬레이터', '히스토리'] as const
+const navItems = [
+  { label: '대시보드', href: '/dashboard' },
+  { label: '체크인', href: '/together' },
+  { label: '시뮬레이터', href: '/subscribe' },
+  { label: '히스토리', href: '/history' },
+] as const
 
 export function DesktopDashboard({
   footerAction,
@@ -60,10 +65,10 @@ export function DesktopDashboard({
             <span className="text-[15px] font-bold text-fb-ink">Fire Banking</span>
           </div>
           <nav className="ml-4 flex gap-1">
-            {navItems.map((label, i) => (
+            {navItems.map(({ label, href }, i) => (
               <Link
                 key={label}
-                href="/dashboard"
+                href={href}
                 className={cn(
                   'flex h-9 items-center rounded-full px-3.5 text-[13px] font-semibold',
                   i === 0
