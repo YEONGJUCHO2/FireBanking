@@ -1,4 +1,4 @@
-import { dashboardMetrics, liteRows, onboardingRows } from '@/lib/sample-data'
+import { dashboardMetrics, liteRows } from '@/lib/sample-data'
 import { formatManWon, formatNumber } from '@/lib/format'
 import { BrandLockup } from './brand'
 import { Button } from './button'
@@ -78,35 +78,58 @@ function MockBackButton() {
 
 export function OnboardingScreenPreview() {
   return (
-    <div className="flex h-full flex-col px-5 pb-5 pt-3">
-      <MockStatusBar />
-      <div className="mt-3"><MockBackButton /></div>
+    <div className="relative flex h-full flex-col overflow-hidden bg-fb-page">
+      {/* Top nav */}
+      <div className="flex items-center justify-between bg-fb-page/85 px-3 py-3 backdrop-blur">
+        <MockBackButton />
+        <span className="fb-num text-[13px] font-semibold text-fb-ink-2">
+          1 <span className="text-fb-ink-4">/ 5</span>
+        </span>
+        <span className="size-11" />
+      </div>
 
-      <section className="mt-5">
-        <h1 className="text-[1.55rem] font-black leading-[1.26] tracking-normal text-fb-ink">
-          우리 가정의 기본 정보를
-          <br />
-          입력해 주세요
-        </h1>
-        <p className="mt-4 text-[13px] font-semibold leading-[1.75] tracking-normal text-fb-ink-2">
-          정확하지 않아도 괜찮아요.
-          <br />
-          지금은 첫 거리감을 보는 단계예요.
-        </p>
-      </section>
+      {/* Progress bar */}
+      <div className="px-5 pb-2">
+        <div className="h-[3px] overflow-hidden rounded-full bg-[#F0F0F2]">
+          <div className="h-full w-0 rounded-full bg-fb-trust" />
+        </div>
+      </div>
 
-      <form className="mt-4 flex min-h-0 flex-1 flex-col">
-        <p className="mb-2 text-right text-[11px] font-bold text-fb-ink-2">단위: 만원</p>
-        <div className="space-y-2">
-          {onboardingRows.map((row) => (
-            <CompactMoneyRow key={row.label} label={row.label} value={row.value} />
-          ))}
+      {/* Body — step 1: 한 달 총지출 */}
+      <div className="flex-1 overflow-hidden px-6 pt-5">
+        <div className="flex flex-col items-center text-center">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.10em] text-fb-trust">
+            가구 캐시플로우
+          </span>
+          <h1 className="mt-2 whitespace-pre-line text-[22px] font-bold leading-[1.30] tracking-[-0.022em] text-fb-ink">
+            {'한 달 총지출은\n얼마쯤인가요?'}
+          </h1>
+          <p className="mt-3 whitespace-pre-line text-[12px] font-medium leading-[1.55] text-fb-ink-2">
+            {'지금 생활의 기준점부터 잡아요.\n총액만 입력해도 돼요.'}
+          </p>
+
+          {/* Big number input mock */}
+          <div className="mt-6 flex w-2/3 items-baseline justify-center gap-2 rounded-[20px] border border-fb-trust bg-white px-5 py-5 shadow-[0_0_0_4px_rgba(0,102,255,0.12)]">
+            <span className="fb-num text-[40px] font-bold tracking-[-0.024em] text-fb-ink-4">0</span>
+            <span className="text-[16px] font-bold text-fb-ink-3">만원</span>
+          </div>
+
+          <p className="mt-3 text-[11px] font-medium leading-[1.55] text-fb-ink-3">
+            정확한 가계부보다 첫 FIRE 거리감을 보는 것이 먼저입니다.
+          </p>
         </div>
-        <Button className="mt-auto w-full" size="lg">다음</Button>
-        <div className="pt-4">
-          <ProgressStepper steps={['입력', '확인', '완료']} current={0} />
-        </div>
-      </form>
+      </div>
+
+      {/* Bottom CTA */}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-b from-fb-page/0 via-fb-page/92 to-fb-page px-5 pb-7 pt-3.5">
+        <button
+          type="button"
+          className="flex h-[50px] w-full items-center justify-center gap-1.5 rounded-[14px] bg-fb-ink text-[14px] font-bold text-white"
+        >
+          다음
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </button>
+      </div>
     </div>
   )
 }

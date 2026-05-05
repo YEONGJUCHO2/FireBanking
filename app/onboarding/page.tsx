@@ -11,11 +11,13 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <MobileAppShell className="h-[min(calc(100dvh-2.5rem),820px)]">
-      <OnboardingStepper
-        doneHref="/dashboard"
-        backOutHref="/"
-      />
-    </MobileAppShell>
+    <div data-screen-label="onboarding">
+      <MobileAppShell className="h-[min(calc(100dvh-2.5rem),820px)]">
+        <OnboardingStepper
+          doneHref="/dashboard"
+          backOutHref="/"
+        />
+      </MobileAppShell>
+    </div>
   )
 }
