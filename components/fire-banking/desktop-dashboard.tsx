@@ -231,7 +231,10 @@ function HeroStat({
   srHint?: string
 }) {
   const labelRow = (
-    <div className="text-[12px] font-medium text-fb-ink-3">{label}</div>
+    <div className="flex items-center gap-1.5 text-[12px] font-medium text-fb-ink-3">
+      {href ? <span aria-hidden className="size-1.5 rounded-full bg-fb-trust" /> : null}
+      {label}
+    </div>
   )
   const valueRow = (
     <div className="mt-1 flex items-baseline gap-1">
@@ -240,14 +243,6 @@ function HeroStat({
         {value.toLocaleString('ko-KR')}
       </span>
       <span className="text-[12px] font-semibold text-fb-ink-3">만원</span>
-      {href ? (
-        <span
-          aria-hidden
-          className="ml-0.5 text-[16px] font-bold leading-none text-fb-ink-4 transition-colors group-hover:text-fb-trust group-focus-visible:text-fb-trust"
-        >
-          ›
-        </span>
-      ) : null}
     </div>
   )
 
