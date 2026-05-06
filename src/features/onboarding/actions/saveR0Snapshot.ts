@@ -150,5 +150,5 @@ export async function saveR0Snapshot(
   }
 
   revalidatePath("/dashboard");
-  redirect("/dashboard");
+  redirect("/onboarding/result");
 }

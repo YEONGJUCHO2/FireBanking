@@ -13,6 +13,8 @@ import { CheckinRow } from "@/components/fire-banking/checkin-row";
 import { Icon } from "@/components/fire-banking/icons";
 import { getAssetManagementData } from "@/src/features/assets/lib/getAssetManagementData";
 import { SignOutButton } from "@/src/features/auth/components/SignOutButton";
+import { getCurrentUser } from "@/src/features/auth/lib/getCurrentUser";
+import { getUserAvatar } from "@/src/features/auth/lib/getUserAvatar";
 import { AdminPartnerCard } from "@/src/features/dashboard/components/AdminPartnerCard";
 import {
   getDashboardCashflowSnapshot,
@@ -43,11 +45,13 @@ const baseData = {
 };
 
 export default async function DashboardPage() {
-  const [assetData, cashflowSnapshot, partnerState] = await Promise.all([
+  const [assetData, cashflowSnapshot, partnerState, currentUser] = await Promise.all([
     getAssetManagementData(),
     getDashboardCashflowSnapshot(),
     getDashboardPartnerState(),
+    getCurrentUser(),
   ]);
+  const avatar = getUserAvatar(currentUser);
   const data = withFireDistance(deriveDashboardData(assetData, cashflowSnapshot));
   const percent = Math.max(0, Math.min(1, data.investableMan / data.fireTargetMan));
   const pendingPartnerState =
@@ -99,13 +103,11 @@ export default async function DashboardPage() {
               months={data.fireMonths}
             />
 
-            {partnerPending ? (
-              <section className="mt-6 space-y-3">
-                <SectionHeader
-                  title="이번 달 부부 체크인"
-                  subtitle="배우자 입력이 끝나면 결과가 확정돼요"
-                />
-                <Card className="px-4 py-1">
+            <div className="mt-6">
+              <Card radius="hero" className="p-5">
+                <div className="mb-3 h-[2px] w-6 rounded-[2px] bg-fb-ink" />
+                <h3 className="text-[16px] font-bold text-fb-ink">이번 달 부부 체크인</h3>
+                <div className="mt-3">
                   <CheckinRow name="나" role="admin" status="done" when="오늘 14:08 입력" />
                   <div className="fb-divider" />
                   <CheckinRow
@@ -114,9 +116,12 @@ export default async function DashboardPage() {
                     status="pending"
                     when="초대 수락 · 입력 대기 중"
                   />
-                </Card>
-              </section>
-            ) : null}
+                  <div className="mt-3 rounded-[12px] bg-fb-cautionary-soft p-3 text-[12px] font-medium leading-[1.5] text-fb-cautionary-ink">
+                    배우자 체크인이 완료되면 이번 달 결과가 확정돼요.
+                  </div>
+                </div>
+              </Card>
+            </div>
 
             <div className="mt-6">
               <CashflowSummary
@@ -156,7 +161,7 @@ export default async function DashboardPage() {
         <DesktopDashboard
           footerAction={<SignOutButton />}
           data={{ ...data, netDeltaMan: data.netWorthDeltaMan }}
-          partnerPending={partnerPending}
+          avatar={avatar}
         />
         <div className="mx-auto mt-6 w-full max-w-[1280px]">
           <FireLivingExpenseAdjusterLink />

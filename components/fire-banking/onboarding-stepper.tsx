@@ -183,7 +183,7 @@ export function OnboardingStepper({
   }
 
   return (
-    <div className="relative flex h-full flex-1 flex-col overflow-hidden bg-fb-page">
+    <div data-od-id="stepper" className="relative flex h-full flex-1 flex-col overflow-hidden bg-fb-page">
       {/* Top nav */}
       <div className="flex items-center justify-between bg-fb-page/85 px-3 py-3 backdrop-blur">
         <button
@@ -246,6 +246,7 @@ export function OnboardingStepper({
           </div>
         ) : (
           <div
+            data-od-id="step-active"
             key={step.key}
             className={cn(dir === 'fwd' ? 'animate-[fb-step-fwd-in_280ms_cubic-bezier(.2,.8,.2,1)]' : 'animate-[fb-step-bwd-in_280ms_cubic-bezier(.2,.8,.2,1)]')}
           >
@@ -269,6 +270,7 @@ export function OnboardingStepper({
 
             <div className="mt-9">
               <BigInput
+                odId={stepKeyToOdId(step.key)}
                 inputRef={inputRef}
                 value={values[step.key]}
                 onChange={(v) => setVal(step.key, v)}
@@ -306,6 +308,7 @@ export function OnboardingStepper({
       <BottomCta>
         {onSummary ? (
           <button
+            data-od-id="cta-primary"
             type="button"
             onClick={finish}
             className="fbpress flex h-[54px] w-full items-center justify-center gap-1.5 rounded-[14px] bg-fb-ink text-[15px] font-bold tracking-[-0.008em] text-white"
@@ -324,6 +327,7 @@ export function OnboardingStepper({
               </button>
             ) : null}
             <button
+              data-od-id="cta-primary"
               type="button"
               onClick={next}
               className="fbpress flex h-[54px] flex-1 items-center justify-center gap-1.5 rounded-[14px] bg-fb-ink text-[15px] font-bold tracking-[-0.008em] text-white"
@@ -443,16 +447,28 @@ function BottomCta({ children }: { children: ReactNode }) {
   )
 }
 
+function stepKeyToOdId(key: StepKey): string {
+  const map: Record<StepKey, string> = {
+    totalExpense: 'input-monthly-expense',
+    goalExpense: 'input-monthly-living-expense',
+    income: 'input-monthly-income',
+    investable: 'input-net-worth',
+  }
+  return map[key]
+}
+
 function BigInput({
   value,
   onChange,
   onSubmit,
   inputRef,
+  odId,
 }: {
   value: number
   onChange: (v: number) => void
   onSubmit?: () => void
   inputRef: React.RefObject<HTMLInputElement | null>
+  odId?: string
 }) {
   const [focused, setFocused] = useState(false)
   const display = value === 0 ? '' : value.toLocaleString('ko-KR')
@@ -460,6 +476,7 @@ function BigInput({
 
   return (
     <div
+      data-od-id={odId}
       className={cn(
         'flex items-baseline justify-center gap-2 rounded-[20px] border bg-white px-5 py-6 transition-all duration-200',
         focused

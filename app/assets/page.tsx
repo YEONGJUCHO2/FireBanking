@@ -7,7 +7,8 @@ export default async function AssetsPage() {
   const assetData = await getAssetManagementData();
 
   return (
-    <>
+    <div data-screen-label="assets">
+      {/* ── Mobile ── */}
       <div className="lg:hidden">
         <MobileAppShell>
           <AppHeader
@@ -16,17 +17,70 @@ export default async function AssetsPage() {
             backHref="/dashboard"
           />
           <main className="flex-1 overflow-auto px-4 pb-28 pt-2">
+            {/* Hero — FIRE 계산 순자산 공식 */}
+            <div
+              data-od-id="hero-net-worth-formula"
+              className="mb-4 rounded-[24px] border border-fb-line bg-fb-card p-5 shadow-elevated"
+            >
+              <p className="text-[11px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">
+                FIRE 반영 순자산 공식
+              </p>
+              <p className="mt-2 text-[15px] font-bold leading-snug tracking-[-0.012em] text-fb-ink">
+                즉시 운용 가능 투자자산
+                <br />
+                <span className="text-fb-ink-3">−</span> 투자 연계 부채
+              </p>
+              <p className="mt-3 text-[12px] font-medium leading-[1.6] text-fb-ink-2">
+                일반·기타 계좌 국내주식·ETF와 해외거래소 직접 보유는 FIRE 반영,
+                연금저축·IRP는 제한·미래 자산으로 제외해요.
+              </p>
+            </div>
+
             <div className="grid gap-4">
-              <InvestmentAssetPanel coupleId={assetData.coupleId} holdings={assetData.holdings} />
-              <LiabilityPanel coupleId={assetData.coupleId} liabilities={assetData.liabilities} />
+              {/* FIRE 반영 투자자산 그룹 */}
+              <div data-od-id="group-fire-investments">
+                <InvestmentAssetPanel
+                  coupleId={assetData.coupleId}
+                  holdings={assetData.holdings}
+                />
+              </div>
+
+              {/* 투자 연계 부채 그룹 */}
+              <div data-od-id="group-loans">
+                <LiabilityPanel
+                  coupleId={assetData.coupleId}
+                  liabilities={assetData.liabilities}
+                />
+              </div>
+            </div>
+
+            {/* CTA 영역 */}
+            <div className="mt-4 grid gap-3">
+              <button
+                data-od-id="cta-add-asset"
+                className="h-11 rounded-button border border-fb-line bg-fb-card text-[13px] font-bold text-fb-ink shadow-soft hover:bg-fb-card-alt"
+              >
+                + 투자자산 추가
+              </button>
+              <button
+                data-od-id="cta-add-liability"
+                className="h-11 rounded-button border border-fb-line bg-fb-card text-[13px] font-bold text-fb-ink-2 shadow-soft hover:bg-fb-card-alt"
+              >
+                + 투자 연계 부채 추가
+              </button>
             </div>
           </main>
-          <BottomNav active="home" partnerPending />
+
+          <div data-od-id="bottom-nav">
+            <BottomNav active="home" partnerPending />
+          </div>
         </MobileAppShell>
       </div>
 
+      {/* ── Desktop ── */}
       <PageCanvas className="hidden lg:block">
         <div className="mx-auto grid w-full max-w-[1280px] gap-6">
+          {/* 페이지 헤더 */}
           <header className="flex items-end justify-between border-b border-fb-line pb-5">
             <div>
               <a
@@ -44,12 +98,59 @@ export default async function AssetsPage() {
             </div>
           </header>
 
+          {/* Hero — FIRE 계산 순자산 공식 */}
+          <div
+            data-od-id="hero-net-worth-formula"
+            className="rounded-[24px] border border-fb-line bg-fb-card p-6 shadow-elevated"
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">
+              FIRE 반영 순자산 공식
+            </p>
+            <p className="mt-2 text-[20px] font-bold tracking-[-0.018em] text-fb-ink">
+              FIRE 계산 순자산 = 즉시 운용 가능 투자자산 − 투자 연계 부채
+            </p>
+            <p className="mt-3 text-[13px] font-medium leading-[1.6] text-fb-ink-2">
+              일반·기타 계좌 국내주식·ETF와 해외거래소 직접 보유는 FIRE 반영, 연금저축·IRP는
+              제한·미래 자산으로 제외해요. 주거·생활 부채는 KPI에서 제외하고, 투자 자산 취득을
+              위해 빌린 대출(우리사주·주식담보대출 등)만 차감해요.
+            </p>
+          </div>
+
           <section className="grid gap-5">
-            <InvestmentAssetPanel coupleId={assetData.coupleId} holdings={assetData.holdings} />
-            <LiabilityPanel coupleId={assetData.coupleId} liabilities={assetData.liabilities} />
+            {/* FIRE 반영 투자자산 그룹 */}
+            <div data-od-id="group-fire-investments">
+              <InvestmentAssetPanel
+                coupleId={assetData.coupleId}
+                holdings={assetData.holdings}
+              />
+            </div>
+
+            {/* 투자 연계 부채 그룹 */}
+            <div data-od-id="group-loans">
+              <LiabilityPanel
+                coupleId={assetData.coupleId}
+                liabilities={assetData.liabilities}
+              />
+            </div>
           </section>
+
+          {/* CTA 영역 */}
+          <div className="flex items-center gap-3">
+            <button
+              data-od-id="cta-add-asset"
+              className="h-10 rounded-button border border-fb-line bg-white px-4 text-[13px] font-bold text-fb-ink shadow-soft hover:bg-fb-card-alt"
+            >
+              + 투자자산 추가
+            </button>
+            <button
+              data-od-id="cta-add-liability"
+              className="h-10 rounded-button border border-fb-line bg-white px-4 text-[13px] font-bold text-fb-ink-2 shadow-soft hover:bg-fb-card-alt"
+            >
+              + 투자 연계 부채 추가
+            </button>
+          </div>
         </div>
       </PageCanvas>
-    </>
+    </div>
   );
 }
