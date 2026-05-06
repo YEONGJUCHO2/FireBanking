@@ -174,10 +174,10 @@ export function DashboardScreenPreview() {
           </p>
           <div className="my-2.5 h-px bg-fb-line" />
           <div className="grid grid-cols-2 gap-x-3 gap-y-2">
-            <MockBreakdown label="목표 월 생활비" value="300" />
-            <MockBreakdown label="FIRE 목표자산" value={formatManWon(m.fireTargetAssetMan)} highlight />
-            <MockBreakdown label="FIRE 계산 순자산" value={formatManWon(m.fireNetWorthMan)} highlight badge="FIRE" />
-            <MockBreakdown label="월 자산 증가 여력" value={formatManWon(m.monthlyAssetGrowthCapacityMan)} />
+            <MockBreakdown label="목표 금액" value={formatManWon(m.fireTargetAssetMan)} />
+            <MockBreakdown label="FIRE 후 생활비" value="월 300" />
+            <MockBreakdown label="FIRE 계산 순자산" value={formatManWon(m.fireNetWorthMan)} />
+            <MockBreakdown label="모이는 돈" value={`월 ${formatManWon(m.monthlyAssetGrowthCapacityMan)}`} />
           </div>
         </section>
 

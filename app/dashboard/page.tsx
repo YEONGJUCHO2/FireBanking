@@ -83,13 +83,8 @@ export default async function DashboardPage() {
 
           <main className="flex-1 overflow-auto px-4 pb-28 pt-5">
             <div className="mb-3 flex items-center justify-between">
-              <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">
-                  {formatCheckinMonthLabel()}
-                </div>
-                <div className="mt-0.5 text-[18px] font-bold tracking-[-0.012em] text-fb-ink">
-                  안녕하세요
-                </div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">
+                {formatCheckinMonthLabel()}
               </div>
               <StatusPill
                 tone="trust"

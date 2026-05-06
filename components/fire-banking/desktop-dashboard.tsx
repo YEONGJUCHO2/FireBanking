@@ -164,8 +164,8 @@ export function DesktopDashboard({
 
               {/* 4-column FIRE breakdown */}
               <div className="mt-7 grid grid-cols-4 gap-5 border-t border-fb-line pt-6">
-                <HeroStat label="목표 월 생활비" value={dashboardData.targetMonthlyExpenseMan} />
-                <HeroStat label="FIRE 목표자산" value={dashboardData.fireTargetMan} />
+                <HeroStat label="목표 금액" value={dashboardData.fireTargetMan} />
+                <HeroStat label="FIRE 후 생활비" value={dashboardData.targetMonthlyExpenseMan} monthly />
                 <div data-od-id="metric-fire-net-worth">
                   <HeroStat
                     label="FIRE 계산 순자산"
@@ -176,8 +176,9 @@ export function DesktopDashboard({
                 </div>
                 <div data-od-id="metric-monthly-growth">
                   <HeroStat
-                    label="월 자산 증가 여력"
+                    label="모이는 돈"
                     value={dashboardData.monthlyAddMan}
+                    monthly
                     href="/subscribe"
                     srHint="생활비 조정기 열기"
                   />
@@ -219,11 +220,13 @@ export function DesktopDashboard({
 function HeroStat({
   label,
   value,
+  monthly,
   href,
   srHint,
 }: {
   label: string
   value: number
+  monthly?: boolean
   href?: string
   srHint?: string
 }) {
@@ -232,6 +235,7 @@ function HeroStat({
   )
   const valueRow = (
     <div className="mt-1 flex items-baseline gap-1">
+      {monthly ? <span className="text-[12px] font-semibold text-fb-ink-3">월</span> : null}
       <span className="fb-num text-[22px] font-bold tracking-[-0.012em] text-fb-ink">
         {value.toLocaleString('ko-KR')}
       </span>

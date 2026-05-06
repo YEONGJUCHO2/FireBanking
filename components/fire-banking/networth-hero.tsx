@@ -73,8 +73,8 @@ export function NetWorthHero({
       <div className="my-5 fb-divider" />
 
       <div className="grid grid-cols-2 gap-x-4 gap-y-4">
-        <BreakdownItem label="목표 월 생활비" value={targetMonthlyExpenseManWon} />
-        <BreakdownItem label="FIRE 목표자산" value={fireTargetManWon} />
+        <BreakdownItem label="목표 금액" value={fireTargetManWon} />
+        <BreakdownItem label="FIRE 후 생활비" value={targetMonthlyExpenseManWon} monthly />
         <BreakdownItem
           label="FIRE 계산 순자산"
           value={fireNetWorthManWon}
@@ -82,8 +82,9 @@ export function NetWorthHero({
           srHint="자산 진단 열기"
         />
         <BreakdownItem
-          label="월 자산 증가 여력"
+          label="모이는 돈"
           value={monthlyGrowthManWon}
+          monthly
           href="/subscribe"
           srHint="생활비 조정기 열기"
         />
@@ -95,16 +96,19 @@ export function NetWorthHero({
 function BreakdownItem({
   label,
   value,
+  monthly,
   href,
   srHint,
 }: {
   label: string
   value: number
+  monthly?: boolean
   href?: string
   srHint?: string
 }) {
   const valueRow = (
     <div className="mt-0.5 flex items-baseline gap-1">
+      {monthly ? <span className="text-[12px] font-semibold text-fb-ink-3">월</span> : null}
       <span className="fb-num text-[17px] font-bold text-fb-ink">
         {value.toLocaleString('ko-KR')}
       </span>

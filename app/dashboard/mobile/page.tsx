@@ -67,16 +67,10 @@ function DashboardMobilePage() {
         />
 
         <main className="flex-1 overflow-auto px-4 pb-20 pt-5">
-          {/* Month label + greeting + status pill */}
+          {/* Month label + status pill */}
           <div className="mb-3 flex items-center justify-between">
-            <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">
-                {formatCheckinMonthLabel()}
-              </div>
-              <div className="mt-0.5 text-[18px] font-bold tracking-[-0.012em] text-fb-ink">
-                <span>안녕하세요</span>
-                {data.myName ? <span className="text-fb-trust">, {data.myName}님</span> : null}
-              </div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">
+              {formatCheckinMonthLabel()}
             </div>
             <StatusPill tone={checkinPill.tone} icon={<span className={`size-1.5 rounded-full ${checkinPill.dot}`} />}>
               {checkinPill.text}
@@ -110,7 +104,7 @@ function DashboardMobilePage() {
             {isOverTarget ? (
               <div className="mt-3 flex items-start gap-2 rounded-[12px] bg-fb-positive-soft p-3.5 text-[13px] font-medium leading-[1.55] text-fb-positive-ink">
                 <span className="shrink-0">🎉</span>
-                <span>이미 FIRE 목표 자산을 넘었어요. 목표 월 생활비를 다시 점검해 볼까요?</span>
+                <span>이미 목표 금액을 넘었어요. FIRE 후 생활비를 다시 점검해 볼까요?</span>
               </div>
             ) : null}
           </div>

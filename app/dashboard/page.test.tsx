@@ -58,7 +58,8 @@ describe("DashboardPage", () => {
   it("keeps asset and liability management panels out of the home dashboard", async () => {
     render(await DashboardPage());
 
-    expect(screen.getByText("안녕하세요")).toBeInTheDocument();
+    // Greeting was removed; only the month label remains.
+    expect(screen.queryByText("안녕하세요")).not.toBeInTheDocument();
     expect(screen.getByText("이번 달 결과를 같이 봐요.")).toBeInTheDocument();
     expect(screen.queryByText("이번 달 부부 체크인")).not.toBeInTheDocument();
     expect(screen.queryByText("배우자 초대")).not.toBeInTheDocument();
@@ -66,8 +67,8 @@ describe("DashboardPage", () => {
     expect(screen.getAllByRole("button", { name: "기간" }).length).toBeGreaterThan(0);
     fireEvent.click(screen.getAllByRole("button", { name: "기간" })[0]);
     expect(screen.getAllByText("FIRE까지 남은 기간").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("목표 월 생활비").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("FIRE 목표자산").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("FIRE 후 생활비").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("목표 금액").length).toBeGreaterThan(0);
     // 'FIRE 자산 진단' card moved off the dashboard. The 'FIRE 계산 순자산'
     // breakdown cell now links to /assets directly.
     expect(screen.queryByText("FIRE 자산 진단")).not.toBeInTheDocument();
