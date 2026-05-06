@@ -62,8 +62,8 @@ export function NetWorthHero({
           ))}
         </div>
       </div>
-      <div className="fb-num mt-1.5 flex items-baseline gap-1.5">
-        <span className="text-[44px] font-bold leading-[1.1] tracking-[-0.024em] text-fb-ink">
+      <div className="fb-num mt-0.5 flex items-baseline gap-1.5">
+        <span className="text-[44px] font-bold leading-[1.1] tracking-[-0.024em] text-fb-trust">
           {heroValue}
         </span>
         {displayMode === 'amount' ? <span className="text-[18px] font-bold text-fb-ink-2">만원</span> : null}
@@ -76,12 +76,10 @@ export function NetWorthHero({
 
       <div className="grid grid-cols-2 gap-x-4 gap-y-4">
         <BreakdownItem label="목표 월 생활비" value={targetMonthlyExpenseManWon} />
-        <BreakdownItem label="FIRE 목표자산" value={fireTargetManWon} highlight />
+        <BreakdownItem label="FIRE 목표자산" value={fireTargetManWon} />
         <BreakdownItem
           label="FIRE 계산 순자산"
           value={fireNetWorthManWon}
-          highlight
-          badge="FIRE"
           href="/assets"
           srHint="자산 진단 열기"
         />
@@ -99,26 +97,17 @@ export function NetWorthHero({
 function BreakdownItem({
   label,
   value,
-  highlight = false,
-  badge,
   href,
   srHint,
 }: {
   label: string
   value: number
-  highlight?: boolean
-  badge?: string
   href?: string
   srHint?: string
 }) {
   const valueRow = (
     <div className="mt-0.5 flex items-baseline gap-1">
-      <span
-        className={cn(
-          'fb-num text-[17px] font-bold',
-          highlight ? 'text-fb-trust' : 'text-fb-ink',
-        )}
-      >
+      <span className="fb-num text-[17px] font-bold text-fb-ink">
         {value.toLocaleString('ko-KR')}
       </span>
       <span className="text-[12px] font-semibold text-fb-ink-3">만원</span>
@@ -136,11 +125,6 @@ function BreakdownItem({
   const labelRow = (
     <div className="flex items-center gap-1 text-[12px] font-medium text-fb-ink-3">
       {label}
-      {badge ? (
-        <span className="rounded-[4px] bg-fb-trust-soft px-1.5 py-px text-[10px] font-bold text-fb-trust-ink">
-          {badge}
-        </span>
-      ) : null}
     </div>
   )
 

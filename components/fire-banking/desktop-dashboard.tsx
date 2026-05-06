@@ -150,8 +150,8 @@ export function DesktopDashboard({
                   ))}
                 </div>
               </div>
-              <div className="fb-num mt-2 flex items-baseline gap-1.5">
-                <span className="text-[48px] font-bold leading-none tracking-[-0.030em] text-fb-ink">
+              <div className="fb-num mt-0.5 flex items-baseline gap-1.5">
+                <span className="text-[48px] font-bold leading-none tracking-[-0.030em] text-fb-trust">
                   {displayMode === 'amount'
                     ? remainingManWon.toLocaleString('ko-KR')
                     : `${dashboardData.fireYears}년 ${dashboardData.fireMonths}개월`}
@@ -167,12 +167,11 @@ export function DesktopDashboard({
               {/* 4-column FIRE breakdown */}
               <div className="mt-7 grid grid-cols-4 gap-5 border-t border-fb-line pt-6">
                 <HeroStat label="목표 월 생활비" value={dashboardData.targetMonthlyExpenseMan} />
-                <HeroStat label="FIRE 목표자산" value={dashboardData.fireTargetMan} muted />
+                <HeroStat label="FIRE 목표자산" value={dashboardData.fireTargetMan} />
                 <div data-od-id="metric-fire-net-worth">
                   <HeroStat
                     label="FIRE 계산 순자산"
                     value={dashboardData.investableMan}
-                    highlight
                     href="/assets"
                     srHint="자산 진단 열기"
                   />
@@ -222,15 +221,11 @@ export function DesktopDashboard({
 function HeroStat({
   label,
   value,
-  highlight,
-  muted,
   href,
   srHint,
 }: {
   label: string
   value: number
-  highlight?: boolean
-  muted?: boolean
   href?: string
   srHint?: string
 }) {
@@ -239,12 +234,7 @@ function HeroStat({
   )
   const valueRow = (
     <div className="mt-1 flex items-baseline gap-1">
-      <span
-        className={cn(
-          'fb-num text-[22px] font-bold tracking-[-0.012em]',
-          highlight ? 'text-fb-trust' : muted ? 'text-fb-ink-2' : 'text-fb-ink',
-        )}
-      >
+      <span className="fb-num text-[22px] font-bold tracking-[-0.012em] text-fb-ink">
         {value.toLocaleString('ko-KR')}
       </span>
       <span className="text-[12px] font-semibold text-fb-ink-3">만원</span>

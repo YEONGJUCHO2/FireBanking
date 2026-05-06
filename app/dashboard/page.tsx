@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   BottomNav,
   DashboardFireOverview,
@@ -99,8 +98,6 @@ export default async function DashboardPage() {
               months={data.fireMonths}
             />
 
-            <AssetManagementLink linkedAssetCount={data.linkedAssetCount} />
-
             <div className="mt-6">
               <SignOutButton />
             </div>
@@ -116,33 +113,8 @@ export default async function DashboardPage() {
           data={{ ...data, netDeltaMan: data.netWorthDeltaMan }}
           avatar={avatar}
         />
-        <div className="mx-auto mt-6 w-full max-w-[1280px]">
-          <AssetManagementLink linkedAssetCount={data.linkedAssetCount} />
-        </div>
       </div>
     </>
-  );
-}
-
-function AssetManagementLink({ linkedAssetCount }: { linkedAssetCount?: number }) {
-  return (
-    <Link
-      href="/assets"
-      className="fbpress mt-4 flex items-center gap-3.5 rounded-[20px] border border-fb-line bg-white p-5"
-    >
-      <span className="flex size-11 items-center justify-center rounded-[14px] bg-fb-trust-soft text-fb-trust-ink">
-        <Icon name="wallet" className="size-[22px]" />
-      </span>
-      <span className="flex-1">
-        <span className="block text-[14px] font-bold text-fb-ink">FIRE 자산 진단</span>
-        <span className="mt-0.5 block text-[12px] font-medium text-fb-ink-3">
-          {linkedAssetCount
-            ? `${linkedAssetCount.toLocaleString("ko-KR")}개 투자자산이 FIRE 금액에 반영 중`
-            : "투자자산과 투자 연동 대출을 분리해요"}
-        </span>
-      </span>
-      <Icon name="chevron-right" className="size-5 text-fb-ink-3" />
-    </Link>
   );
 }
 

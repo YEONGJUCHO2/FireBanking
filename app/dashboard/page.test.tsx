@@ -68,12 +68,10 @@ describe("DashboardPage", () => {
     expect(screen.getAllByText("FIRE까지 남은 기간").length).toBeGreaterThan(0);
     expect(screen.getAllByText("목표 월 생활비").length).toBeGreaterThan(0);
     expect(screen.getAllByText("FIRE 목표자산").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("FIRE 자산 진단").length).toBeGreaterThan(0);
-    const mobileDashboard = document.querySelector(".lg\\:hidden");
-    expect(mobileDashboard?.textContent?.indexOf("FIRE 생활비 조정기")).toBeLessThan(
-      mobileDashboard?.textContent?.indexOf("FIRE 자산 진단") ?? -1,
-    );
-    expect(screen.getAllByRole("link", { name: /FIRE 자산 진단/ })[0]).toHaveAttribute(
+    // 'FIRE 자산 진단' card moved off the dashboard. The 'FIRE 계산 순자산'
+    // breakdown cell now links to /assets directly.
+    expect(screen.queryByText("FIRE 자산 진단")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /FIRE 계산 순자산/ })[0]).toHaveAttribute(
       "href",
       "/assets",
     );
@@ -138,7 +136,9 @@ describe("DashboardPage", () => {
     expect(screen.queryByText("거주 부동산")).not.toBeInTheDocument();
     expect(screen.queryByText("기타 순자산")).not.toBeInTheDocument();
     expect(screen.queryByText("연금/IRP 별도")).not.toBeInTheDocument();
-    expect(screen.getAllByText(/3개 투자자산이 FIRE 금액에 반영 중/).length).toBeGreaterThan(0);
+    // The 'FIRE 자산 진단' entry card with the linked-asset count copy was
+    // removed; assert it's no longer rendered on the dashboard.
+    expect(screen.queryByText(/투자자산이 FIRE 금액에 반영 중/)).not.toBeInTheDocument();
   });
 
   it("subtracts only investment-linked loans from dashboard FIRE reflected assets", async () => {
