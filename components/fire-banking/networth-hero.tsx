@@ -77,18 +77,19 @@ export function NetWorthHero({
       <div className="grid grid-cols-2 gap-x-4 gap-y-4">
         <BreakdownItem label="목표 월 생활비" value={targetMonthlyExpenseManWon} />
         <BreakdownItem label="FIRE 목표자산" value={fireTargetManWon} highlight />
-        <BreakdownItem label="FIRE 계산 순자산" value={fireNetWorthManWon} highlight badge="FIRE" />
+        <BreakdownItem
+          label="FIRE 계산 순자산"
+          value={fireNetWorthManWon}
+          highlight
+          badge="FIRE"
+          href="/assets"
+          srHint="자산 진단 열기"
+        />
         <BreakdownItem
           label="월 자산 증가 여력"
           value={monthlyGrowthManWon}
-          action={
-            <Link
-              href="/subscribe"
-              className="fbpress inline-flex h-7 shrink-0 items-center rounded-[10px] border border-fb-line bg-white px-2.5 text-[11px] font-bold text-fb-trust hover:bg-fb-trust-soft hover:border-fb-trust/30"
-            >
-              계산하기
-            </Link>
-          }
+          href="/subscribe"
+          srHint="생활비 조정기 열기"
         />
       </div>
     </Card>
@@ -100,36 +101,66 @@ function BreakdownItem({
   value,
   highlight = false,
   badge,
-  action,
+  href,
+  srHint,
 }: {
   label: string
   value: number
   highlight?: boolean
   badge?: string
-  action?: React.ReactNode
+  href?: string
+  srHint?: string
 }) {
+  const valueRow = (
+    <div className="mt-0.5 flex items-baseline gap-1">
+      <span
+        className={cn(
+          'fb-num text-[17px] font-bold',
+          highlight ? 'text-fb-trust' : 'text-fb-ink',
+        )}
+      >
+        {value.toLocaleString('ko-KR')}
+      </span>
+      <span className="text-[12px] font-semibold text-fb-ink-3">만원</span>
+      {href ? (
+        <span
+          aria-hidden
+          className="ml-0.5 text-[14px] font-bold leading-none text-fb-ink-4 transition-colors group-hover:text-fb-trust group-focus-visible:text-fb-trust"
+        >
+          ›
+        </span>
+      ) : null}
+    </div>
+  )
+
+  const labelRow = (
+    <div className="flex items-center gap-1 text-[12px] font-medium text-fb-ink-3">
+      {label}
+      {badge ? (
+        <span className="rounded-[4px] bg-fb-trust-soft px-1.5 py-px text-[10px] font-bold text-fb-trust-ink">
+          {badge}
+        </span>
+      ) : null}
+    </div>
+  )
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className="group fb-focus -m-1 block rounded-[10px] p-1 transition-colors hover:bg-fb-card-alt"
+      >
+        {labelRow}
+        {valueRow}
+        {srHint ? <span className="sr-only">— {srHint}</span> : null}
+      </Link>
+    )
+  }
+
   return (
     <div>
-      <div className="flex items-center gap-1 text-[12px] font-medium text-fb-ink-3">
-        {label}
-        {badge ? (
-          <span className="rounded-[4px] bg-fb-trust-soft px-1.5 py-px text-[10px] font-bold text-fb-trust-ink">
-            {badge}
-          </span>
-        ) : null}
-      </div>
-      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-        <div
-          className={cn(
-            'fb-num text-[17px] font-bold',
-            highlight ? 'text-fb-trust' : 'text-fb-ink',
-          )}
-        >
-          {value.toLocaleString('ko-KR')}
-          <span className="ml-1 text-[12px] font-semibold text-fb-ink-3">만원</span>
-        </div>
-        {action}
-      </div>
+      {labelRow}
+      {valueRow}
     </div>
   )
 }
