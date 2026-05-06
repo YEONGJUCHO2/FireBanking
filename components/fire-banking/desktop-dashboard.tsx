@@ -125,105 +125,93 @@ export function DesktopDashboard({
           </div>
         </div>
 
-        {/* 2-column main grid: 1.6fr | 1fr */}
-        <div className="grid gap-5" style={{ gridTemplateColumns: '1.6fr 1fr' }}>
-          {/* LEFT column */}
-          <div className="flex flex-col gap-5">
-            {/* Hero: FIRE-centric net worth */}
-            <div data-od-id="hero-fire">
-              <Card radius="hero" className="p-8">
-                <div className="flex items-start justify-between gap-3">
-                  <p className="text-[13px] font-medium text-fb-ink-3">
-                    {displayMode === 'amount' ? 'FIRE까지 남은 금액' : 'FIRE까지 남은 기간'}
-                  </p>
-                  <div className="flex rounded-full border border-fb-line bg-white p-1">
-                    {(['amount', 'period'] as const).map((mode) => (
-                      <button
-                        key={mode}
-                        type="button"
-                        onClick={() => setDisplayMode(mode)}
-                        className={cn(
-                          'h-8 rounded-full px-3 text-[12px] font-bold transition-colors',
-                          displayMode === mode ? 'bg-fb-ink text-white' : 'text-fb-ink-2 hover:bg-fb-card-alt',
-                        )}
-                      >
-                        {mode === 'amount' ? '금액' : '기간'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="fb-num mt-2 flex items-baseline gap-1.5">
-                  <span className="text-[48px] font-bold leading-none tracking-[-0.030em] text-fb-ink">
-                    {displayMode === 'amount'
-                      ? remainingManWon.toLocaleString('ko-KR')
-                      : `${dashboardData.fireYears}년 ${dashboardData.fireMonths}개월`}
-                  </span>
-                  {displayMode === 'amount' ? (
-                    <span className="text-[22px] font-bold text-fb-ink-2">만원</span>
-                  ) : null}
-                </div>
-                <p className="mt-2 text-[12px] font-medium leading-5 text-fb-ink-3">
-                  월 {dashboardData.targetMonthlyExpenseMan.toLocaleString('ko-KR')}만원 생활비 기준 · 연 5%, 25배 룰
+        {/* Single-column stack: hero + timeline */}
+        <div className="flex flex-col gap-5">
+          {/* Hero: FIRE-centric net worth */}
+          <div data-od-id="hero-fire">
+            <Card radius="hero" className="p-8">
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-[13px] font-medium text-fb-ink-3">
+                  {displayMode === 'amount' ? 'FIRE까지 남은 금액' : 'FIRE까지 남은 기간'}
                 </p>
-
-                {/* 4-column FIRE breakdown */}
-                <div className="mt-7 grid grid-cols-4 gap-5 border-t border-fb-line pt-6">
-                  <HeroStat label="목표 월 생활비" value={dashboardData.targetMonthlyExpenseMan} />
-                  <HeroStat label="FIRE 목표자산" value={dashboardData.fireTargetMan} muted />
-                  <div data-od-id="metric-fire-net-worth">
-                    <HeroStat label="FIRE 계산 순자산" value={dashboardData.investableMan} highlight />
-                  </div>
-                  <div data-od-id="metric-monthly-growth">
-                    <HeroStat label="월 자산 증가 여력" value={dashboardData.monthlyAddMan} />
-                  </div>
+                <div className="flex rounded-full border border-fb-line bg-white p-1">
+                  {(['amount', 'period'] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => setDisplayMode(mode)}
+                      className={cn(
+                        'h-8 rounded-full px-3 text-[12px] font-bold transition-colors',
+                        displayMode === mode ? 'bg-fb-ink text-white' : 'text-fb-ink-2 hover:bg-fb-card-alt',
+                      )}
+                    >
+                      {mode === 'amount' ? '금액' : '기간'}
+                    </button>
+                  ))}
                 </div>
-              </Card>
-            </div>
+              </div>
+              <div className="fb-num mt-2 flex items-baseline gap-1.5">
+                <span className="text-[48px] font-bold leading-none tracking-[-0.030em] text-fb-ink">
+                  {displayMode === 'amount'
+                    ? remainingManWon.toLocaleString('ko-KR')
+                    : `${dashboardData.fireYears}년 ${dashboardData.fireMonths}개월`}
+                </span>
+                {displayMode === 'amount' ? (
+                  <span className="text-[22px] font-bold text-fb-ink-2">만원</span>
+                ) : null}
+              </div>
+              <p className="mt-2 text-[12px] font-medium leading-5 text-fb-ink-3">
+                월 {dashboardData.targetMonthlyExpenseMan.toLocaleString('ko-KR')}만원 생활비 기준 · 연 5%, 25배 룰
+              </p>
 
-            {/* FIRE timeline card */}
-            <div data-od-id="fire-timeline" className="flex flex-1">
-              <Card radius="hero" className="flex w-full flex-col p-7">
-                <div className="mb-5 flex items-baseline justify-between">
-                  <div>
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">
-                      FIRE까지 남은 거리
-                    </div>
-                    <h3 className="mt-1.5 text-[20px] font-bold tracking-[-0.012em] text-fb-ink">
-                      현재 입력 기준 시뮬레이션
-                    </h3>
-                  </div>
+              {/* 4-column FIRE breakdown */}
+              <div className="mt-7 grid grid-cols-4 gap-5 border-t border-fb-line pt-6">
+                <HeroStat label="목표 월 생활비" value={dashboardData.targetMonthlyExpenseMan} />
+                <HeroStat label="FIRE 목표자산" value={dashboardData.fireTargetMan} muted />
+                <div data-od-id="metric-fire-net-worth">
+                  <HeroStat label="FIRE 계산 순자산" value={dashboardData.investableMan} highlight />
                 </div>
-
-                <FireTimelineWide
-                  percent={percent}
-                  years={dashboardData.fireYears}
-                  months={dashboardData.fireMonths}
-                  fireValueManWon={dashboardData.fireTargetMan}
-                  hereValueManWon={dashboardData.investableMan}
-                  displayMode={displayMode}
-                />
-              </Card>
-            </div>
+                <div data-od-id="metric-monthly-growth">
+                  <HeroStat
+                    label="월 자산 증가 여력"
+                    value={dashboardData.monthlyAddMan}
+                    action={
+                      <Link
+                        href="/subscribe"
+                        className="fbpress inline-flex h-7 shrink-0 items-center rounded-[10px] border border-fb-line bg-white px-2.5 text-[11px] font-bold text-fb-trust hover:bg-fb-trust-soft hover:border-fb-trust/30"
+                      >
+                        계산하기
+                      </Link>
+                    }
+                  />
+                </div>
+              </div>
+            </Card>
           </div>
 
-          {/* RIGHT column */}
-          <div className="flex flex-col gap-5">
-            {/* cashflow card */}
-            <div data-od-id="cashflow-summary" className="flex flex-1">
-              <Card radius="hero" className="flex w-full flex-col p-6">
-                <div className="mb-3 h-[2px] w-6 rounded-[2px] bg-fb-ink" />
-                <h3 className="text-[17px] font-bold text-fb-ink">이번 달 현금흐름</h3>
-                <div className="mt-4 flex flex-col gap-3">
-                  <CFRow label="월 세후 수입" value={`+${dashboardData.incomeMan}`} />
-                  <CFRow label="고정비" value={`−${dashboardData.fixedMan}`} />
-                  <CFRow label="변동비" value={`−${dashboardData.variableMan}`} />
-                  <CFRow label="저축 / 투자" value={`−${dashboardData.saveMan}`} trust />
-                  <div className="fb-divider" />
-                  <CFRow label="자산 증가 여력" value={`+${dashboardData.monthlyAddMan}`} hero />
+          {/* FIRE timeline card */}
+          <div data-od-id="fire-timeline">
+            <Card radius="hero" className="p-7">
+              <div className="mb-5 flex items-baseline justify-between">
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.10em] text-fb-ink-3">
+                    FIRE까지 남은 거리
+                  </div>
+                  <h3 className="mt-1.5 text-[20px] font-bold tracking-[-0.012em] text-fb-ink">
+                    현재 입력 기준 시뮬레이션
+                  </h3>
                 </div>
-              </Card>
-            </div>
+              </div>
 
+              <FireTimelineWide
+                percent={percent}
+                years={dashboardData.fireYears}
+                months={dashboardData.fireMonths}
+                fireValueManWon={dashboardData.fireTargetMan}
+                hereValueManWon={dashboardData.investableMan}
+                displayMode={displayMode}
+              />
+            </Card>
           </div>
         </div>
       </div>
@@ -236,57 +224,30 @@ function HeroStat({
   value,
   highlight,
   muted,
+  action,
 }: {
   label: string
   value: number
   highlight?: boolean
   muted?: boolean
+  action?: ReactNode
 }) {
   return (
     <div>
       <div className="text-[12px] font-medium text-fb-ink-3">{label}</div>
-      <div
-        className={cn(
-          'fb-num mt-1 text-[22px] font-bold tracking-[-0.012em]',
-          highlight ? 'text-fb-trust' : muted ? 'text-fb-ink-2' : 'text-fb-ink',
-        )}
-      >
-        {value.toLocaleString('ko-KR')}
-        <span className="ml-1 text-[12px] font-semibold text-fb-ink-3">만원</span>
+      <div className="mt-1 flex items-center justify-between gap-2">
+        <div
+          className={cn(
+            'fb-num text-[22px] font-bold tracking-[-0.012em]',
+            highlight ? 'text-fb-trust' : muted ? 'text-fb-ink-2' : 'text-fb-ink',
+          )}
+        >
+          {value.toLocaleString('ko-KR')}
+          <span className="ml-1 text-[12px] font-semibold text-fb-ink-3">만원</span>
+        </div>
+        {action}
       </div>
     </div>
   )
 }
 
-function CFRow({
-  label,
-  value,
-  trust,
-  hero,
-}: {
-  label: string
-  value: string
-  trust?: boolean
-  hero?: boolean
-}) {
-  return (
-    <div className="flex items-baseline justify-between">
-      <span
-        className={cn(
-          hero ? 'text-[14px] font-bold text-fb-ink' : 'text-[13px] font-medium text-fb-ink-2',
-        )}
-      >
-        {label}
-      </span>
-      <span
-        className={cn(
-          'fb-num font-bold tracking-[-0.008em]',
-          hero ? 'text-[22px] text-fb-trust' : trust ? 'text-[14px] text-fb-trust' : 'text-[14px] text-fb-ink',
-        )}
-      >
-        {value}
-        <span className="ml-1 text-[11px] font-semibold text-fb-ink-3">만원</span>
-      </span>
-    </div>
-  )
-}

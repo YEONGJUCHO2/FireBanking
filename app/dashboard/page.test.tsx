@@ -210,15 +210,12 @@ describe("DashboardPage", () => {
 
     render(await DashboardPage());
 
+    // FIRE numbers derived from the snapshot still surface on the dashboard hero.
     expect(screen.getAllByText("월 210만원 생활비 기준 · 연 5%, 25배 룰").length).toBeGreaterThan(0);
     expect(screen.getAllByText("63,000").length).toBeGreaterThan(0);
-    expect(screen.getAllByText(exactNormalizedText("−100만원")).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(exactNormalizedText("−110만원")).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(exactNormalizedText("+310만원")).length).toBeGreaterThan(0);
+    // Cashflow line items (월 세후 수입 / 고정비 / 변동비 / 저축 · 투자 / 자산 증가 여력)
+    // moved to /subscribe per spec; assert they are NOT on the dashboard.
+    expect(screen.queryByText("월 세후 수입")).not.toBeInTheDocument();
+    expect(screen.queryByText("이번 달 현금흐름")).not.toBeInTheDocument();
   });
 });
-
-function exactNormalizedText(expected: string) {
-  return (_content: string, element: Element | null) =>
-    element?.textContent?.replace(/\s+/g, "") === expected;
-}

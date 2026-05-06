@@ -15,6 +15,10 @@ vi.mock("@/src/features/subscribe/components/FixedCostSimulator", () => ({
   FixedCostSimulator: () => <section>고정비 시뮬레이터 본문</section>,
 }));
 
+vi.mock("@/src/features/dashboard/lib/getDashboardCashflowSnapshot", () => ({
+  getDashboardCashflowSnapshot: vi.fn(async () => null),
+}));
+
 describe("SubscribePage", () => {
   it("keeps the back link inside onboarding when opened from onboarding", async () => {
     render(await SubscribePage({ searchParams: Promise.resolve({ returnTo: "/onboarding" }) }));

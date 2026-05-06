@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Card } from './card'
 import { cn } from '@/lib/cn'
 import type { FireDisplayMode } from './fire-timeline'
@@ -77,7 +78,18 @@ export function NetWorthHero({
         <BreakdownItem label="목표 월 생활비" value={targetMonthlyExpenseManWon} />
         <BreakdownItem label="FIRE 목표자산" value={fireTargetManWon} highlight />
         <BreakdownItem label="FIRE 계산 순자산" value={fireNetWorthManWon} highlight badge="FIRE" />
-        <BreakdownItem label="월 자산 증가 여력" value={monthlyGrowthManWon} />
+        <BreakdownItem
+          label="월 자산 증가 여력"
+          value={monthlyGrowthManWon}
+          action={
+            <Link
+              href="/subscribe"
+              className="fbpress inline-flex h-7 shrink-0 items-center rounded-[10px] border border-fb-line bg-white px-2.5 text-[11px] font-bold text-fb-trust hover:bg-fb-trust-soft hover:border-fb-trust/30"
+            >
+              계산하기
+            </Link>
+          }
+        />
       </div>
     </Card>
   )
@@ -88,11 +100,13 @@ function BreakdownItem({
   value,
   highlight = false,
   badge,
+  action,
 }: {
   label: string
   value: number
   highlight?: boolean
   badge?: string
+  action?: React.ReactNode
 }) {
   return (
     <div>
@@ -104,14 +118,17 @@ function BreakdownItem({
           </span>
         ) : null}
       </div>
-      <div
-        className={cn(
-          'fb-num mt-0.5 text-[17px] font-bold',
-          highlight ? 'text-fb-trust' : 'text-fb-ink',
-        )}
-      >
-        {value.toLocaleString('ko-KR')}
-        <span className="ml-1 text-[12px] font-semibold text-fb-ink-3">만원</span>
+      <div className="mt-0.5 flex items-center justify-between gap-2">
+        <div
+          className={cn(
+            'fb-num text-[17px] font-bold',
+            highlight ? 'text-fb-trust' : 'text-fb-ink',
+          )}
+        >
+          {value.toLocaleString('ko-KR')}
+          <span className="ml-1 text-[12px] font-semibold text-fb-ink-3">만원</span>
+        </div>
+        {action}
       </div>
     </div>
   )

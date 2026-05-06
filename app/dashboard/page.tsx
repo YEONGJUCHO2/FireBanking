@@ -1,21 +1,17 @@
 import Link from "next/link";
 import {
   BottomNav,
-  CashflowSummary,
   DashboardFireOverview,
   DesktopDashboard,
   MobileAppShell,
   ScreenTopBar,
   StatusPill,
 } from "@/components/fire-banking";
-import { Card, SectionHeader } from "@/components/fire-banking/card";
-import { CheckinRow } from "@/components/fire-banking/checkin-row";
 import { Icon } from "@/components/fire-banking/icons";
 import { getAssetManagementData } from "@/src/features/assets/lib/getAssetManagementData";
 import { SignOutButton } from "@/src/features/auth/components/SignOutButton";
 import { getCurrentUser } from "@/src/features/auth/lib/getCurrentUser";
 import { getUserAvatar } from "@/src/features/auth/lib/getUserAvatar";
-import { AdminPartnerCard } from "@/src/features/dashboard/components/AdminPartnerCard";
 import {
   getDashboardCashflowSnapshot,
   type DashboardCashflowSnapshot,
@@ -103,18 +99,6 @@ export default async function DashboardPage() {
               months={data.fireMonths}
             />
 
-            <div className="mt-6">
-              <CashflowSummary
-                incomeMan={data.incomeMan}
-                fixedMan={data.fixedMan}
-                variableMan={data.variableMan}
-                regularInvestmentMan={data.saveMan}
-                remainingMan={data.monthlyAddMan}
-              />
-            </div>
-
-            <FireLivingExpenseAdjusterLink />
-
             <AssetManagementLink linkedAssetCount={data.linkedAssetCount} />
 
             <div className="mt-6">
@@ -133,31 +117,10 @@ export default async function DashboardPage() {
           avatar={avatar}
         />
         <div className="mx-auto mt-6 w-full max-w-[1280px]">
-          <FireLivingExpenseAdjusterLink />
           <AssetManagementLink linkedAssetCount={data.linkedAssetCount} />
         </div>
       </div>
     </>
-  );
-}
-
-function FireLivingExpenseAdjusterLink() {
-  return (
-    <Link
-      href="/subscribe"
-      className="fbpress mt-4 flex items-center gap-3.5 rounded-[20px] border border-fb-line bg-white p-5"
-    >
-      <span className="flex size-11 items-center justify-center rounded-[14px] bg-fb-trust-soft text-fb-trust-ink">
-        <Icon name="refresh" className="size-[22px]" />
-      </span>
-      <span className="flex-1">
-        <span className="block text-[14px] font-bold text-fb-ink">FIRE 생활비 조정기</span>
-        <span className="mt-0.5 block text-[12px] font-medium text-fb-ink-3">
-          고정비·변동비·버퍼로 목표 생활비 조정
-        </span>
-      </span>
-      <Icon name="chevron-right" className="size-5 text-fb-ink-3" />
-    </Link>
   );
 }
 
