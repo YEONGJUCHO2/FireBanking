@@ -235,7 +235,7 @@ function HeroStat({
   return (
     <div>
       <div className="text-[12px] font-medium text-fb-ink-3">{label}</div>
-      <div className="mt-1 flex items-center justify-between gap-2">
+      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
         <div
           className={cn(
             'fb-num text-[22px] font-bold tracking-[-0.012em]',

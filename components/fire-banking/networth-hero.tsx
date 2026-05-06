@@ -118,7 +118,7 @@ function BreakdownItem({
           </span>
         ) : null}
       </div>
-      <div className="mt-0.5 flex items-center justify-between gap-2">
+      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
         <div
           className={cn(
             'fb-num text-[17px] font-bold',
