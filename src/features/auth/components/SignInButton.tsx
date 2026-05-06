@@ -85,26 +85,25 @@ export function SignInButton({ callbackPath = "/auth/callback" }: { callbackPath
         </div>
       ) : null}
 
-      {/* G-mail (primary, inverse): black card, Gmail mark, label per prototype */}
+      {/* G-mail (primary, inverse): black card, Gmail mark — matches /showcase mockup */}
       <button
         type="button"
         onClick={() => signInWithProvider("google")}
         disabled={pending !== null}
-        className="fb-focus flex h-14 w-full items-center justify-center gap-2.5 rounded-button bg-fb-ink px-4 py-3 text-sm font-bold text-white shadow-card hover:bg-fb-ink/90 disabled:opacity-60"
+        className="fb-focus flex h-14 w-full items-center justify-center gap-2.5 rounded-button bg-fb-ink text-[13px] font-bold text-white hover:bg-fb-ink/90 disabled:opacity-60"
       >
         <GmailMark />
         G-mail로 시작하기
       </button>
 
-      {/* Kakao (always shown — brand-locked yellow, do not restyle) */}
+      {/* Kakao (always shown — brand-locked yellow) — matches /showcase mockup */}
       <div data-od-id="kakao-login">
         <button
           type="button"
           onClick={() => signInWithProvider("kakao")}
           disabled={pending !== null}
-          className="fb-focus flex h-14 w-full items-center justify-center gap-2.5 rounded-button bg-fb-kakao px-4 py-3 text-sm font-bold text-fb-kakao-ink shadow-card hover:brightness-95 disabled:opacity-60"
+          className="fb-focus flex h-14 w-full items-center justify-center gap-2 rounded-button bg-fb-kakao text-[13px] font-bold text-fb-kakao-ink hover:brightness-95 disabled:opacity-60"
         >
-          <KakaoMark />
           카카오로 계속하기
         </button>
       </div>
@@ -131,16 +130,3 @@ function GmailMark() {
   );
 }
 
-function KakaoMark() {
-  return (
-    <svg
-      aria-hidden
-      viewBox="0 0 24 24"
-      className="size-5"
-      fill="currentColor"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M12 4C7 4 3 7.13 3 11c0 2.42 1.55 4.55 3.9 5.78L5.9 20l3.6-2.05c.81.13 1.65.2 2.5.2 5 0 9-3.13 9-7s-4-7.15-9-7.15Z" />
-    </svg>
-  );
-}
