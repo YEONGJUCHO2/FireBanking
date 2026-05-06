@@ -1,9 +1,8 @@
 import { dashboardMetrics } from '@/lib/sample-data'
 import { formatManWon } from '@/lib/format'
 import { BrandLockup } from './brand'
-import { Button } from './button'
 import { Icon } from './icons'
-import Image from 'next/image'
+import { LoginScreenContent } from './landing-experience'
 
 export function PhoneMockup({ children, label, subtitle, scale = 1 }: { children: React.ReactNode; label?: string; subtitle?: string; scale?: number }) {
   const match = label?.match(/^(\d+)\s*(.*)$/)
@@ -33,78 +32,13 @@ export function PhoneMockup({ children, label, subtitle, scale = 1 }: { children
 }
 
 export function LoginScreenPreview() {
+  // Renders the same LoginScreenContent the live `/` page renders, so both
+  // surfaces stay pixel-aligned. The phone-frame chrome is provided by the
+  // surrounding <PhoneMockup>; we just drop in the content + page background.
   return (
-    <div
-      data-screen-label="login"
-      className="flex h-full flex-col bg-fb-page px-5 pb-6 pt-14"
-    >
-      <div data-od-id="brand-lockup">
-        <BrandLockup />
-      </div>
-
-      <div data-od-id="product-definition" className="mt-16">
-        <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.10em] text-fb-trust">
-          월 1회 · 3분 · 부부
-        </p>
-        <h1 className="text-[22px] font-bold leading-[1.28] tracking-[-0.024em] text-fb-ink">
-          같은 숫자를 보면<br />
-          돈 이야기가<br />
-          조금 덜 불편해져요.
-        </h1>
-        <p className="mt-3.5 text-[12px] font-medium leading-[1.55] text-fb-ink-2">
-          부부가 함께 순자산과 경제적 자유 진척을<br />
-          확인하는 월간 재무 체크인 앱이에요.
-        </p>
-      </div>
-
-      <div className="flex-1" />
-
-      <div className="mb-3 flex items-center gap-1.5 text-[10px] font-medium text-fb-ink-3">
-        <span>가계부 아님</span>
-        <span aria-hidden>·</span>
-        <span>매일 입력 안 함</span>
-        <span aria-hidden>·</span>
-        <span>지난달 값 재사용</span>
-      </div>
-
-      {/* CTA stack — mock only, no Supabase */}
-      <div className="flex flex-col gap-2" data-od-id="cta-google-signin">
-        <button
-          type="button"
-          className="flex h-14 w-full items-center justify-center gap-2.5 rounded-button bg-fb-ink text-[13px] font-bold text-white"
-        >
-          <MockGoogleMark />
-          G-mail로 시작하기
-        </button>
-        <div data-od-id="kakao-login">
-          <button
-            type="button"
-            className="flex h-14 w-full items-center justify-center gap-2 rounded-button bg-fb-kakao text-[13px] font-bold text-fb-kakao-ink"
-          >
-            카카오로 계속하기
-          </button>
-        </div>
-      </div>
-
-      <p className="mt-3.5 text-center text-[10px] font-medium leading-[1.5] text-fb-ink-3">
-        계속 진행하면{' '}
-        <span className="font-semibold text-fb-ink underline underline-offset-[3px]">이용약관</span>과{' '}
-        <span className="font-semibold text-fb-ink underline underline-offset-[3px]">개인정보 처리방침</span>에 동의하게 돼요.
-      </p>
+    <div className="flex h-full flex-col bg-fb-page">
+      <LoginScreenContent />
     </div>
-  )
-}
-
-function MockGoogleMark() {
-  return (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" className="shrink-0">
-      <path d="M4.5 6.5v11h3.2V9.9L12 13.1l4.3-3.2v7.6h3.2v-11L12 12.1 4.5 6.5Z" fill="#FFFFFF" />
-      <path d="M4.5 6.5 12 12.1l7.5-5.6v2.9L12 15 4.5 9.4V6.5Z" fill="#EA4335" />
-      <path d="M4.5 9.4v8.1h3.2v-5.7L4.5 9.4Z" fill="#34A853" />
-      <path d="M16.3 11.8v5.7h3.2V9.4l-3.2 2.4Z" fill="#4285F4" />
-      <path d="M4.5 6.5 12 12.1l2.1-1.6L6.8 5H5.7C5 5 4.5 5.6 4.5 6.5Z" fill="#FBBC04" />
-      <path d="M17.2 5 12 8.9l7.5-2.4C19.5 5.6 19 5 18.3 5h-1.1Z" fill="#C5221F" />
-    </svg>
   )
 }
 

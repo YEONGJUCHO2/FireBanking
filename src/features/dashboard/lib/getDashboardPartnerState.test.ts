@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 import { getDashboardPartnerState } from "./getDashboardPartnerState";
 
 const mocks = vi.hoisted(() => ({
@@ -32,7 +32,7 @@ function inviteBuilder(data: { token: string } | null) {
 }
 
 function partnerMembersBuilder(data: Array<{ user_id: string }>) {
-  const builder = {
+  const builder: { select: Mock; eq: Mock } = {
     select: vi.fn(() => builder),
     eq: vi.fn(() => builder),
   };

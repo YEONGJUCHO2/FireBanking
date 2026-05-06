@@ -104,8 +104,6 @@ export function FireTimelineWide({
   percent,
   years = 8,
   months = 4,
-  dateLabel = '2034. 8.',
-  mode = 'distance',
   displayMode = 'amount',
   fireValueManWon = 40000,
   hereValueManWon = 13500,
