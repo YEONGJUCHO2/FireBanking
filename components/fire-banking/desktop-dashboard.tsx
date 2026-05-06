@@ -129,28 +129,26 @@ export function DesktopDashboard({
         <div className="flex flex-col gap-5">
           {/* Hero: FIRE-centric net worth */}
           <div data-od-id="hero-fire">
-            <Card radius="hero" className="p-8">
-              <div className="flex items-start justify-between gap-3">
-                <p className="text-[13px] font-medium text-fb-ink-3">
-                  {displayMode === 'amount' ? 'FIRE까지 남은 금액' : 'FIRE까지 남은 기간'}
-                </p>
-                <div className="flex rounded-full border border-fb-line bg-white p-1">
-                  {(['amount', 'period'] as const).map((mode) => (
-                    <button
-                      key={mode}
-                      type="button"
-                      onClick={() => setDisplayMode(mode)}
-                      className={cn(
-                        'h-8 rounded-full px-3 text-[12px] font-bold transition-colors',
-                        displayMode === mode ? 'bg-fb-ink text-white' : 'text-fb-ink-2 hover:bg-fb-card-alt',
-                      )}
-                    >
-                      {mode === 'amount' ? '금액' : '기간'}
-                    </button>
-                  ))}
-                </div>
+            <Card radius="hero" className="relative p-8">
+              <div className="absolute right-8 top-8 flex rounded-full border border-fb-line bg-white p-1">
+                {(['amount', 'period'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setDisplayMode(mode)}
+                    className={cn(
+                      'h-8 rounded-full px-3 text-[12px] font-bold transition-colors',
+                      displayMode === mode ? 'bg-fb-ink text-white' : 'text-fb-ink-2 hover:bg-fb-card-alt',
+                    )}
+                  >
+                    {mode === 'amount' ? '금액' : '기간'}
+                  </button>
+                ))}
               </div>
-              <div className="fb-num mt-0.5 flex items-baseline gap-1.5">
+              <p className="text-[13px] font-medium leading-none text-fb-ink-3">
+                {displayMode === 'amount' ? 'FIRE까지 남은 금액' : 'FIRE까지 남은 기간'}
+              </p>
+              <div className="fb-num mt-1 flex items-baseline gap-1.5">
                 <span className="text-[48px] font-bold leading-none tracking-[-0.030em] text-fb-trust">
                   {displayMode === 'amount'
                     ? remainingManWon.toLocaleString('ko-KR')

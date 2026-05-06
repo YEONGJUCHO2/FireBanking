@@ -43,26 +43,24 @@ export function NetWorthHero({
         : '계산 대기'
 
   return (
-    <Card radius="hero" className={cn('p-6', className)}>
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-[13px] font-medium text-fb-ink-3">{heroLabel}</p>
-        <div className="flex rounded-full border border-fb-line bg-white p-1">
-          {(['amount', 'period'] as const).map((mode) => (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => onDisplayModeChange?.(mode)}
-              className={cn(
-                'h-8 rounded-full px-3 text-[12px] font-bold transition-colors',
-                displayMode === mode ? 'bg-fb-ink text-white' : 'text-fb-ink-2 hover:bg-fb-card-alt',
-              )}
-            >
-              {mode === 'amount' ? '금액' : '기간'}
-            </button>
-          ))}
-        </div>
+    <Card radius="hero" className={cn('relative p-6', className)}>
+      <div className="absolute right-6 top-6 flex rounded-full border border-fb-line bg-white p-1">
+        {(['amount', 'period'] as const).map((mode) => (
+          <button
+            key={mode}
+            type="button"
+            onClick={() => onDisplayModeChange?.(mode)}
+            className={cn(
+              'h-8 rounded-full px-3 text-[12px] font-bold transition-colors',
+              displayMode === mode ? 'bg-fb-ink text-white' : 'text-fb-ink-2 hover:bg-fb-card-alt',
+            )}
+          >
+            {mode === 'amount' ? '금액' : '기간'}
+          </button>
+        ))}
       </div>
-      <div className="fb-num mt-0.5 flex items-baseline gap-1.5">
+      <p className="text-[13px] font-medium leading-none text-fb-ink-3">{heroLabel}</p>
+      <div className="fb-num mt-1 flex items-baseline gap-1.5">
         <span className="text-[44px] font-bold leading-[1.1] tracking-[-0.024em] text-fb-trust">
           {heroValue}
         </span>
