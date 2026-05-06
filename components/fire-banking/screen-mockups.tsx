@@ -74,14 +74,14 @@ export function LoginScreenPreview() {
           className="flex h-14 w-full items-center justify-center gap-2.5 rounded-button bg-fb-ink text-[13px] font-bold text-white"
         >
           <MockGoogleMark />
-          Google로 시작하기
+          G-mail로 시작하기
         </button>
         <div data-od-id="kakao-login">
           <button
             type="button"
             className="flex h-14 w-full items-center justify-center gap-2 rounded-button bg-fb-kakao text-[13px] font-bold text-fb-kakao-ink"
           >
-            카카오로 시작하기
+            카카오로 계속하기
           </button>
         </div>
       </div>
