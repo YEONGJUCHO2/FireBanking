@@ -104,26 +104,6 @@ export default async function DashboardPage() {
             />
 
             <div className="mt-6">
-              <Card radius="hero" className="p-5">
-                <div className="mb-3 h-[2px] w-6 rounded-[2px] bg-fb-ink" />
-                <h3 className="text-[16px] font-bold text-fb-ink">이번 달 부부 체크인</h3>
-                <div className="mt-3">
-                  <CheckinRow name="나" role="admin" status="done" when="오늘 14:08 입력" />
-                  <div className="fb-divider" />
-                  <CheckinRow
-                    name="배우자"
-                    role="lite"
-                    status="pending"
-                    when="초대 수락 · 입력 대기 중"
-                  />
-                  <div className="mt-3 rounded-[12px] bg-fb-cautionary-soft p-3 text-[12px] font-medium leading-[1.5] text-fb-cautionary-ink">
-                    배우자 체크인이 완료되면 이번 달 결과가 확정돼요.
-                  </div>
-                </div>
-              </Card>
-            </div>
-
-            <div className="mt-6">
               <CashflowSummary
                 incomeMan={data.incomeMan}
                 fixedMan={data.fixedMan}
@@ -136,17 +116,6 @@ export default async function DashboardPage() {
             <FireLivingExpenseAdjusterLink />
 
             <AssetManagementLink linkedAssetCount={data.linkedAssetCount} />
-
-            {pendingPartnerState ? (
-              <section className="mt-6 space-y-3">
-                <SectionHeader title="배우자 초대" />
-                <AdminPartnerCard
-                  coupleId={pendingPartnerState.coupleId}
-                  connectedPartnerCount={pendingPartnerState.connectedPartnerCount}
-                  latestInviteUrl={pendingPartnerState.latestInviteUrl}
-                />
-              </section>
-            ) : null}
 
             <div className="mt-6">
               <SignOutButton />
@@ -166,16 +135,6 @@ export default async function DashboardPage() {
         <div className="mx-auto mt-6 w-full max-w-[1280px]">
           <FireLivingExpenseAdjusterLink />
           <AssetManagementLink linkedAssetCount={data.linkedAssetCount} />
-          {pendingPartnerState ? (
-            <section className="mt-4 space-y-3">
-              <SectionHeader title="배우자 초대" />
-              <AdminPartnerCard
-                coupleId={pendingPartnerState.coupleId}
-                connectedPartnerCount={pendingPartnerState.connectedPartnerCount}
-                latestInviteUrl={pendingPartnerState.latestInviteUrl}
-              />
-            </section>
-          ) : null}
         </div>
       </div>
     </>

@@ -59,8 +59,9 @@ describe("DashboardPage", () => {
     render(await DashboardPage());
 
     expect(screen.getByText("안녕하세요")).toBeInTheDocument();
-    expect(screen.getAllByText("이번 달 부부 체크인").length).toBeGreaterThan(0);
     expect(screen.getByText("이번 달 결과를 같이 봐요.")).toBeInTheDocument();
+    expect(screen.queryByText("이번 달 부부 체크인")).not.toBeInTheDocument();
+    expect(screen.queryByText("배우자 초대")).not.toBeInTheDocument();
     expect(screen.getAllByText("FIRE까지 남은 금액").length).toBeGreaterThan(0);
     expect(screen.getAllByRole("button", { name: "기간" }).length).toBeGreaterThan(0);
     fireEvent.click(screen.getAllByRole("button", { name: "기간" })[0]);
@@ -85,30 +86,14 @@ describe("DashboardPage", () => {
     expect(document.body).not.toHaveTextContent("민호");
   });
 
-  it("hides the spouse card after the partner has completed the current input", async () => {
-    mocks.getDashboardPartnerState.mockResolvedValue({
-      state: "complete",
-      coupleId: "couple-1",
-      connectedPartnerCount: 1,
-    });
-
+  it("does not surface spouse invite or checkin sections on the home dashboard", async () => {
     render(await DashboardPage());
 
     expect(screen.queryByText("배우자 초대")).not.toBeInTheDocument();
     expect(screen.queryByText("배우자에게 공유할 준비")).not.toBeInTheDocument();
-    // The desktop dashboard's spouse checkin row is the design preview placeholder
-    // and intentionally always shows '초대 수락 · 입력 대기 중'. The completion
-    // gate is the AdminPartnerCard above, which is correctly hidden here.
-  });
-
-  it("shows the spouse invite workflow in the desktop dashboard when a partner is pending", async () => {
-    render(await DashboardPage());
-
-    const desktopDashboard = document.querySelector(".lg\\:block");
-
-    expect(desktopDashboard).toHaveTextContent("배우자 초대");
-    expect(desktopDashboard).toHaveTextContent("배우자에게 공유할 준비");
-    expect(desktopDashboard).toHaveTextContent("/invite/token-1");
+    expect(screen.queryByText("이번 달 부부 체크인")).not.toBeInTheDocument();
+    // Spouse invite + checkin live on /together. The home dashboard stays
+    // focused on the FIRE numbers per /showcase mockup spec.
   });
 
   it("links registered assets to dashboard net worth while excluding pension and IRP from FIRE assets", async () => {
