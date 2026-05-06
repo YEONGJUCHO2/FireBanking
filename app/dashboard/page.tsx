@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   BottomNav,
   DashboardFireOverview,
@@ -6,9 +7,7 @@ import {
   ScreenTopBar,
   StatusPill,
 } from "@/components/fire-banking";
-import { Icon } from "@/components/fire-banking/icons";
 import { getAssetManagementData } from "@/src/features/assets/lib/getAssetManagementData";
-import { SignOutButton } from "@/src/features/auth/components/SignOutButton";
 import { getCurrentUser } from "@/src/features/auth/lib/getCurrentUser";
 import { getUserAvatar } from "@/src/features/auth/lib/getUserAvatar";
 import {
@@ -61,12 +60,24 @@ export default async function DashboardPage() {
         <MobileAppShell>
           <ScreenTopBar
             right={
-              <button
-                aria-label="설정"
-                className="fbpress flex size-11 items-center justify-center rounded-full text-fb-ink-2 hover:bg-fb-card-alt"
+              <Link
+                href="/settings"
+                aria-label={`설정 — ${avatar.alt}`}
+                data-od-id="nav-profile"
+                className="fbpress flex size-9 items-center justify-center overflow-hidden rounded-full bg-fb-ink hover:opacity-90"
               >
-                <Icon name="settings" className="size-5" />
-              </button>
+                {avatar.url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={avatar.url}
+                    alt=""
+                    referrerPolicy="no-referrer"
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  <span className="text-[12px] font-bold text-white">{avatar.initial}</span>
+                )}
+              </Link>
             }
           />
 
@@ -97,10 +108,6 @@ export default async function DashboardPage() {
               years={data.fireYears}
               months={data.fireMonths}
             />
-
-            <div className="mt-6">
-              <SignOutButton />
-            </div>
           </main>
 
           <BottomNav active="home" partnerPending={partnerPending} />
@@ -109,7 +116,6 @@ export default async function DashboardPage() {
 
       <div className="hidden min-h-dvh bg-fb-page px-8 py-10 lg:block">
         <DesktopDashboard
-          footerAction={<SignOutButton />}
           data={{ ...data, netDeltaMan: data.netWorthDeltaMan }}
           avatar={avatar}
         />

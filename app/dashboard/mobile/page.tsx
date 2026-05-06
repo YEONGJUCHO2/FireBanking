@@ -11,7 +11,6 @@ import { CheckinRow } from '@/components/fire-banking/checkin-row'
 import { FireHeroCard } from '@/components/fire-banking/fire-hero-card'
 import { Icon } from '@/components/fire-banking/icons'
 import { NetWorthHero } from '@/components/fire-banking/networth-hero'
-import { SignOutButton } from '@/src/features/auth/components/SignOutButton'
 import { formatCheckinMonthLabel } from '@/src/lib/checkinDate'
 
 // Static mock data: this preview route demonstrates the new visual treatment.
@@ -56,12 +55,14 @@ function DashboardMobilePage() {
       <MobileAppShell>
         <ScreenTopBar
           right={
-            <button
-              aria-label="설정"
-              className="fbpress flex size-9 items-center justify-center rounded-full text-fb-ink-2 hover:bg-fb-card-alt"
+            <Link
+              href="/settings"
+              aria-label="프로필 — 설정 열기"
+              data-od-id="nav-profile"
+              className="fbpress flex size-9 items-center justify-center overflow-hidden rounded-full bg-fb-ink hover:opacity-90"
             >
-              <Icon name="settings" className="size-5" />
-            </button>
+              <span className="text-[12px] font-bold text-white">{data.myName?.charAt(0) ?? '나'}</span>
+            </Link>
           }
         />
 
@@ -184,10 +185,6 @@ function DashboardMobilePage() {
           {/* Footer disclaimer */}
           <div className="mt-5 pb-2 text-center text-[11px] font-medium leading-[1.55] text-fb-ink-4">
             25배 룰 · 연 5% 단순 가정의 참고 시뮬레이션이에요. 투자 자문이 아닙니다.
-          </div>
-
-          <div className="mt-4">
-            <SignOutButton />
           </div>
         </main>
 
