@@ -8,12 +8,7 @@ export default async function LitePage({
 }) {
   const { token } = await params
 
-  // Token validation: no Supabase lookup needed for the visual route — an invalid
-  // token will simply result in the form rendering without a prior-month snapshot.
-  // The actual write (persistence) is deferred to R1 (see lite-onboarding-client.tsx).
-
-  // Previous-month spouse snapshot lookup would go here when the DB table exists.
-  // For now pass undefined so the "지난달과 같아요" reuse action is hidden.
+  // Previous-month reuse is hidden until at least one saved spouse check-in exists.
   const prevValues: null = null
 
   return (

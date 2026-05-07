@@ -1,5 +1,4 @@
 import { createSupabaseServerClient } from "@/src/lib/supabase/server";
-import { cookies } from "next/headers";
 import type { HoldingView } from "@/src/features/assets/components/InvestmentAssetPanel";
 import type { LiabilityView } from "@/src/features/assets/components/LiabilityPanel";
 
@@ -51,8 +50,6 @@ const liabilityPurposeLabels: Record<NonNullable<LiabilityView["purpose"]>, stri
   other: "기타",
 };
 
-const DEMO_HOLDINGS_COOKIE = "fb_demo_asset_holdings";
-
 export async function getAssetManagementData(): Promise<AssetManagementData> {
   const supabase = await createSupabaseServerClient();
   const {
@@ -60,7 +57,7 @@ export async function getAssetManagementData(): Promise<AssetManagementData> {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { coupleId: null, holdings: await getDemoHoldings(), liabilities: undefined };
+    return { coupleId: null, holdings: undefined, liabilities: undefined };
   }
 
   const { data: membership, error: membershipError } = await supabase
@@ -72,7 +69,7 @@ export async function getAssetManagementData(): Promise<AssetManagementData> {
     .maybeSingle();
 
   if (membershipError || !membership?.couple_id) {
-    return { coupleId: null, holdings: await getDemoHoldings(), liabilities: undefined };
+    return { coupleId: null, holdings: undefined, liabilities: undefined };
   }
 
   const coupleId = membership.couple_id;
@@ -81,7 +78,7 @@ export async function getAssetManagementData(): Promise<AssetManagementData> {
       supabase
         .from("asset_holdings")
         .select(
-          "id,quantity,account_category,asset_instruments(symbol,display_name)",
+          "id,quantity,account_category,asset_instruments(id,symbol,display_name)",
         )
         .eq("couple_id", coupleId)
         .order("created_at", { ascending: true }),
@@ -116,69 +113,6 @@ export async function getAssetManagementData(): Promise<AssetManagementData> {
         ),
     liabilities: liabilitiesError ? [] : mapLiabilities((liabilityRows ?? []) as LiabilityRow[]),
   };
-}
-
-async function getDemoHoldings() {
-  const cookieStore = await cookies();
-  const rawValue = cookieStore.get(DEMO_HOLDINGS_COOKIE)?.value;
-
-  if (!rawValue) {
-    return undefined;
-  }
-
-  try {
-    const parsed = JSON.parse(decodeURIComponent(rawValue));
-
-    if (!Array.isArray(parsed)) {
-      return undefined;
-    }
-
-    const holdings = parsed
-      .map(normalizeDemoHolding)
-      .filter((holding): holding is HoldingView => Boolean(holding));
-
-    return holdings.length > 0 ? holdings : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function normalizeDemoHolding(value: unknown): HoldingView | null {
-  if (!value || typeof value !== "object") {
-    return null;
-  }
-
-  const row = value as Partial<HoldingView>;
-  const quantity = Number(row.quantity);
-  const valuationAmount = Number(row.valuationAmount);
-
-  if (
-    !row.id ||
-    !row.symbol ||
-    !row.displayName ||
-    !Number.isFinite(quantity) ||
-    quantity <= 0 ||
-    !Number.isFinite(valuationAmount) ||
-    valuationAmount < 0
-  ) {
-    return null;
-  }
-
-  return {
-    id: String(row.id),
-    symbol: String(row.symbol),
-    displayName: String(row.displayName),
-    quantity,
-    valuationAmount: Math.round(valuationAmount),
-    valuationDate: String(row.valuationDate ?? "수동 저장"),
-    accountCategory: normalizeDemoAccountCategory(row.accountCategory),
-  };
-}
-
-function normalizeDemoAccountCategory(value: unknown): HoldingView["accountCategory"] {
-  return value === "general" || value === "pension_savings" || value === "irp" || value === "other"
-    ? value
-    : "general";
 }
 
 function mapHoldings(rows: HoldingRow[], priceRows: PriceSnapshotRow[]): HoldingView[] {

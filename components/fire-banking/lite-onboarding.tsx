@@ -26,12 +26,16 @@ export function LiteOnboarding({
   prevValues,
   doneHref = '/dashboard',
   onComplete,
+  submitLabel = '체크인 마치기',
+  disabled = false,
 }: {
   token: string
   initial?: Partial<LiteValues>
   prevValues?: Partial<LiteValues> | null
   doneHref?: string
   onComplete?: (payload: LiteOnboardingCompletePayload) => void
+  submitLabel?: string
+  disabled?: boolean
 }) {
   const router = useRouter()
   const [v, setV] = useState<LiteValues>({ income: 0, recur: 0, save: 0, ...initial })
@@ -181,10 +185,11 @@ export function LiteOnboarding({
             variant="inverse"
             size="lg"
             full
+            disabled={disabled}
             onClick={() => handleComplete(v)}
             iconRight={<Icon name="chevron-right" className="size-[18px]" />}
           >
-            체크인 마치기
+            {submitLabel}
           </Button>
         </div>
       </div>

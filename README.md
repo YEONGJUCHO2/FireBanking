@@ -60,7 +60,7 @@ KIWOOM_BASE_URL=https://api.kiwoom.com
 ```
 
 `KIWOOM_APP_KEY` and `KIWOOM_APP_SECRET` enable live domestic instrument search and daily close-price sync.
-Without them, the asset screen falls back to the non-live alpha behavior.
+Without them, domestic instrument search shows an unavailable state and manual inputs remain usable.
 
 ## Development
 

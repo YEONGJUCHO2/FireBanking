@@ -85,7 +85,7 @@ export function SignInButton({ callbackPath = "/auth/callback" }: { callbackPath
         </div>
       ) : null}
 
-      {/* G-mail (primary, inverse): black card, Gmail mark — matches /showcase mockup */}
+      {/* Google (primary, inverse): black card, Gmail mark — matches /showcase mockup */}
       <button
         type="button"
         onClick={() => signInWithProvider("google")}
@@ -93,7 +93,7 @@ export function SignInButton({ callbackPath = "/auth/callback" }: { callbackPath
         className="fb-focus flex h-14 w-full items-center justify-center gap-2.5 rounded-button bg-fb-ink text-[13px] font-bold text-white hover:bg-fb-ink/90 disabled:opacity-60"
       >
         <GmailMark />
-        G-mail로 시작하기
+        Google로 시작하기
       </button>
 
       {/* Kakao (always shown — brand-locked yellow) — matches /showcase mockup */}
@@ -129,4 +129,3 @@ function GmailMark() {
     </svg>
   );
 }
-

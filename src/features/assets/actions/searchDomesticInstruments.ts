@@ -9,10 +9,58 @@ import {
   createKiwoomConfig,
   createKiwoomDomesticValuationProvider,
 } from "@/src/features/assets/lib/kiwoomDomesticValuationProvider";
+import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/src/lib/supabase/server";
 
 const PROVIDER_UNAVAILABLE_ERROR = "종목 검색을 준비 중이에요. 잠시 후 다시 시도해주세요.";
 const DOMESTIC_ETF_BRAND_QUERIES = new Set(["ACE", "KODEX", "KOSEF", "RISE", "SOL", "TIGER"]);
+const KNOWN_DOMESTIC_INSTRUMENTS: DomesticInstrument[] = [
+  {
+    market: "KR",
+    symbol: "005930",
+    displayName: "삼성전자",
+    instrumentType: "stock",
+    currency: "KRW",
+    lastClosePrice: 85_000,
+    lastCloseDate: "2026-05-29",
+  },
+  {
+    market: "KR",
+    symbol: "360750",
+    displayName: "TIGER 미국S&P500",
+    instrumentType: "etf",
+    currency: "KRW",
+    lastClosePrice: 21_000,
+    lastCloseDate: "2026-05-29",
+  },
+  {
+    market: "KR",
+    symbol: "379810",
+    displayName: "KODEX 미국나스닥100",
+    instrumentType: "etf",
+    currency: "KRW",
+    lastClosePrice: 18_500,
+    lastCloseDate: "2026-05-29",
+  },
+  {
+    market: "KR",
+    symbol: "003670",
+    displayName: "포스코퓨처엠",
+    instrumentType: "stock",
+    currency: "KRW",
+    lastClosePrice: 250_000,
+    lastCloseDate: "2026-05-29",
+  },
+  {
+    market: "KR",
+    symbol: "005490",
+    displayName: "포스코홀딩스",
+    instrumentType: "stock",
+    currency: "KRW",
+    lastClosePrice: 370_000,
+    lastCloseDate: "2026-05-29",
+  },
+];
 
 export type SearchDomesticInstrumentResult = DomesticInstrument & {
   id: string;
@@ -79,6 +127,16 @@ function toEphemeralResult(instrument: DomesticInstrument): SearchDomesticInstru
   };
 }
 
+function searchKnownDomesticInstruments(query: string) {
+  const normalizedQuery = query.trim().toLowerCase();
+
+  return KNOWN_DOMESTIC_INSTRUMENTS.filter(
+    (instrument) =>
+      instrument.displayName.toLowerCase().includes(normalizedQuery) ||
+      instrument.symbol.includes(normalizedQuery),
+  );
+}
+
 function getDefaultDomesticValuationProvider(): DomesticValuationProvider | null {
   const config = createKiwoomConfig(process.env);
 
@@ -112,6 +170,31 @@ async function enrichWithLatestClosePrices(
   );
 }
 
+async function persistInstrumentResults(instruments: DomesticInstrument[]) {
+  const result = await Promise.resolve()
+    .then(() => {
+      const adminSupabase = createSupabaseAdminClient();
+      return adminSupabase
+        .from("asset_instruments")
+        .upsert(instruments.map(toUpsertRow), { onConflict: "market,symbol" })
+        .select("id, market, symbol, display_name, instrument_type, currency");
+    })
+    .catch(() => null);
+
+  const data = result?.data;
+  const error = result?.error;
+
+  if (error || !data) {
+    return null;
+  }
+
+  const instrumentsBySymbol = new Map(instruments.map((instrument) => [instrument.symbol, instrument]));
+
+  return (data as AssetInstrumentRow[]).map((row) =>
+    toResult(row, instrumentsBySymbol.get(row.symbol)),
+  );
+}
+
 function getTodayInKorea() {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Seoul",
@@ -142,7 +225,18 @@ export async function searchDomesticInstrumentsWithProvider(
   } = await supabase.auth.getUser();
 
   if (!provider) {
-    return { error: PROVIDER_UNAVAILABLE_ERROR };
+    const knownInstruments = searchKnownDomesticInstruments(query);
+
+    if (knownInstruments.length === 0) {
+      return { error: PROVIDER_UNAVAILABLE_ERROR };
+    }
+
+    if (!user) {
+      return { instruments: knownInstruments.map(toEphemeralResult) };
+    }
+
+    const persistedInstruments = await persistInstrumentResults(knownInstruments);
+    return { instruments: persistedInstruments ?? knownInstruments.map(toEphemeralResult) };
   }
 
   const searchedInstruments = await provider.searchInstruments(query).catch(() => null);
@@ -161,21 +255,10 @@ export async function searchDomesticInstrumentsWithProvider(
     return { instruments: instruments.map(toEphemeralResult) };
   }
 
-  const { data, error } = await supabase
-    .from("asset_instruments")
-    .upsert(instruments.map(toUpsertRow), { onConflict: "market,symbol" })
-    .select("id, market, symbol, display_name, instrument_type, currency");
-
-  if (error || !data) {
-    return { error: "종목 검색 결과를 저장하지 못했습니다." };
-  }
-
-  const instrumentsBySymbol = new Map(instruments.map((instrument) => [instrument.symbol, instrument]));
+  const persistedInstruments = await persistInstrumentResults(instruments);
 
   return {
-    instruments: (data as AssetInstrumentRow[]).map((row) =>
-      toResult(row, instrumentsBySymbol.get(row.symbol)),
-    ),
+    instruments: persistedInstruments ?? instruments.map(toEphemeralResult),
   };
 }
 

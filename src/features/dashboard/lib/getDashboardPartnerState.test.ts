@@ -40,7 +40,7 @@ function partnerMembersBuilder(data: Array<{ user_id: string }>) {
   return builder;
 }
 
-function snapshotsBuilder(data: Array<{ created_by: string }>) {
+function partnerCheckinsBuilder(data: Array<{ user_id: string }>) {
   const builder = {
     select: vi.fn(() => builder),
     eq: vi.fn(() => builder),
@@ -86,12 +86,12 @@ describe("getDashboardPartnerState", () => {
     });
   });
 
-  it("marks the partner card complete only after a connected spouse has a current snapshot", async () => {
+  it("marks the partner card complete only after a connected spouse has a current lite check-in", async () => {
     const builders = [
       membershipBuilder({ couple_id: "couple-1" }),
       partnerMembersBuilder([{ user_id: "lite-1" }]),
       inviteBuilder(null),
-      snapshotsBuilder([{ created_by: "lite-1" }]),
+      partnerCheckinsBuilder([{ user_id: "lite-1" }]),
     ];
     const supabase = {
       auth: { getUser: vi.fn(async () => ({ data: { user: { id: "user-1" } } })) },

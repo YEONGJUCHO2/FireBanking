@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, SectionHeader, StatusPill } from "@/components/fire-banking";
+import { deleteLiability as deleteLiabilityAction } from "@/src/features/assets/actions/deleteLiability";
+import { saveLiability } from "@/src/features/assets/actions/saveLiability";
 import { updateLiability } from "@/src/features/assets/actions/updateLiability";
 import { formatKrw } from "@/src/lib/format";
 
@@ -16,12 +18,21 @@ export type LiabilityView = {
   purpose?: "residence" | "investment" | "lifestyle_credit" | "other";
 };
 
+const liabilityPurposeLabels: Record<NonNullable<LiabilityView["purpose"]>, string> = {
+  residence: "거주 부동산",
+  investment: "투자 관련",
+  lifestyle_credit: "생활/신용",
+  other: "기타",
+};
+
 export function LiabilityPanel({
   coupleId,
   liabilities = [],
+  idPrefix = "liability",
 }: {
   coupleId?: string | null;
   liabilities?: LiabilityView[];
+  idPrefix?: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -32,6 +43,13 @@ export function LiabilityPanel({
     interestManwon: "",
     principalManwon: "",
   });
+  const [addDraft, setAddDraft] = useState({
+    purpose: "investment" as NonNullable<LiabilityView["purpose"]>,
+    balanceManwon: "",
+    interestManwon: "",
+    principalManwon: "",
+  });
+  const [actionError, setActionError] = useState<string | null>(null);
   const investmentLinkedLoanBalance = items
     .filter((liability) => liability.purpose === "investment")
     .reduce((sum, liability) => sum + liability.balanceAmount, 0);
@@ -43,6 +61,7 @@ export function LiabilityPanel({
     (sum, liability) => sum + liability.monthlyPrincipalAmount,
     0,
   );
+  const fieldId = (id: string) => `${idPrefix}-${id}`;
 
   const startEdit = (liability: LiabilityView) => {
     setEditingId(liability.id);
@@ -88,10 +107,91 @@ export function LiabilityPanel({
       startTransition(async () => {
         const result = await updateLiability({}, formData);
         if (result.success) {
+          setActionError(null);
           router.refresh();
+        } else if (result.error) {
+          setActionError(result.error);
         }
       });
     }
+  };
+
+  const addLiability = () => {
+    const balance = Number(addDraft.balanceManwon);
+    const interest = Number(addDraft.interestManwon);
+    const principal = Number(addDraft.principalManwon);
+
+    if (![balance, interest, principal].every((value) => Number.isFinite(value) && value >= 0)) {
+      setActionError("부채 금액은 0만원 이상 숫자로 입력해주세요.");
+      return;
+    }
+
+    if (!coupleId) {
+      const purposeLabel = liabilityPurposeLabels[addDraft.purpose];
+      setItems((current) => [
+        ...current,
+        {
+          id: `demo-liability-${Date.now()}`,
+          label: `${purposeLabel} 대출`,
+          purposeLabel,
+          purpose: addDraft.purpose,
+          balanceAmount: balance * 10_000,
+          monthlyInterestAmount: interest * 10_000,
+          monthlyPrincipalAmount: principal * 10_000,
+        },
+      ]);
+      setActionError(null);
+      setAddDraft({
+        purpose: "investment",
+        balanceManwon: "",
+        interestManwon: "",
+        principalManwon: "",
+      });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.set("coupleId", coupleId);
+    formData.set("purpose", addDraft.purpose);
+    formData.set("balanceAmount", addDraft.balanceManwon);
+    formData.set("monthlyInterestAmount", addDraft.interestManwon);
+    formData.set("monthlyPrincipalAmount", addDraft.principalManwon);
+    startTransition(async () => {
+      const result = await saveLiability({}, formData);
+      if (result.success) {
+        setActionError(null);
+        setAddDraft({
+          purpose: "investment",
+          balanceManwon: "",
+          interestManwon: "",
+          principalManwon: "",
+        });
+        router.refresh();
+      } else if (result.error) {
+        setActionError(result.error);
+      }
+    });
+  };
+
+  const deleteLiability = (liabilityId: string) => {
+    setItems((current) => current.filter((item) => item.id !== liabilityId));
+
+    if (!coupleId) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.set("coupleId", coupleId);
+    formData.set("liabilityId", liabilityId);
+    startTransition(async () => {
+      const result = await deleteLiabilityAction({}, formData);
+      if (result.success) {
+        setActionError(null);
+        router.refresh();
+      } else if (result.error) {
+        setActionError(result.error);
+      }
+    });
   };
 
   return (
@@ -120,6 +220,58 @@ export function LiabilityPanel({
         </section>
 
         <section className="rounded-[16px] border border-fb-line bg-white p-4">
+          <div className="mb-4 rounded-[12px] border border-fb-line bg-fb-card-alt p-3">
+            <p className="text-[13px] font-bold text-fb-ink">투자 연계 부채 추가</p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor={fieldId("purpose")}>
+                부채 목적
+                <select
+                  id={fieldId("purpose")}
+                  value={addDraft.purpose}
+                  onChange={(event) =>
+                    setAddDraft((current) => ({
+                      ...current,
+                      purpose: event.target.value as NonNullable<LiabilityView["purpose"]>,
+                    }))
+                  }
+                  className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
+                >
+                  {Object.entries(liabilityPurposeLabels).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <MoneyInput
+                id={fieldId("add-balance")}
+                label="추가할 부채 잔액"
+                helper="부채 잔액"
+                value={addDraft.balanceManwon}
+                onChange={(value) => setAddDraft((current) => ({ ...current, balanceManwon: value }))}
+              />
+              <MoneyInput
+                id={fieldId("add-interest")}
+                label="추가할 부채 월 이자"
+                helper="월 이자"
+                value={addDraft.interestManwon}
+                onChange={(value) => setAddDraft((current) => ({ ...current, interestManwon: value }))}
+              />
+              <MoneyInput
+                id={fieldId("add-principal")}
+                label="추가할 부채 월 원금상환"
+                helper="월 원금상환"
+                value={addDraft.principalManwon}
+                onChange={(value) => setAddDraft((current) => ({ ...current, principalManwon: value }))}
+              />
+            </div>
+            {actionError ? (
+              <p className="mt-2 text-[12px] font-bold text-fb-negative-ink">{actionError}</p>
+            ) : null}
+            <Button type="button" variant="secondary" size="sm" className="mt-3 w-full" onClick={addLiability}>
+              부채 추가
+            </Button>
+          </div>
           {items.length === 0 ? (
             <p className="rounded-[12px] bg-fb-card-alt px-3 py-3 text-[13px] font-medium text-fb-ink-3">
               등록한 부채가 없어요.
@@ -139,21 +291,21 @@ export function LiabilityPanel({
                       <div className="mt-3 rounded-[12px] bg-fb-card-alt p-3">
                         <div className="grid gap-3 sm:grid-cols-3">
                           <MoneyInput
-                            id={`${liability.id}-balance`}
+                            id={fieldId(`${liability.id}-balance`)}
                             label={`${liability.label} 잔액`}
                             helper="대출 잔액"
                             value={draft.balanceManwon}
                             onChange={(value) => setDraft((current) => ({ ...current, balanceManwon: value }))}
                           />
                           <MoneyInput
-                            id={`${liability.id}-interest`}
+                            id={fieldId(`${liability.id}-interest`)}
                             label={`${liability.label} 월 이자`}
                             helper="월 이자"
                             value={draft.interestManwon}
                             onChange={(value) => setDraft((current) => ({ ...current, interestManwon: value }))}
                           />
                           <MoneyInput
-                            id={`${liability.id}-principal`}
+                            id={fieldId(`${liability.id}-principal`)}
                             label={`${liability.label} 월 원금상환`}
                             helper="월 원금상환"
                             value={draft.principalManwon}
@@ -185,6 +337,9 @@ export function LiabilityPanel({
                         </p>
                       <Button type="button" variant="secondary" size="sm" onClick={() => startEdit(liability)}>
                         부채 수정
+                      </Button>
+                      <Button type="button" variant="dangerSoft" size="sm" onClick={() => deleteLiability(liability.id)}>
+                        삭제
                       </Button>
                       </>
                     )}

@@ -63,14 +63,13 @@ export default async function InvitePage({
           </div>
         </div>
 
-        {/* R0 alpha scope explainer — required by r0-admin-solo.spec.ts */}
         <div className="mt-6 rounded-[14px] border border-fb-line bg-fb-card-alt p-4">
-          <h1 className="text-[16px] font-bold tracking-[-0.012em] text-fb-ink">
-            배우자 체크인은 R1에서 열립니다
-          </h1>
+          <h2 className="text-[16px] font-bold tracking-[-0.012em] text-fb-ink">
+            입력은 3개만 필요해요
+          </h2>
           <p className="mt-2 text-[13px] font-medium leading-[1.55] text-fb-ink-2">
-            이 링크는 R0에서 초대 의향을 확인하기 위한 알파 기능입니다. 실제 배우자 가입과 입력은 다음
-            릴리즈에서 연결합니다.
+            세후 월수입, 반복지출, 정기저축/투자만 입력하면 이번 달 가족 결과에 합산돼요.
+            개별 입력값은 리드 파트너에게 따로 노출되지 않아요.
           </p>
         </div>
       </section>

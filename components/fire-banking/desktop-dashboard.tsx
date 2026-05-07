@@ -6,7 +6,6 @@ import { useState } from 'react'
 import { BrandMark } from './brand'
 import { Button } from './button'
 import { Card } from './card'
-import { CheckinRow } from './checkin-row'
 import { FireTimelineWide, type FireDisplayMode } from './fire-timeline'
 import { Icon } from './icons'
 import { cn } from '@/lib/cn'
@@ -275,4 +274,3 @@ function HeroStat({
     </div>
   )
 }
-

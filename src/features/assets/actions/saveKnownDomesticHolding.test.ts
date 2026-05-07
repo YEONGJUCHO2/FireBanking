@@ -3,11 +3,16 @@ import { saveKnownDomesticHolding } from "./saveKnownDomesticHolding";
 
 const mocks = vi.hoisted(() => ({
   createSupabaseServerClient: vi.fn(),
+  createSupabaseAdminClient: vi.fn(),
   revalidatePath: vi.fn(),
 }));
 
 vi.mock("@/src/lib/supabase/server", () => ({
   createSupabaseServerClient: mocks.createSupabaseServerClient,
+}));
+
+vi.mock("@/src/lib/supabase/admin", () => ({
+  createSupabaseAdminClient: mocks.createSupabaseAdminClient,
 }));
 
 vi.mock("next/cache", () => ({
@@ -51,6 +56,7 @@ function createSupabaseMock() {
 describe("saveKnownDomesticHolding", () => {
   beforeEach(() => {
     mocks.createSupabaseServerClient.mockReset();
+    mocks.createSupabaseAdminClient.mockReset();
     mocks.revalidatePath.mockClear();
   });
 
@@ -64,6 +70,7 @@ describe("saveKnownDomesticHolding", () => {
   it("upserts a known domestic instrument and inserts a holding", async () => {
     const refs = createSupabaseMock();
     mocks.createSupabaseServerClient.mockResolvedValue(refs.supabase);
+    mocks.createSupabaseAdminClient.mockReturnValue(refs.supabase);
 
     const result = await saveKnownDomesticHolding({}, form());
 
@@ -87,5 +94,20 @@ describe("saveKnownDomesticHolding", () => {
     });
     expect(mocks.revalidatePath).toHaveBeenCalledWith("/dashboard");
     expect(mocks.revalidatePath).toHaveBeenCalledWith("/assets");
+  });
+
+  it("returns an error instead of throwing when admin instrument upsert is unavailable", async () => {
+    const refs = createSupabaseMock();
+    mocks.createSupabaseServerClient.mockResolvedValue(refs.supabase);
+    mocks.createSupabaseAdminClient.mockImplementation(() => {
+      throw new Error("Missing required environment variable: SUPABASE_SERVICE_ROLE_KEY");
+    });
+
+    const result = await saveKnownDomesticHolding({}, form());
+
+    expect(result).toEqual({
+      error: "종목 기준정보를 저장하지 못했습니다. 잠시 후 다시 시도해주세요.",
+    });
+    expect(refs.holdingsInsert).not.toHaveBeenCalled();
   });
 });

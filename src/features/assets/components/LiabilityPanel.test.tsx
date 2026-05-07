@@ -27,8 +27,8 @@ describe("LiabilityPanel", () => {
     expect(screen.getByText("투자 연동 대출")).toBeInTheDocument();
     expect(screen.getByText(/투자자산을 만들기 위해 낀 대출만 FIRE 반영 투자자산에서 차감해요/)).toBeInTheDocument();
     expect(screen.getByText("차감 대상 대출")).toBeInTheDocument();
-    expect(screen.getByText("월 이자")).toBeInTheDocument();
-    expect(screen.getByText("월 원금상환")).toBeInTheDocument();
+    expect(screen.getAllByText("월 이자").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("월 원금상환").length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "부채 수정" })).toBeInTheDocument();
   });
 

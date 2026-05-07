@@ -62,14 +62,14 @@ export async function getDashboardPartnerState(): Promise<DashboardPartnerState>
     };
   }
 
-  const { data: snapshotRows, error: snapshotError } = await supabase
-    .from("monthly_cashflow_snapshots")
-    .select("created_by")
+  const { data: checkinRows, error: checkinError } = await supabase
+    .from("partner_lite_checkins")
+    .select("user_id")
     .eq("couple_id", coupleId)
     .eq("month", currentMonthDate())
-    .in("created_by", partnerIds);
+    .in("user_id", partnerIds);
 
-  if (snapshotError) {
+  if (checkinError) {
     return {
       state: "waiting_for_input",
       coupleId,
@@ -78,7 +78,7 @@ export async function getDashboardPartnerState(): Promise<DashboardPartnerState>
     };
   }
 
-  const hasPartnerSnapshot = (snapshotRows ?? []).length > 0;
+  const hasPartnerSnapshot = (checkinRows ?? []).length > 0;
 
   return {
     state: hasPartnerSnapshot ? "complete" : "waiting_for_input",

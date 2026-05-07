@@ -38,6 +38,7 @@ vi.mock("@/src/features/assets/actions/deleteHolding", () => ({
 describe("InvestmentAssetPanel", () => {
   beforeEach(() => {
     document.cookie = "fb_demo_asset_holdings=; Path=/; Max-Age=0";
+    window.localStorage.clear();
     mocks.searchDomesticInstruments.mockReset();
     mocks.searchDomesticInstruments.mockImplementation(() => new Promise(() => {}));
     mocks.saveHolding.mockReset();
@@ -116,7 +117,7 @@ describe("InvestmentAssetPanel", () => {
     expect(screen.getByText("아직 등록한 종목이 없어요.")).toBeInTheDocument();
   });
 
-  it("persists demo holdings in a cookie so navigation does not reset local entries", async () => {
+  it("persists demo holdings in localStorage so navigation does not reset local entries", async () => {
     render(<InvestmentAssetPanel holdings={[]} />);
 
     fireEvent.change(screen.getByLabelText("종목 검색어"), { target: { value: "포스코" } });
@@ -124,16 +125,11 @@ describe("InvestmentAssetPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "검색" }));
     fireEvent.click(screen.getAllByRole("button", { name: "추가" })[0]);
 
-    let cookieValue: string | undefined;
     await waitFor(() => {
-      cookieValue = document.cookie
-        .split("; ")
-        .find((cookie) => cookie.startsWith("fb_demo_asset_holdings="))
-        ?.split("=")[1];
-      expect(cookieValue).toBeTruthy();
+      expect(window.localStorage.getItem("fb_demo_asset_holdings")).toBeTruthy();
     });
 
-    expect(JSON.parse(decodeURIComponent(cookieValue ?? ""))).toEqual(
+    expect(JSON.parse(window.localStorage.getItem("fb_demo_asset_holdings") ?? "[]")).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           symbol: "003670",
@@ -144,6 +140,7 @@ describe("InvestmentAssetPanel", () => {
         }),
       ]),
     );
+    expect(document.cookie).not.toContain("fb_demo_asset_holdings=");
   });
 
   it("collapses account sections by default and shows only total valuation until opened", () => {
@@ -295,6 +292,43 @@ describe("InvestmentAssetPanel", () => {
     expect(submitted.get("instrumentId")).toBe("instrument-posco");
     expect(submitted.get("quantity")).toBe("3");
     expect(submitted.get("accountCategory")).toBe("pension_savings");
+  });
+
+  it("saves fallback known search results by symbol instead of treating search ids as instrument ids", async () => {
+    mocks.searchDomesticInstruments.mockResolvedValue({
+      instruments: [
+        {
+          id: "search-005930",
+          market: "KR",
+          symbol: "005930",
+          displayName: "삼성전자",
+          instrumentType: "stock",
+          currency: "KRW",
+          lastClosePrice: 85_000,
+          lastCloseDate: "2026-05-29",
+        },
+      ],
+    });
+    mocks.saveKnownDomesticHolding.mockResolvedValue({ success: true });
+    render(<InvestmentAssetPanel coupleId="couple-1" holdings={[]} />);
+
+    fireEvent.change(screen.getByLabelText("종목 검색어"), { target: { value: "삼성전자" } });
+    fireEvent.click(screen.getByRole("button", { name: "검색" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("삼성전자")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "추가" }));
+
+    await waitFor(() => {
+      expect(mocks.saveKnownDomesticHolding).toHaveBeenCalled();
+    });
+    expect(mocks.saveHolding).not.toHaveBeenCalled();
+    const submitted = mocks.saveKnownDomesticHolding.mock.calls[0][1] as FormData;
+    expect(submitted.get("coupleId")).toBe("couple-1");
+    expect(submitted.get("symbol")).toBe("005930");
+    expect(submitted.get("quantity")).toBe("1");
   });
 
   it("uses live domestic instrument search even before a couple exists", async () => {
