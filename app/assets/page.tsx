@@ -38,36 +38,40 @@ export default async function AssetsPage() {
 
             <div className="grid gap-4">
               {/* FIRE 반영 투자자산 그룹 */}
-              <div data-od-id="group-fire-investments">
+              <div id="investment-assets" data-od-id="group-fire-investments">
                 <InvestmentAssetPanel
                   coupleId={assetData.coupleId}
                   holdings={assetData.holdings}
+                  idPrefix="mobile-investment"
                 />
               </div>
 
               {/* 투자 연계 부채 그룹 */}
-              <div data-od-id="group-loans">
+              <div id="investment-liabilities" data-od-id="group-loans">
                 <LiabilityPanel
                   coupleId={assetData.coupleId}
                   liabilities={assetData.liabilities}
+                  idPrefix="mobile-liability"
                 />
               </div>
             </div>
 
             {/* CTA 영역 */}
             <div className="mt-4 grid gap-3">
-              <button
+              <a
+                href="#investment-assets"
                 data-od-id="cta-add-asset"
-                className="h-11 rounded-button border border-fb-line bg-fb-card text-[13px] font-bold text-fb-ink shadow-soft hover:bg-fb-card-alt"
+                className="fbpress flex h-11 items-center justify-center rounded-button border border-fb-line bg-fb-card text-[13px] font-bold text-fb-ink shadow-soft hover:bg-fb-card-alt"
               >
                 + 투자자산 추가
-              </button>
-              <button
+              </a>
+              <a
+                href="#investment-liabilities"
                 data-od-id="cta-add-liability"
-                className="h-11 rounded-button border border-fb-line bg-fb-card text-[13px] font-bold text-fb-ink-2 shadow-soft hover:bg-fb-card-alt"
+                className="fbpress flex h-11 items-center justify-center rounded-button border border-fb-line bg-fb-card text-[13px] font-bold text-fb-ink-2 shadow-soft hover:bg-fb-card-alt"
               >
                 + 투자 연계 부채 추가
-              </button>
+              </a>
             </div>
           </main>
 
@@ -118,36 +122,40 @@ export default async function AssetsPage() {
 
           <section className="grid gap-5">
             {/* FIRE 반영 투자자산 그룹 */}
-            <div data-od-id="group-fire-investments">
+            <div id="investment-assets-desktop" data-od-id="group-fire-investments">
               <InvestmentAssetPanel
                 coupleId={assetData.coupleId}
                 holdings={assetData.holdings}
+                idPrefix="desktop-investment"
               />
             </div>
 
             {/* 투자 연계 부채 그룹 */}
-            <div data-od-id="group-loans">
+            <div id="investment-liabilities-desktop" data-od-id="group-loans">
               <LiabilityPanel
                 coupleId={assetData.coupleId}
                 liabilities={assetData.liabilities}
+                idPrefix="desktop-liability"
               />
             </div>
           </section>
 
           {/* CTA 영역 */}
           <div className="flex items-center gap-3">
-            <button
+            <a
+              href="#investment-assets-desktop"
               data-od-id="cta-add-asset"
-              className="h-10 rounded-button border border-fb-line bg-white px-4 text-[13px] font-bold text-fb-ink shadow-soft hover:bg-fb-card-alt"
+              className="fbpress flex h-10 items-center justify-center rounded-button border border-fb-line bg-white px-4 text-[13px] font-bold text-fb-ink shadow-soft hover:bg-fb-card-alt"
             >
               + 투자자산 추가
-            </button>
-            <button
+            </a>
+            <a
+              href="#investment-liabilities-desktop"
               data-od-id="cta-add-liability"
-              className="h-10 rounded-button border border-fb-line bg-white px-4 text-[13px] font-bold text-fb-ink-2 shadow-soft hover:bg-fb-card-alt"
+              className="fbpress flex h-10 items-center justify-center rounded-button border border-fb-line bg-white px-4 text-[13px] font-bold text-fb-ink-2 shadow-soft hover:bg-fb-card-alt"
             >
               + 투자 연계 부채 추가
-            </button>
+            </a>
           </div>
         </div>
       </PageCanvas>

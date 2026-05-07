@@ -1,5 +1,6 @@
 import { BottomNav, MobileAppShell } from '@/components/fire-banking'
 import { SignOutButton } from '@/src/features/auth/components/SignOutButton'
+import { getCurrentUser } from '@/src/features/auth/lib/getCurrentUser'
 
 // PRD hard rule: 동작하지 않는 가짜 행을 두지 말 것.
 // 실제로 의미 있는 항목만 렌더링하고, 비활성 행은 cursor-default + 시각적으로 inert.
@@ -49,7 +50,9 @@ function SettingsRow({
   )
 }
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const user = await getCurrentUser()
+
   return (
     <MobileAppShell>
       <div data-screen-label="settings" className="flex flex-1 flex-col">
@@ -63,7 +66,7 @@ export default function SettingsPage() {
             {/* 프로필 / 계정 */}
             <SettingsGroup label="프로필 / 계정">
               <div data-od-id="row-profile">
-                <SettingsRow label="로그인 상태" value="연결됨" />
+                <SettingsRow label="로그인 상태" value={user ? '연결됨' : '미연결'} />
                 <SettingsRow label="화폐 단위" value="원 (만원 표시)" isLast />
               </div>
             </SettingsGroup>
@@ -94,9 +97,11 @@ export default function SettingsPage() {
             </div>
 
             {/* 로그아웃 */}
-            <div data-od-id="cta-sign-out" className="mt-6 text-center">
-              <SignOutButton />
-            </div>
+            {user ? (
+              <div data-od-id="cta-sign-out" className="mt-6 text-center">
+                <SignOutButton />
+              </div>
+            ) : null}
           </section>
         </main>
 

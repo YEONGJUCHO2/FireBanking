@@ -24,7 +24,7 @@ describe("SignInButton", () => {
     signInWithOAuth.mockResolvedValue({});
     render(<SignInButton />);
 
-    fireEvent.click(screen.getByRole("button", { name: /G-mail로 시작하기/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Google로 시작하기/ }));
 
     await waitFor(() => {
       expect(signInWithOAuth).toHaveBeenCalledWith({
@@ -77,13 +77,13 @@ describe("SignInButton", () => {
       await screen.findByText("카카오톡 안에서는 카카오 로그인을 권장해요."),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "외부 브라우저로 열기" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /G-mail로 시작하기/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Google로 시작하기/ })).toBeInTheDocument();
   });
 
-  it("always renders both Gmail and Kakao login buttons", () => {
+  it("always renders both Google and Kakao login buttons", () => {
     render(<SignInButton />);
 
-    expect(screen.getByRole("button", { name: /G-mail로 시작하기/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Google로 시작하기/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /카카오로 계속하기/ })).toBeInTheDocument();
   });
 });

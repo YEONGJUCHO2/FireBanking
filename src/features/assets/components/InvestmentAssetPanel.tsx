@@ -38,7 +38,7 @@ type OverseasManualHolding = {
 };
 
 const SEARCH_RESULTS_PAGE_SIZE = 3;
-const DEMO_HOLDINGS_COOKIE = "fb_demo_asset_holdings";
+const DEMO_HOLDINGS_STORAGE_KEY = "fb_demo_asset_holdings";
 
 const accountCategoryOptions: Array<{ value: AccountCategory; label: string }> = [
   { value: "general", label: "일반" },
@@ -134,13 +134,22 @@ const searchableInstruments: SearchableHoldingView[] = [
 export function InvestmentAssetPanel({
   coupleId,
   holdings = [],
+  idPrefix = "investment",
 }: {
   coupleId?: string | null;
   holdings?: HoldingView[];
+  idPrefix?: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [items, setItems] = useState(holdings);
+  const [items, setItems] = useState<HoldingView[]>(() => {
+    if (coupleId || holdings.length > 0 || typeof window === "undefined") {
+      return holdings;
+    }
+
+    const storedHoldings = readDemoHoldings();
+    return storedHoldings.length > 0 ? storedHoldings : holdings;
+  });
   const [query, setQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
   const [serverSearchResults, setServerSearchResults] = useState<SearchableHoldingView[] | null>(
@@ -160,6 +169,7 @@ export function InvestmentAssetPanel({
   const [overseasHoldings, setOverseasHoldings] = useState<OverseasManualHolding[]>([]);
   const searchRequestId = useRef(0);
   const searchDebounceId = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasMounted = useRef(false);
   const localSearchResults = useMemo(() => {
     const normalized = submittedQuery.trim().toLowerCase();
 
@@ -192,6 +202,7 @@ export function InvestmentAssetPanel({
     overseasUsdPrice,
     overseasExchangeRate,
   );
+  const fieldId = (id: string) => `${idPrefix}-${id}`;
 
   const toggleSection = (accountCategory: AccountCategory) => {
     setExpandedSections((current) => ({
@@ -257,11 +268,11 @@ export function InvestmentAssetPanel({
                     </div>
                     {editingId === holding.id ? (
                       <div className="mt-2 flex items-center gap-2">
-                        <label className="sr-only" htmlFor={`${holding.id}-quantity`}>
+                        <label className="sr-only" htmlFor={fieldId(`${holding.id}-quantity`)}>
                           {holding.displayName} 보유 수량
                         </label>
                         <input
-                          id={`${holding.id}-quantity`}
+                          id={fieldId(`${holding.id}-quantity`)}
                           value={editingQuantity}
                           onChange={(event) => setEditingQuantity(event.target.value)}
                           className="h-9 w-24 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
@@ -320,9 +331,16 @@ export function InvestmentAssetPanel({
   }, []);
 
   useEffect(() => {
-    if (!coupleId) {
-      persistDemoHoldings(items);
+    if (coupleId) {
+      return;
     }
+
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
+
+    persistDemoHoldings(items);
   }, [coupleId, items]);
 
   const runSearch = (nextQuery: string, options: { defer?: boolean } = {}) => {
@@ -376,7 +394,7 @@ export function InvestmentAssetPanel({
       setServerSearchResults(
         (result.instruments ?? []).map((instrument) => ({
           id: `search-${instrument.symbol}`,
-          instrumentId: coupleId ? instrument.id : undefined,
+          instrumentId: coupleId && !instrument.id.startsWith("search-") ? instrument.id : undefined,
           symbol: instrument.symbol,
           displayName: instrument.displayName,
           lastClosePrice: instrument.lastClosePrice,
@@ -554,11 +572,11 @@ export function InvestmentAssetPanel({
           </div>
 
           <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_auto]">
-            <label className="sr-only" htmlFor="domestic-instrument-query">
+            <label className="sr-only" htmlFor={fieldId("domestic-instrument-query")}>
               종목 검색어
             </label>
             <input
-              id="domestic-instrument-query"
+              id={fieldId("domestic-instrument-query")}
               value={query}
               onChange={(event) => {
                 const nextQuery = event.target.value;
@@ -582,11 +600,11 @@ export function InvestmentAssetPanel({
           <div className="mt-3 grid gap-2 rounded-[12px] border border-fb-line bg-fb-card-alt p-3 sm:grid-cols-[minmax(0,1fr)_120px]">
             <label
               className="grid min-w-0 gap-1 text-[12px] font-bold text-fb-ink-2"
-              htmlFor="holding-account-category"
+              htmlFor={fieldId("holding-account-category")}
             >
               계좌 유형
               <select
-                id="holding-account-category"
+                id={fieldId("holding-account-category")}
                 value={addAccountCategory}
                 onChange={(event) => setAddAccountCategory(event.target.value as AccountCategory)}
                 className="h-10 w-full min-w-0 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
@@ -598,10 +616,10 @@ export function InvestmentAssetPanel({
                 ))}
               </select>
             </label>
-            <label className="grid min-w-0 gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="holding-add-quantity">
+            <label className="grid min-w-0 gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor={fieldId("holding-add-quantity")}>
               추가 수량
               <input
-                id="holding-add-quantity"
+                id={fieldId("holding-add-quantity")}
                 value={addQuantity}
                 onChange={(event) => setAddQuantity(event.target.value)}
                 className="h-10 w-full min-w-0 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
@@ -708,40 +726,40 @@ export function InvestmentAssetPanel({
 
                   <div className="mt-4 grid gap-3 rounded-[12px] border border-fb-line bg-white p-3">
                     <div className="grid gap-2 lg:grid-cols-4">
-                      <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="overseas-name">
+                      <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor={fieldId("overseas-name")}>
                         티커/이름
                         <input
-                          id="overseas-name"
+                          id={fieldId("overseas-name")}
                           value={overseasName}
                           onChange={(event) => setOverseasName(event.target.value)}
                           className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
                           placeholder="VOO"
                         />
                       </label>
-                      <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="overseas-quantity">
+                      <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor={fieldId("overseas-quantity")}>
                         보유 수량
                         <input
-                          id="overseas-quantity"
+                          id={fieldId("overseas-quantity")}
                           value={overseasQuantity}
                           onChange={(event) => setOverseasQuantity(event.target.value)}
                           className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
                           inputMode="decimal"
                         />
                       </label>
-                      <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="overseas-usd-price">
+                      <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor={fieldId("overseas-usd-price")}>
                         1주 가격 USD
                         <input
-                          id="overseas-usd-price"
+                          id={fieldId("overseas-usd-price")}
                           value={overseasUsdPrice}
                           onChange={(event) => setOverseasUsdPrice(event.target.value)}
                           className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
                           inputMode="decimal"
                         />
                       </label>
-                      <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor="overseas-exchange-rate">
+                      <label className="grid gap-1 text-[12px] font-bold text-fb-ink-2" htmlFor={fieldId("overseas-exchange-rate")}>
                         적용 환율
                         <input
-                          id="overseas-exchange-rate"
+                          id={fieldId("overseas-exchange-rate")}
                           value={overseasExchangeRate}
                           onChange={(event) => setOverseasExchangeRate(event.target.value)}
                           className="h-10 rounded-[10px] border border-fb-line bg-white px-3 text-[13px] font-semibold text-fb-ink outline-none focus:border-fb-trust"
@@ -837,6 +855,68 @@ function formatPlainNumber(value: number) {
 }
 
 function persistDemoHoldings(holdings: HoldingView[]) {
-  const value = encodeURIComponent(JSON.stringify(holdings));
-  document.cookie = `${DEMO_HOLDINGS_COOKIE}=${value}; Path=/; Max-Age=2592000; SameSite=Lax`;
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  if (holdings.length === 0) {
+    window.localStorage.removeItem(DEMO_HOLDINGS_STORAGE_KEY);
+    return;
+  }
+
+  window.localStorage.setItem(DEMO_HOLDINGS_STORAGE_KEY, JSON.stringify(holdings));
+}
+
+function readDemoHoldings() {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(DEMO_HOLDINGS_STORAGE_KEY) ?? "[]");
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed
+      .map(normalizeDemoHolding)
+      .filter((holding): holding is HoldingView => Boolean(holding));
+  } catch {
+    window.localStorage.removeItem(DEMO_HOLDINGS_STORAGE_KEY);
+    return [];
+  }
+}
+
+function normalizeDemoHolding(value: unknown): HoldingView | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const row = value as Partial<HoldingView>;
+  const quantity = Number(row.quantity);
+  const valuationAmount = Number(row.valuationAmount);
+
+  if (
+    !row.id ||
+    !row.symbol ||
+    !row.displayName ||
+    !Number.isFinite(quantity) ||
+    quantity <= 0 ||
+    !Number.isFinite(valuationAmount) ||
+    valuationAmount < 0
+  ) {
+    return null;
+  }
+
+  return {
+    id: String(row.id),
+    symbol: String(row.symbol),
+    displayName: String(row.displayName),
+    quantity,
+    valuationAmount,
+    valuationDate: String(row.valuationDate ?? "직접 입력"),
+    accountCategory: normalizeDemoAccountCategory(row.accountCategory),
+  };
+}
+
+function normalizeDemoAccountCategory(value: unknown): HoldingView["accountCategory"] {
+  return value === "general" || value === "pension_savings" || value === "irp" || value === "other"
+    ? value
+    : "general";
 }

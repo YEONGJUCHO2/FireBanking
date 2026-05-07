@@ -17,14 +17,12 @@ function getSafeReturnTo(returnTo?: string) {
   return returnTo === '/onboarding' ? '/onboarding' : '/dashboard'
 }
 
-// Static placeholder when no snapshot exists yet — keeps the design preview
-// visible for users who haven't run their first month-end check-in.
 const cashflowFallback = {
-  incomeMan: 850,
-  fixedMan: 350,
-  variableMan: 220,
-  saveMan: 180,
-  monthlyAddMan: 280,
+  incomeMan: 0,
+  fixedMan: 0,
+  variableMan: 0,
+  saveMan: 0,
+  monthlyAddMan: 0,
 }
 
 export default async function SubscribePage({ searchParams }: SubscribePageProps = {}) {

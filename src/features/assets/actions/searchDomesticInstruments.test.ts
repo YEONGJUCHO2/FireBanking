@@ -4,10 +4,15 @@ import { searchDomesticInstrumentsWithProvider } from "./searchDomesticInstrumen
 
 const mocks = vi.hoisted(() => ({
   createSupabaseServerClient: vi.fn(),
+  createSupabaseAdminClient: vi.fn(),
 }));
 
 vi.mock("@/src/lib/supabase/server", () => ({
   createSupabaseServerClient: mocks.createSupabaseServerClient,
+}));
+
+vi.mock("@/src/lib/supabase/admin", () => ({
+  createSupabaseAdminClient: mocks.createSupabaseAdminClient,
 }));
 
 function createFormData(query: string) {
@@ -108,11 +113,13 @@ function createSupabaseMock({
 describe("searchDomesticInstrumentsWithProvider", () => {
   beforeEach(() => {
     mocks.createSupabaseServerClient.mockReset();
+    mocks.createSupabaseAdminClient.mockReset();
   });
 
   it("returns domestic stock and ETF results from the provider", async () => {
     const refs = createSupabaseMock();
     mocks.createSupabaseServerClient.mockResolvedValue(refs.supabase);
+    mocks.createSupabaseAdminClient.mockReturnValue(refs.supabase);
 
     const result = await searchDomesticInstrumentsWithProvider(
       {},
@@ -148,6 +155,7 @@ describe("searchDomesticInstrumentsWithProvider", () => {
     const refs = createSupabaseMock();
     const provider = createProvider();
     mocks.createSupabaseServerClient.mockResolvedValue(refs.supabase);
+    mocks.createSupabaseAdminClient.mockReturnValue(refs.supabase);
 
     await searchDomesticInstrumentsWithProvider({}, createFormData("미국"), provider);
 
@@ -158,6 +166,7 @@ describe("searchDomesticInstrumentsWithProvider", () => {
   it("upserts searched domestic instruments into asset_instruments", async () => {
     const refs = createSupabaseMock();
     mocks.createSupabaseServerClient.mockResolvedValue(refs.supabase);
+    mocks.createSupabaseAdminClient.mockReturnValue(refs.supabase);
 
     await searchDomesticInstrumentsWithProvider({}, createFormData("미국"), createProvider());
 
@@ -231,6 +240,7 @@ describe("searchDomesticInstrumentsWithProvider", () => {
     const refs = createSupabaseMock();
     const provider = createProvider();
     mocks.createSupabaseServerClient.mockResolvedValue(refs.supabase);
+    mocks.createSupabaseAdminClient.mockReturnValue(refs.supabase);
 
     const result = await searchDomesticInstrumentsWithProvider({}, createFormData("TIGER"), provider);
 
@@ -238,11 +248,46 @@ describe("searchDomesticInstrumentsWithProvider", () => {
     expect(result.instruments?.some((instrument) => instrument.displayName === "TIGER 미국S&P500")).toBe(true);
   });
 
-  it("returns a Korean error when the provider is unavailable", async () => {
-    const refs = createSupabaseMock();
+  it("falls back to known domestic instruments when the provider is unavailable", async () => {
+    const refs = createSupabaseMock({ user: null });
     mocks.createSupabaseServerClient.mockResolvedValue(refs.supabase);
 
     const result = await searchDomesticInstrumentsWithProvider({}, createFormData("삼성"), null);
+
+    expect(result.instruments).toEqual([
+      expect.objectContaining({
+        id: "search-005930",
+        symbol: "005930",
+        displayName: "삼성전자",
+        lastClosePrice: 85_000,
+      }),
+    ]);
+    expect(refs.upsert).not.toHaveBeenCalled();
+  });
+
+  it("does not crash logged-in search when admin instrument upsert is unavailable", async () => {
+    const refs = createSupabaseMock();
+    mocks.createSupabaseServerClient.mockResolvedValue(refs.supabase);
+    mocks.createSupabaseAdminClient.mockImplementation(() => {
+      throw new Error("Missing required environment variable: SUPABASE_SERVICE_ROLE_KEY");
+    });
+
+    const result = await searchDomesticInstrumentsWithProvider({}, createFormData("삼성"), null);
+
+    expect(result.instruments).toEqual([
+      expect.objectContaining({
+        id: "search-005930",
+        symbol: "005930",
+        displayName: "삼성전자",
+      }),
+    ]);
+  });
+
+  it("returns a Korean error for unknown queries when the provider is unavailable", async () => {
+    const refs = createSupabaseMock();
+    mocks.createSupabaseServerClient.mockResolvedValue(refs.supabase);
+
+    const result = await searchDomesticInstrumentsWithProvider({}, createFormData("모르는종목"), null);
 
     expect(result).toEqual({
       error: "종목 검색을 준비 중이에요. 잠시 후 다시 시도해주세요.",

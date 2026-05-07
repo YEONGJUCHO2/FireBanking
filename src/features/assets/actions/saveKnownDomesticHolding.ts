@@ -8,6 +8,7 @@ import {
   requireAdminSupabase,
   type AssetActionState,
 } from "./assetActionHelpers";
+import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
 
 const knownInstruments = {
   "005930": { symbol: "005930", displayName: "삼성전자", instrumentType: "stock" },
@@ -45,23 +46,30 @@ export async function saveKnownDomesticHolding(
   }
 
   const known = knownInstruments[parsed.data.symbol];
-  const { data: instrument, error: instrumentError } = await auth.supabase
-    .from("asset_instruments")
-    .upsert(
-      {
-        market: "KR",
-        symbol: known.symbol,
-        display_name: known.displayName,
-        instrument_type: known.instrumentType,
-        currency: "KRW",
-      },
-      { onConflict: "market,symbol" },
-    )
-    .select("id")
-    .single();
+  const instrumentResult = await Promise.resolve()
+    .then(() => {
+      const adminSupabase = createSupabaseAdminClient();
+      return adminSupabase
+        .from("asset_instruments")
+        .upsert(
+          {
+            market: "KR",
+            symbol: known.symbol,
+            display_name: known.displayName,
+            instrument_type: known.instrumentType,
+            currency: "KRW",
+          },
+          { onConflict: "market,symbol" },
+        )
+        .select("id")
+        .single();
+    })
+    .catch(() => null);
+  const instrument = instrumentResult?.data;
+  const instrumentError = instrumentResult?.error;
 
   if (instrumentError || !instrument) {
-    return { error: "종목 검색 결과를 저장하지 못했습니다." };
+    return { error: "종목 기준정보를 저장하지 못했습니다. 잠시 후 다시 시도해주세요." };
   }
 
   const { error } = await auth.supabase.from("asset_holdings").insert({

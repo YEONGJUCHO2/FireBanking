@@ -1,6 +1,5 @@
 import { dashboardMetrics } from '@/lib/sample-data'
 import { formatManWon } from '@/lib/format'
-import { BrandLockup } from './brand'
 import { Icon } from './icons'
 import { LoginScreenContent } from './landing-experience'
 
@@ -362,11 +361,10 @@ export function InviteScreenPreview() {
         </button>
       </div>
 
-      {/* R0 alpha notice */}
       <div className="mt-3 rounded-[11px] border border-fb-line bg-fb-card p-3">
-        <p className="text-[9px] font-bold leading-[1.55] text-fb-ink">배우자 체크인은 R1에서 열립니다</p>
+        <p className="text-[9px] font-bold leading-[1.55] text-fb-ink">입력은 3개만 필요해요</p>
         <p className="mt-0.5 text-[8px] font-medium leading-[1.55] text-fb-ink-2">
-          R0에서 초대 의향을 확인하기 위한 알파 기능입니다.
+          세후 월수입, 반복지출, 정기저축/투자만 가족 결과에 합산돼요.
         </p>
       </div>
     </div>

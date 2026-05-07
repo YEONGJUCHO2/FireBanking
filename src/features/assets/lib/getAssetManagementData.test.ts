@@ -3,15 +3,10 @@ import { getAssetManagementData } from "./getAssetManagementData";
 
 const mocks = vi.hoisted(() => ({
   createSupabaseServerClient: vi.fn(),
-  cookies: vi.fn(),
 }));
 
 vi.mock("@/src/lib/supabase/server", () => ({
   createSupabaseServerClient: mocks.createSupabaseServerClient,
-}));
-
-vi.mock("next/headers", () => ({
-  cookies: mocks.cookies,
 }));
 
 function createQueryResult<T>(data: T, error: unknown = null) {
@@ -32,8 +27,6 @@ function createQueryResult<T>(data: T, error: unknown = null) {
 describe("getAssetManagementData", () => {
   beforeEach(() => {
     mocks.createSupabaseServerClient.mockReset();
-    mocks.cookies.mockReset();
-    mocks.cookies.mockResolvedValue({ get: vi.fn(() => undefined) });
   });
 
   it("returns demo mode markers when there is no signed-in user", async () => {
@@ -49,38 +42,15 @@ describe("getAssetManagementData", () => {
     });
   });
 
-  it("returns cookie-backed demo holdings when there is no persisted couple workspace", async () => {
-    const demoHoldings = [
-      {
-        id: "demo-posco",
-        symbol: "003670",
-        displayName: "포스코퓨처엠",
-        quantity: 2,
-        valuationAmount: 504_000,
-        valuationDate: "2026-04-30",
-        accountCategory: "general",
-      },
-      {
-        id: "demo-tiger",
-        symbol: "360750",
-        displayName: "TIGER 미국S&P500",
-        quantity: 10,
-        valuationAmount: 261_600,
-        valuationDate: "2026-04-30",
-        accountCategory: "pension_savings",
-      },
-    ];
+  it("does not read demo holdings from server-visible cookies", async () => {
     const supabase = {
       auth: { getUser: vi.fn(async () => ({ data: { user: null } })) },
     };
     mocks.createSupabaseServerClient.mockResolvedValue(supabase);
-    mocks.cookies.mockResolvedValue({
-      get: vi.fn(() => ({ value: encodeURIComponent(JSON.stringify(demoHoldings)) })),
-    });
 
     await expect(getAssetManagementData()).resolves.toEqual({
       coupleId: null,
-      holdings: demoHoldings,
+      holdings: undefined,
       liabilities: undefined,
     });
   });
