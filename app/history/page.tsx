@@ -1,17 +1,32 @@
+import Link from 'next/link'
 import { BottomNav, MobileAppShell } from '@/components/fire-banking'
+import { getAssetManagementData } from '@/src/features/assets/lib/getAssetManagementData'
 import { createSupabaseServerClient } from '@/src/lib/supabase/server'
 
 // ---------- types ----------------------------------------------------------
 
+const firstRealHistoryMonth = '2026-05-01'
+
 interface HistoryRow {
   id: string
-  ym: string           // e.g. "2026년 4월"
+  ym: string
   fireNetworth: number // 만원
   remainingFireAmount: number // 만원
   monthlyGrowth: number // 만원
   targetMonthlyExpense: number // 만원
   fireTargetAsset: number // 만원
   projectedDistance: string
+  basisLabel: string
+}
+
+interface SnapshotRow {
+  id: string
+  month: string
+  fireNetworth: number
+  monthlyGrowth: number
+  targetMonthlyExpense: number
+  fireTargetAsset: number
+  projectedFireDate: string | null
 }
 
 // ---------- helpers --------------------------------------------------------
@@ -44,6 +59,9 @@ function HistoryCheckinCard({ row, index }: { row: HistoryRow; index: number }) 
           </p>
           <p className="fb-num mt-1 whitespace-nowrap text-[22px] font-bold tracking-[-0.020em] text-fb-trust">
             {formatEok(row.remainingFireAmount)}
+          </p>
+          <p className="mt-1 rounded-full bg-fb-trust-soft px-2 py-0.5 text-[10px] font-bold text-fb-trust">
+            {row.basisLabel}
           </p>
         </div>
       </div>
@@ -150,6 +168,12 @@ export default async function HistoryPage() {
                 <br />
                 몇 달 지나면 추세가 보이기 시작해요.
               </p>
+              <Link
+                href="/dashboard"
+                className="fbpress mt-5 inline-flex h-[44px] items-center justify-center rounded-[12px] bg-fb-ink px-5 text-[13px] font-bold text-white"
+              >
+                홈에서 현재 결과 보기
+              </Link>
             </div>
           ) : (
             <div data-od-id="history-list" className="grid gap-3">
@@ -190,7 +214,8 @@ async function fetchHistoryRows(): Promise<HistoryRow[]> {
     return []
   }
 
-  const { data } = await supabase
+  const [{ data }, assetData] = await Promise.all([
+    supabase
     .from('monthly_cashflow_snapshots')
     .select(
       [
@@ -205,9 +230,11 @@ async function fetchHistoryRows(): Promise<HistoryRow[]> {
     )
     .eq('couple_id', membership.couple_id)
     .order('month', { ascending: false })
-    .limit(24)
+    .limit(24),
+    getAssetManagementData(),
+  ])
 
-  const snapshots = ((data ?? []) as unknown as Array<{
+  const storedSnapshots = ((data ?? []) as unknown as Array<{
     id: string
     month: string
     fire_calculation_net_worth: number | string
@@ -224,6 +251,13 @@ async function fetchHistoryRows(): Promise<HistoryRow[]> {
     fireTargetAsset: Math.round(Number(row.fire_target_asset) / 10_000),
     projectedFireDate: row.projected_fire_date,
   }))
+  const currentMonth = currentKstMonthStart(new Date())
+  const currentFireNetworthMan = getCurrentFireNetworthMan(assetData)
+  const snapshots = applyCurrentFireNetworth(
+    fillMissingMonthlySnapshots(storedSnapshots),
+    currentFireNetworthMan,
+    currentMonth,
+  )
 
   return snapshots.map((row) => ({
     id: row.id,
@@ -234,17 +268,126 @@ async function fetchHistoryRows(): Promise<HistoryRow[]> {
     targetMonthlyExpense: row.targetMonthlyExpense,
     fireTargetAsset: row.fireTargetAsset,
     projectedDistance: formatProjectedDistance(row.month, row.projectedFireDate),
+    basisLabel: row.month === currentMonth && currentFireNetworthMan != null
+      ? '현재 자산진단 기준'
+      : '월 체크인 저장 기준',
+  }))
+}
+
+function getCurrentFireNetworthMan({
+  holdings,
+  liabilities,
+}: Awaited<ReturnType<typeof getAssetManagementData>>) {
+  const registeredHoldings = holdings ?? []
+  const registeredLiabilities = liabilities ?? []
+
+  if (registeredHoldings.length === 0 && registeredLiabilities.length === 0) {
+    return null
+  }
+
+  const fireIncludedHoldingAmount = registeredHoldings
+    .filter((holding) => holding.accountCategory !== 'pension_savings' && holding.accountCategory !== 'irp')
+    .reduce((total, holding) => total + holding.valuationAmount, 0)
+  const fireIncludedLiabilityAmount = registeredLiabilities
+    .filter((liability) => liability.purpose === 'investment')
+    .reduce((total, liability) => total + liability.balanceAmount, 0)
+
+  return Math.max(0, Math.round((fireIncludedHoldingAmount - fireIncludedLiabilityAmount) / 10_000))
+}
+
+function applyCurrentFireNetworth(
+  snapshots: SnapshotRow[],
+  currentFireNetworthMan: number | null,
+  currentMonth: string,
+) {
+  if (currentFireNetworthMan == null) {
+    return snapshots
+  }
+
+  return snapshots.map((snapshot) => ({
+    ...snapshot,
+    fireNetworth: snapshot.month === currentMonth ? currentFireNetworthMan : snapshot.fireNetworth,
   }))
 }
 
 function formatHistoryMonth(month: string) {
-  const date = new Date(`${month}T00:00:00.000Z`)
+  const normalizedMonth = normalizeMonthStart(month)
+  if (!normalizedMonth) {
+    return month
+  }
+
+  const date = new Date(`${normalizedMonth}T00:00:00.000Z`)
 
   if (Number.isNaN(date.getTime())) {
     return month
   }
 
   return `${date.getUTCFullYear()}년 ${date.getUTCMonth() + 1}월`
+}
+
+function fillMissingMonthlySnapshots(snapshots: SnapshotRow[], now = new Date()): SnapshotRow[] {
+  if (snapshots.length === 0) {
+    return []
+  }
+
+  const normalizedSnapshots = snapshots
+    .map((snapshot) => {
+      const month = normalizeMonthStart(snapshot.month)
+      return month ? { ...snapshot, month } : snapshot
+    })
+    .sort((a, b) => b.month.localeCompare(a.month))
+
+  const latest = normalizedSnapshots[0]
+  const latestMonth = normalizeMonthStart(latest.month)
+  const currentMonth = currentKstMonthStart(now)
+
+  if (!latestMonth || latestMonth >= currentMonth) {
+    return normalizedSnapshots.filter((snapshot) => snapshot.month >= firstRealHistoryMonth)
+  }
+
+  const generatedSnapshots: SnapshotRow[] = []
+  let month = addMonths(latestMonth, 1)
+
+  while (month <= currentMonth) {
+    generatedSnapshots.push({
+      ...latest,
+      id: `auto-${month}`,
+      month,
+    })
+    month = addMonths(month, 1)
+  }
+
+  return [...generatedSnapshots, ...normalizedSnapshots]
+    .filter((snapshot) => snapshot.month >= firstRealHistoryMonth)
+    .sort((a, b) => b.month.localeCompare(a.month))
+}
+
+function normalizeMonthStart(month: string) {
+  const match = /^(\d{4})-(\d{2})/.exec(month)
+  if (!match) {
+    return null
+  }
+
+  return `${match[1]}-${match[2]}-01`
+}
+
+function currentKstMonthStart(date: Date) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+  }).formatToParts(date)
+  const year = parts.find((part) => part.type === 'year')?.value
+  const month = parts.find((part) => part.type === 'month')?.value
+
+  return `${year}-${month}-01`
+}
+
+function addMonths(month: string, count: number) {
+  const date = new Date(`${month}T00:00:00.000Z`)
+  date.setUTCMonth(date.getUTCMonth() + count)
+
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-01`
 }
 
 function formatProjectedDistance(month: string, projectedFireDate: string | null) {

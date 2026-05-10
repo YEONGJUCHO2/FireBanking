@@ -18,8 +18,15 @@ export type DashboardCashflowSnapshot = {
 type DashboardCashflowSnapshotRow = Record<keyof DashboardCashflowSnapshot, unknown>;
 
 function currentMonthDate() {
-  const now = new Date();
-  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-01`;
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+  }).formatToParts(new Date());
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+
+  return `${year}-${month}-01`;
 }
 
 export async function getDashboardCashflowSnapshot(): Promise<DashboardCashflowSnapshot | null> {
@@ -63,7 +70,9 @@ export async function getDashboardCashflowSnapshot(): Promise<DashboardCashflowS
       ].join(","),
     )
     .eq("couple_id", membership.couple_id)
-    .eq("month", currentMonthDate())
+    .lte("month", currentMonthDate())
+    .order("month", { ascending: false })
+    .limit(1)
     .maybeSingle();
 
   if (error || !data) {
