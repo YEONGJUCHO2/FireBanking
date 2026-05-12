@@ -21,6 +21,18 @@ function readServerInAppBrowser(): InAppBrowser {
   return null;
 }
 
+function buildOAuthQueryParams(provider: Provider) {
+  if (provider === "google") {
+    return { prompt: "select_account" };
+  }
+
+  if (provider === "kakao") {
+    return { prompt: "login" };
+  }
+
+  return undefined;
+}
+
 export function SignInButton({ callbackPath = "/auth/callback" }: { callbackPath?: string }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<Provider | null>(null);
@@ -38,7 +50,10 @@ export function SignInButton({ callbackPath = "/auth/callback" }: { callbackPath
       const origin = window.location.origin;
       const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
-        options: { redirectTo: `${origin}${callbackPath}` },
+        options: {
+          redirectTo: `${origin}${callbackPath}`,
+          queryParams: buildOAuthQueryParams(provider),
+        },
       });
       if (oauthError) {
         setError(`로그인 시작에 실패했어요. (${oauthError.message})`);
@@ -104,7 +119,8 @@ export function SignInButton({ callbackPath = "/auth/callback" }: { callbackPath
           disabled={pending !== null}
           className="fb-focus flex h-14 w-full items-center justify-center gap-2 rounded-button bg-fb-kakao text-[13px] font-bold text-fb-kakao-ink hover:brightness-95 disabled:opacity-60"
         >
-          카카오로 계속하기
+          <KakaoMark />
+          카카오로 시작하기
         </button>
       </div>
 
@@ -114,6 +130,17 @@ export function SignInButton({ callbackPath = "/auth/callback" }: { callbackPath
         </p>
       ) : null}
     </div>
+  );
+}
+
+function KakaoMark() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" className="shrink-0">
+      <path
+        d="M12 4.2C7.3 4.2 3.5 7.2 3.5 10.8c0 2.4 1.7 4.5 4.2 5.7l-.8 2.8c-.1.4.3.6.6.4l3.4-2.3h1.1c4.7 0 8.5-3 8.5-6.6S16.7 4.2 12 4.2Z"
+        fill="#381E1F"
+      />
+    </svg>
   );
 }
 

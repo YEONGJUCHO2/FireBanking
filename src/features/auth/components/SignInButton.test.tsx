@@ -31,6 +31,7 @@ describe("SignInButton", () => {
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: { prompt: "select_account" },
         },
       });
     });
@@ -40,13 +41,14 @@ describe("SignInButton", () => {
     signInWithOAuth.mockResolvedValue({});
     render(<SignInButton />);
 
-    fireEvent.click(screen.getByRole("button", { name: /카카오로 계속하기/ }));
+    fireEvent.click(screen.getByRole("button", { name: /카카오로 시작하기/ }));
 
     await waitFor(() => {
       expect(signInWithOAuth).toHaveBeenCalledWith({
         provider: "kakao",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: { prompt: "login" },
         },
       });
     });
@@ -56,13 +58,14 @@ describe("SignInButton", () => {
     signInWithOAuth.mockResolvedValue({});
     render(<SignInButton callbackPath="/auth/callback?next=/invite/token-1" />);
 
-    fireEvent.click(screen.getByRole("button", { name: /카카오로 계속하기/ }));
+    fireEvent.click(screen.getByRole("button", { name: /카카오로 시작하기/ }));
 
     await waitFor(() => {
       expect(signInWithOAuth).toHaveBeenCalledWith({
         provider: "kakao",
         options: {
           redirectTo: `${window.location.origin}/auth/callback?next=/invite/token-1`,
+          queryParams: { prompt: "login" },
         },
       });
     });
@@ -84,6 +87,6 @@ describe("SignInButton", () => {
     render(<SignInButton />);
 
     expect(screen.getByRole("button", { name: /Google로 시작하기/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /카카오로 계속하기/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /카카오로 시작하기/ })).toBeInTheDocument();
   });
 });
